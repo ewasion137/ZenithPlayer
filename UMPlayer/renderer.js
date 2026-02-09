@@ -413,10 +413,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getCurrentTime() {
-        if (!currentSource || !isPlaying) return pauseTimeSec;
-        const rate = currentSource.playbackRate.value;
-        return (audioContext.currentTime - playbackStartedAt) * rate;
+    if (!currentSource || !isPlaying) return pauseTimeSec;
+    
+    const rate = currentSource.playbackRate.value;
+    let time = (audioContext.currentTime - playbackStartedAt) * rate;
+
+    if (currentTrackBuffer && time > currentTrackBuffer.duration) {
+        return currentTrackBuffer.duration;
     }
+    return Math.max(0, time);
+}
 
     function formatTime(sec) {
         const m = Math.floor(sec / 60) || 0;
