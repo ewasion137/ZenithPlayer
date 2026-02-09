@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>UMPlayer</title>
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/panel.css">
+    <link rel="stylesheet" href="styles/controls.css">
+    <link rel="stylesheet" href="styles/player.css">
+</head>
+<body>
+    <div id="player-view">
+        <div class="player-grid">
+
+            <div id="top-controls">
+                <button id="play-pause-btn" title="Space"></button>
+                <div class="control-group">
+                    <label>Volume</label>
+                    <input type="range" id="track-volume-slider" min="0" max="200" value="100">
+                    <span id="track-volume-value">100%</span>
+                </div>
+                <div class="control-group">
+                    <label>Speed</label>
+                    <input type="range" id="speed-slider" min="50" max="200" value="100">
+                    <span id="speed-value">100%</span>
+                </div>
+                <div id="equalizer-panel">
+                    <h4>Equalizer</h4>
+                    <div class="eq-bands"></div>
+                </div>
+            </div>
+
+            <div id="progress-view">
+                <input type="range" id="progress-slider" min="0" max="1000" value="0">
+                <div id="time-display">
+                    <span>00:00</span>
+                    <span>00:00</span>
+                </div>
+            </div>
+            
+            <div class="playlist-grid-area">
+                <div class="player-container">
+                    <canvas id="spectrogram-canvas"></canvas>
+                    <div class="header">
+                        <button id="select-folder-btn">Select folder</button>
+                        <div class="header-right">
+                            <button id="optimize-btn" title="Disable/Enable visuals">GFX: ON</button>
+                            <button id="save-settings-btn" title="Save settings">Save</button>
+                            <button id="reset-settings-btn" title="Reset">Reset</button>
+                        </div>
+                    </div>
+                    <div class="track-list-container">
+                        <div id="track-list"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="renderer.js"></script>
+</body>

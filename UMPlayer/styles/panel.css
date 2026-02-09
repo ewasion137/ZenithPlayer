@@ -1,0 +1,29 @@
+
+.panel {
+    background-color: rgb(25, 25, 25);
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+h2 {
+    text-align: center;
+    font-weight: 500;
+    border-bottom: 1px solid #444;
+    padding-bottom: 15px;
+}
+
+.setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.description {
+    font-size: 13px;
+    color: #999;
+}
