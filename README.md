@@ -1,7 +1,7 @@
 ![Platform](https://img.shields.io/badge/platform-win%20%7C%20linux-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
-# ZenithPlayer
+# ZenithPlayer (UMPlayer (Just a bit rename, dont mind it))
 **Zenith Player - A player, with great visuals, made listen tracks &amp; edit them.**
 
 Pros:
