@@ -1,283 +1,468 @@
 /* === QUICK SETUP VARIABLES === */
 :root {
     --bg-main: #0f111a;
-    --panel-bg: rgba(255, 255, 255, 0.05);
-    --accent: #00d2ff; /* Main neon color */
+    --panel-bg: rgba(15, 23, 42, 0.75);
+    --accent: #00d2ff; /* Основной неоновый цвет */
     --accent-gradient: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
-    --text-main: #e0e0e0;
+    --text-main: #e2e8f0;
     --text-dim: #94a3b8;
     --glass-border: rgba(255, 255, 255, 0.1);
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* === BASE STYLES === */
 body {
-    background: radial-gradient(circle at top left, #1e293b, #0f172a);
+    background: #0f172a;
+    /* Фоновый градиент */
+    background-image: radial-gradient(circle at 0% 0%, rgba(58, 123, 213, 0.15) 0%, transparent 50%),
+                      radial-gradient(circle at 100% 100%, rgba(0, 210, 255, 0.1) 0%, transparent 50%);
     height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    overflow: hidden;
+    color: var(--text-main);
+    overflow: hidden; /* Убираем скролл самого окна */
+}
+
+/* === LOW-GFX MODE (Экономия ресурсов) === */
+body.low-gfx {
+    background: #0a0a0a;
+}
+body.low-gfx * {
+    /* Отключаем все тяжелые эффекты */
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+}
+body.low-gfx #spectrogram-canvas {
+    display: none; /* Выключаем канвас */
+}
+/* Отключаем ховер эффекты на треках для GFX OFF */
+body.low-gfx .track-item:hover {
+    transform: none;
+    background: transparent;
+    cursor: default;
 }
 
 /* === MAIN PLAYER CONTAINER === */
 .player-grid {
+    position: relative;
     display: grid;
-    grid-template-rows: auto auto 1fr;
-    width: 90vw; 
-    height: 85vh;
+    /* 
+       Row 1: Header (Кнопки, поиск)
+       Row 2: Controls (Плеер)
+       Row 3: EQ (Эквалайзер)
+       Row 4: Playlist (Список треков - занимает всё оставшееся место)
+    */
+    grid-template-rows: auto auto auto 1fr; 
+    width: 90vw;
+    max-width: 1000px;
+    height: 90vh;
     background: var(--panel-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     border: 1px solid var(--glass-border);
-    border-radius: 32px;
+    border-radius: 24px;
+    padding: 20px;
+    gap: 15px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    padding: 30px;
-    gap: 25px;
-    overflow: hidden;
+    z-index: 10;
+    box-sizing: border-box;
 }
 
-/* === TOP CONTROL PANEL (Navigation & Settings) === */
-#top-controls {
-    display: flex; 
-    align-items: center; 
+/* === HEADER (Фиксированная шапка) === */
+.header {
+    display: flex;
     justify-content: space-between;
-    gap: 20px; 
-    padding: 15px 25px;
-    background: rgba(0, 0, 0, 0.2); 
-    border-radius: 20px;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Стиль кнопок */
+button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+#save-settings-btn.saved {
+    background: #22c55e;
+    border-color: #22c55e;
+    color: white;
+}
+
+#optimize-btn.optimized {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+}
+
+/* Поле поиска */
+.search-container input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text-main);
+    width: 220px;
+    outline: none;
+    font-family: inherit;
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.search-container input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+}
+
+/* === PLAYER CONTROLS (Центральная часть) === */
+#top-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 16px;
     border: 1px solid var(--glass-border);
 }
 
-/* === PROGRESS & TIME DISPLAY === */
+.main-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Кнопки Назад/Вперед */
+#prev-btn, #next-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+/* Рисуем стрелочки через CSS */
+#prev-btn::before {
+    content: '';
+    width: 0; height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 10px solid var(--text-main);
+    margin-right: 2px;
+}
+
+#next-btn::before {
+    content: '';
+    width: 0; height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 10px solid var(--text-main);
+    margin-left: 2px;
+}
+
+/* Кнопка Play */
+#play-pause-btn {
+    width: 50px; height: 50px;
+    min-width: 50px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 16px rgba(0, 210, 255, 0.2);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 210, 255, 0.4);
+}
+
+#play-pause-btn::before {
+    content: '';
+    width: 16px; height: 16px;
+    background: white;
+    clip-path: polygon(15% 0%, 100% 50%, 15% 100%); /* Треугольник */
+    margin-left: 2px;
+}
+
+#play-pause-btn.is-playing::before {
+    clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0); /* Пауза */
+    margin-left: 0;
+}
+
+/* Колонки управления */
+.controls-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sliders-row {
+    display: flex;
+    gap: 20px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-dim);
+}
+
+.control-group input[type="range"] {
+    width: 80px;
+    height: 4px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+/* Progress Slider */
 #progress-view {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 5px;
 }
 
 #progress-slider {
     -webkit-appearance: none;
     width: 100%;
-    height: 6px;
+    height: 4px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    border-radius: 2px;
     outline: none;
     cursor: pointer;
+    --value: 0%;
 }
 
 #progress-slider::-webkit-slider-runnable-track {
-    background: linear-gradient(to right, var(--accent) var(--value), rgba(255,255,255,0.1) var(--value));
-    height: 6px;
-    border-radius: 10px;
+    background: linear-gradient(to right, var(--accent) var(--value), transparent var(--value));
+    height: 4px;
+    border-radius: 2px;
 }
 
 #progress-slider::-webkit-slider-thumb {
-    will-change: transform;
-    transform: translateZ(0);
     -webkit-appearance: none;
-    height: 18px;
-    width: 18px;
+    height: 12px; width: 12px;
     border-radius: 50%;
     background: #fff;
-    box-shadow: 0 0 15px var(--accent);
-    margin-top: -6px;
-    transition: transform 0.2s;
+    margin-top: -4px;
+    box-shadow: 0 0 10px var(--accent);
+    transition: transform 0.1s;
 }
 
 #progress-slider:hover::-webkit-slider-thumb {
-    transform: scale(1.2);
+    transform: scale(1.3);
 }
 
 #time-display {
-    font-family: 'Monaco', monospace;
-    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
     color: var(--text-dim);
-    letter-spacing: 1px;
-    display: flex;
-    justify-content: space-between;
 }
 
-/* === MAIN PLAY BUTTON === */
-#play-pause-btn {
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    border: none;
-    background: var(--accent-gradient);
-    box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#play-pause-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 15px 30px rgba(0, 210, 255, 0.5);
-}
-
-#play-pause-btn::before {
-    content: ''; 
-    width: 20px; height: 20px;
-    background: white;
-    clip-path: polygon(15% 0%, 100% 50%, 15% 100%);
-}
-
-#play-pause-btn.is-playing::before {
-    clip-path: polygon(0 0, 30% 0, 30% 100%, 0 100%, 0 0, 70% 0, 100% 0, 100% 100%, 70% 100%, 70% 0);
-}
-
-/* === PLAYLIST AREA === */
-.playlist-grid-area {
-    grid-row: 3;
+/* === EQUALIZER (Пункт 6) === */
+.eq-container-wrapper {
     background: rgba(0, 0, 0, 0.15);
-    border-radius: 24px;
+    border-radius: 12px;
     padding: 10px;
-    overflow-y: auto;
-}
-
-/* Scrollbar Styling */
-.playlist-grid-area::-webkit-scrollbar { width: 6px; }
-.playlist-grid-area::-webkit-scrollbar-track { background: transparent; }
-.playlist-grid-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-
-.track-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    margin-bottom: 8px;
-    border-radius: 16px;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-
-.track-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateX(5px);
-}
-
-.track-item.playing {
-    background: rgba(0, 210, 255, 0.1);
-    border-color: rgba(0, 210, 255, 0.2);
-}
-
-.track-name {
-    color: var(--text-main);
-    font-weight: 500;
-    font-size: 15px;
-}
-
-/* === EQUALIZER PANEL === */
-#equalizer-panel {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 15px 25px;
-    border-radius: 20px;
     border: 1px solid var(--glass-border);
 }
 
-.eq-band input[type="range"] {
-    accent-color: var(--accent);
-    height: 4px;
-}
-
-/* === SPECTROGRAM (Background Visual) === */
-#spectrogram-canvas {
-    position: absolute;
-    bottom: 0; left: 0;
-    width: 100%; height: 40%;
-    z-index: -1;
-    opacity: 0.4;
-    pointer-events: none;
-    mask-image: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0));
-}
-
-/* === HEADER CONTROLS === */
-.header {
+.eq-bands {
     display: flex;
     justify-content: space-between;
+    gap: 5px;
+}
+
+.eq-band {
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    gap: 5px;
+    flex: 1;
 }
 
-.header-right { display: flex; gap: 10px; }
+.eq-band label {
+    font-size: 9px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+}
 
-#save-settings-btn, #reset-settings-btn, #select-folder-btn {
-    background: rgba(255, 255, 255, 0.05);
+/* Вертикальный слайдер */
+.eq-band input[type="range"] {
+    -webkit-appearance: slider-vertical;
+    width: 20px;
+    height: 60px;
+    accent-color: var(--accent);
+    background: transparent;
+}
+
+/* Числовой инпут */
+.eq-band input[type="number"] {
+    width: 36px;
+    background: rgba(255,255,255,0.05);
     border: 1px solid var(--glass-border);
-    color: var(--text-main);
-    padding: 6px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
+    color: var(--accent);
+    font-size: 10px;
+    text-align: center;
+    border-radius: 4px;
+    outline: none;
+    -moz-appearance: textfield; /* Убирает стрелки в Firefox */
 }
 
-#save-settings-btn:hover { 
-    background: var(--accent); 
-    color: #000; 
-    box-shadow: 0 0 15px var(--accent); 
+/* Убираем стрелки в Chrome/Safari */
+.eq-band input[type="number"]::-webkit-outer-spin-button,
+.eq-band input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
-/* Feedback for saved state */
-#save-settings-btn.saved { 
-    background: #22c55e; 
-    color: white; 
-    border-color: #22c55e; 
+/* === PLAYLIST (Скроллится только эта часть) === */
+.playlist-grid-area {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    overflow-y: auto; /* Включает скролл */
+    padding: 10px;
+    margin-top: 5px;
 }
 
-/* === FOLDER NAVIGATION === */
+/* Кастомный скроллбар */
+.playlist-grid-area::-webkit-scrollbar {
+    width: 6px;
+}
+.playlist-grid-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+.playlist-grid-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+.playlist-grid-area::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Группы папок */
+.folder-group {
+    margin-bottom: 5px;
+}
+
 .folder-group h3 {
+    font-size: 13px;
+    padding: 8px 12px;
+    margin: 0;
     cursor: pointer;
+    color: var(--text-dim);
     display: flex;
     align-items: center;
-    gap: 10px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 6px;
+    transition: 0.2s;
     user-select: none;
+}
+
+.folder-group h3:hover {
+    background: rgba(255,255,255,0.05);
     color: var(--text-main);
 }
 
-.folder-tracks {
-    display: none;
-    list-style: none;
-    padding-left: 15px;
-}
-
-/* Expanded Folder Logic */
-.folder-group.open .folder-tracks {
-    display: block;
+/* Стрелочка папки */
+.folder-group h3::before {
+    content: '▶';
+    font-size: 9px;
+    margin-right: 10px;
+    transition: transform 0.2s;
+    color: var(--accent);
 }
 
 .folder-group.open h3::before {
     transform: rotate(90deg);
 }
 
-/* === OPTIMIZATION / LOW-GFX MODES === */
-#optimize-btn {
-    background: rgba(0, 210, 255, 0.1);
-    border: 1px solid var(--accent);
+.folder-group.open h3 {
     color: var(--accent);
+    background: rgba(0, 210, 255, 0.05);
+}
+
+/* Список треков (Скрыт по умолчанию) */
+.folder-tracks {
+    display: none;
+    padding-left: 10px;
+    margin-top: 5px;
+}
+/* JS добавляет класс open, и треки появляются */
+.folder-group.open .folder-tracks {
+    display: block;
+}
+
+/* Элемент трека */
+.track-item {
+    padding: 8px 15px;
+    margin: 2px 0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
     cursor: pointer;
-    padding: 6px 15px;
-    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-main);
+    transition: var(--transition);
+    border: 1px solid transparent;
 }
 
-/* Toggle state for UI optimization */
-#optimize-btn.optimized {
-    background: rgba(255, 100, 100, 0.1);
-    border-color: #ff6464;
-    color: #ff6464;
+.track-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    padding-left: 20px; /* Эффект сдвига */
 }
 
-/* Battery/Resource Saver Mode Styles */
-body.low-gfx #progress-slider::-webkit-slider-thumb {
-    box-shadow: none !important;
-    border: 2px solid var(--accent);
-    background: #fff;
-    transform: none !important;
+.track-item.playing {
+    background: rgba(0, 210, 255, 0.15);
+    border-color: rgba(0, 210, 255, 0.3);
+    color: var(--accent);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
 }
 
-body.low-gfx #progress-slider {
-    background: #333 !important;
-}
-
-body.low-gfx #progress-slider::-webkit-slider-runnable-track {
-    background: #444 !important;
+/* === SPECTROGRAM === */
+#spectrogram-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    opacity: 0.2;
+    pointer-events: none;
+    border-radius: 24px;
 }
