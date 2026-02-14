@@ -1,155 +1,131 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-const fs = require('fs'); 
+const fs = require('fs');
 
 const settingsPath = path.join(app.getPath('userData'), 'umplayer-settings.json');
-let appSettings = {}; 
+let appSettings = {};
+let currentWatchers = []; // Храним активные вотчеры
+let mainWindow = null;
 
-/**
- * Initialize main application window
- */
 const createWindow = () => {
-  const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+  mainWindow = new BrowserWindow({
+    width: 1000, // Чуть шире для нового дизайна
+    height: 700,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true
     }
   });
 
-  win.loadFile('form.html');
+  mainWindow.loadFile('form.html');
 };
 
 app.whenReady().then(() => {
-  loadSettings(); 
+  loadSettings();
   createWindow();
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
 
-/**
- * Load persistent track settings from local JSON
- */
 function loadSettings() {
     try {
-        if (fs.existsSync(settingsPath)) { 
-            const data = fs.readFileSync(settingsPath, 'utf8'); 
-            appSettings = JSON.parse(data);
-            console.log("Settings loaded successfully.");
-        } else {
-            appSettings = {}; 
+        if (fs.existsSync(settingsPath)) {
+            appSettings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
         }
-    } catch (error) {
-        console.error('Failed to load settings:', error);
-        appSettings = {}; 
-    }
+    } catch (error) { console.error(error); }
 }
 
-/**
- * Save current settings object to disk
- */
 function saveSettings() {
     try {
         fs.writeFileSync(settingsPath, JSON.stringify(appSettings, null, 2));
-        console.log("Settings saved to disk.");
-    } catch (error) {
-        console.error('Failed to save settings:', error);
-    }
+    } catch (error) { console.error(error); }
 }
 
-// --- FILE SYSTEM OPERATIONS ---
+// --- FILE SYSTEM ---
 
 const AUDIO_EXTENSIONS = ['.mp3', '.wav', '.ogg', '.flac'];
 
-/**
- * Recursively scan directories for supported audio files
- */
 async function findAudioFilesRecursive(dir, scanSubfolders, folderMap) {
-    const files = await fs.promises.readdir(dir, { withFileTypes: true });
-
-    for (const file of files) {
-        const fullPath = path.join(dir, file.name);
-        
-        if (scanSubfolders && file.isDirectory()) {
-            await findAudioFilesRecursive(fullPath, scanSubfolders, folderMap);
-        } else if (file.isFile() && AUDIO_EXTENSIONS.includes(path.extname(file.name).toLowerCase())) {
-            const directory = path.dirname(fullPath);
-            
-            if (!folderMap.has(directory)) {
-                folderMap.set(directory, []);
+    try {
+        const files = await fs.promises.readdir(dir, { withFileTypes: true });
+        for (const file of files) {
+            const fullPath = path.join(dir, file.name);
+            if (scanSubfolders && file.isDirectory()) {
+                await findAudioFilesRecursive(fullPath, scanSubfolders, folderMap);
+            } else if (file.isFile() && AUDIO_EXTENSIONS.includes(path.extname(file.name).toLowerCase())) {
+                const directory = path.dirname(fullPath);
+                if (!folderMap.has(directory)) folderMap.set(directory, []);
+                folderMap.get(directory).push({
+                    name: path.basename(file.name, path.extname(file.name)),
+                    path: fullPath
+                });
             }
-            
-            folderMap.get(directory).push({
-                name: path.basename(file.name, path.extname(file.name)),
-                path: fullPath
-            });
         }
+    } catch (e) { console.error(e); }
+}
+
+// --- WATCHER FUNCTION (Пункт 7) ---
+function startWatching(folderPath, scanSubfolders) {
+    // Очищаем старые вотчеры
+    currentWatchers.forEach(w => w.close());
+    currentWatchers = [];
+
+    try {
+        // Следим за главной папкой (recursive: true работает на Windows/macOS)
+        const watcher = fs.watch(folderPath, { recursive: scanSubfolders }, (eventType, filename) => {
+            console.log(`File changed: ${filename}`);
+            // Пересканируем с небольшой задержкой (debounce), чтобы не спамить
+            if (mainWindow) {
+                refreshTrackList(folderPath, scanSubfolders);
+            }
+        });
+        currentWatchers.push(watcher);
+    } catch (e) {
+        console.log("Watch failed (might be unsupported on this OS logic):", e);
     }
+}
+
+async function refreshTrackList(folderPath, scanSubfolders) {
+    const folderMap = new Map();
+    await findAudioFilesRecursive(folderPath, scanSubfolders, folderMap);
+    const result = Array.from(folderMap, ([folder, tracks]) => ({ folder, tracks }));
+    if(mainWindow) mainWindow.webContents.send('update-track-list', result);
 }
 
 // --- IPC HANDLERS ---
 
-/**
- * Handle folder selection and file scanning
- */
 ipcMain.handle('dialog:openFolder', async (event, scanSubfolders) => {
     const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
     if (canceled || filePaths.length === 0) return;
-    
+
     const folderPath = filePaths[0];
-    const folderMap = new Map();
     
-    try {
-        await findAudioFilesRecursive(folderPath, scanSubfolders, folderMap);
-    } catch (e) {
-        console.error("Error during folder scan:", e);
-    }
-
-    const result = Array.from(folderMap, ([folder, tracks]) => ({ folder, tracks }));
-    event.sender.send('update-track-list', result);
+    // Запускаем слежение
+    startWatching(folderPath, scanSubfolders);
+    
+    // Первичное сканирование
+    await refreshTrackList(folderPath, scanSubfolders);
 });
 
-/**
- * Retrieve raw audio buffer for the player
- */
 ipcMain.handle('get-audio-data', async (event, filePath) => {
-    try {
-        const audioBuffer = await fs.promises.readFile(filePath);
-        return audioBuffer;
-    } catch (error) {
-        console.error('Error reading audio file:', filePath, error);
-        return null;
-    }
+    try { return await fs.promises.readFile(filePath); } 
+    catch (error) { return null; }
 });
 
-/**
- * Fetch specific settings for a given track
- */
-ipcMain.handle('get-track-settings', (event, trackPath) => {
-    return appSettings[trackPath] || {}; 
-});
+ipcMain.handle('get-track-settings', (event, trackPath) => appSettings[trackPath] || {});
 
-/**
- * Store track settings with a 500ms debounce to limit disk I/O
- */
 let saveTimeout = null;
 ipcMain.on('save-track-settings', (event, { trackPath, settings }) => {
     if (trackPath && settings) {
         appSettings[trackPath] = settings;
-        
         clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(() => {
-            saveSettings();
-        }, 500);
+        saveTimeout = setTimeout(saveSettings, 500);
     }
 });
