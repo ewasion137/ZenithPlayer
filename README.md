@@ -4,17 +4,11 @@
 # ZenithPlayer (UMPlayer (Just a bit rename, dont mind it))
 **Zenith Player - A player, with great visuals, made listen tracks &amp; edit them.**
 
-Pros:
 1. You can edit music: Slow Down / Speed Up ; Equalization
-2. Optimizaton: If program eats too much of GPU - Press `GFX: ON` to turn it off to `GFX: OFF`
-3. Visuals are beautifull (see down).
-4. FL Studio like stop: After you stop the track, it reverts to where your marker were set
-5. Automatic folder, sub-folder scanning.
-6. Equalization, speed settings are saved for every track **individually**
-
-Cons:
-1. Sometimes program can eat TOO much GPU (fixed by `GFX: OFF`)
-2. It's in beta test.
+2. Visuals are beautifull (see down).
+3. FL Studio like stop: After you stop the track, it reverts to where your marker were set
+4. Automatic folder, sub-folder scanning.
+5. Equalization, speed settings are saved for every track **individually**
 
 I would be happy if you use it and review, or give an issue for a bug.
 
@@ -33,4 +27,4 @@ It were made by help of AI (mostly in spectogram and other)
 ## 2 Installer - Portable
 *Just run the executable*
 
-<img width="1919" height="1036" alt="image" src="https://github.com/user-attachments/assets/90b74039-9536-4111-bcee-e84ee8dec8c7" />
+<img width="1920" height="1031" alt="image" src="https://github.com/user-attachments/assets/c4b66406-6a4e-47a0-a88f-58696f293ef2" />
