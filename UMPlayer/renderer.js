@@ -46,6 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const trackVolumeSlider = document.getElementById('track-volume-slider');
     const trackVolumeValue = document.getElementById('track-volume-value');
     const speedSlider = document.getElementById('speed-slider');
+    const trackVolumeInput = document.getElementById('track-volume-input');
+const speedInput = document.getElementById('speed-input');
     const speedValue = document.getElementById('speed-value');
     const progressSlider = document.getElementById('progress-slider');
     const timeDisplay = document.getElementById('time-display');
@@ -123,34 +125,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Audio Functions ---
 
     function play(offsetSeconds) {
-        if (!currentTrackBuffer) return;
-        if (currentSource) currentSource.stop();
+    if (!currentTrackBuffer) return;
+    if (currentSource) currentSource.stop();
 
-        // Запоминаем, откуда начали играть (для возврата по Space)
-        playbackStartSec = offsetSeconds;
+    playbackStartSec = offsetSeconds;
 
-        currentSource = audioContext.createBufferSource();
-        currentSource.buffer = currentTrackBuffer;
-        currentSource.playbackRate.value = Number(speedSlider.value) / 100; 
-        currentSource.connect(masterGain);
-        currentSource.start(0, offsetSeconds);
+    currentSource = audioContext.createBufferSource();
+    currentSource.buffer = currentTrackBuffer;
+    currentSource.playbackRate.value = Number(speedSlider.value) / 100; 
+    currentSource.connect(masterGain);
 
-        isPlaying = true;
-        // Вычисляем время контекста, когда трек был бы на 0:00
-        playbackStartedAtCtx = audioContext.currentTime - offsetSeconds / currentSource.playbackRate.value;
-        
-        currentSource.onended = () => {
-            // Если трек доиграл до конца сам
-            if ((getCurrentTime() + 0.1) >= currentTrackBuffer.duration) {
-                isPlaying = false;
-                updateUIState();
-                playNextTrack(); 
-            }
-        };
+    // Флаг, который по умолчанию true
+    let naturalEnd = true;
+    // Переопределяем его на false, когда прерываем трек вручную
+    currentSource.stop = ((stop) => function(...args) {
+        naturalEnd = false;
+        stop.apply(this, args);
+    })(currentSource.stop);
 
-        updateUIState();
-        startRenderLoop();
-    }
+    currentSource.start(0, offsetSeconds);
+
+    isPlaying = true;
+    playbackStartedAtCtx = audioContext.currentTime - offsetSeconds / currentSource.playbackRate.value;
+    
+    currentSource.onended = () => {
+        // Теперь проверяем только флаг
+        if (naturalEnd) {
+            isPlaying = false;
+            updateUIState();
+            playNextTrack(); 
+        }
+    };
+
+    updateUIState();
+    startRenderLoop();
+}
 
     // Обычная пауза (кнопка мыши) - остаемся где были
     function pause() {
@@ -174,50 +183,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function stopSource() {
-        if (currentSource) {
-            currentSource.onended = null;
-            try { currentSource.stop(); } catch(e) {}
-            currentSource = null;
-        }
-        isPlaying = false;
-        stopRenderLoop();
+    if (currentSource) {
+        try { currentSource.stop(); } catch(e) {} // stop() сам выставит naturalEnd = false
+        currentSource = null;
     }
+    isPlaying = false;
+    stopRenderLoop();
+}
 
     async function loadAndPlayTrack(trackPath, trackElement) {
-        if (currentPlayingElement) currentPlayingElement.classList.remove('playing');
-        stopSource();
+    // 1. Снимаем подсветку со старого трека
+    if (currentPlayingElement) currentPlayingElement.classList.remove('playing');
+    
+    stopSource(); // Останавливаем всё, что играло
 
-        currentTrackBuffer = null; 
-        currentPlayingElement = trackElement;
-        isPlaying = false;
-        timeDisplay.innerHTML = '<span>Loading...</span>';
-        currentTrackPath = trackPath;
+    // 2. Сразу обновляем состояние (чтобы не было путаницы)
+    currentTrackPath = trackPath;
+    currentPlayingElement = trackElement;
+    currentTrackBuffer = null; 
+    isPlaying = false;
+    timeDisplay.innerHTML = '<span>Loading...</span>';
+    
+    const savedSettings = await window.electronAPI.getTrackSettings(trackPath);
+    applySettings(savedSettings);
+    
+    try {
+        const rawData = await window.electronAPI.getAudioData(trackPath);
         
-        const savedSettings = await window.electronAPI.getTrackSettings(trackPath);
-        applySettings(savedSettings);
+        // ПРОВЕРКА: если пользователь уже выбрал другой трек, пока этот грузился - отменяем
+        if (currentTrackPath !== trackPath) return; 
+        if (!rawData) throw new Error("Failed to get audio data");
         
-        try {
-            const rawData = await window.electronAPI.getAudioData(trackPath);
-            if (!rawData) return;
-            
-            const audioBuffer = await audioContext.decodeAudioData(rawData.buffer);
-            if (currentTrackPath !== trackPath) return; 
+        const audioBuffer = await audioContext.decodeAudioData(rawData.buffer);
+        
+        // ЕЩЕ ОДНА ПРОВЕРКА: на случай если декодинг был долгим
+        if (currentTrackPath !== trackPath) return; 
 
-            currentTrackBuffer = audioBuffer;
-            
-            // Новый трек всегда с начала
-            pauseTimeSec = 0;
-            playbackStartSec = 0;
-            progressSlider.value = 0;
-            
-            trackElement.classList.add('playing');
-            play(0);
+        currentTrackBuffer = audioBuffer;
+        
+        // Сбрасываем таймеры
+        pauseTimeSec = 0;
+        playbackStartSec = 0;
+        progressSlider.value = 0;
+        
+        // 3. ВОТ КЛЮЧЕВОЙ МОМЕНТ: Подсвечиваем трек только СЕЙЧАС, когда все готово.
+        trackElement.classList.add('playing');
+        
+        play(0);
 
-        } catch (err) {
-            console.error(err);
-            timeDisplay.textContent = "Error loading";
+    } catch (err) {
+        console.error("Error loading track:", err);
+        timeDisplay.innerHTML = `<span>Error</span>`;
+        // Если была ошибка, убираем подсветку
+        if (currentPlayingElement === trackElement) {
+            trackElement.classList.remove('playing');
         }
     }
+}
 
     function playNextTrack() {
     if (!currentPlayingElement) return;
@@ -425,7 +447,56 @@ document.addEventListener('DOMContentLoaded', () => {
         playPauseBtn.classList.toggle('is-playing', isPlaying);
     }
     
-    // --- Initial Config ---
+    const themeSwitcherBtn = document.getElementById('theme-switcher');
+    const themeLink = document.getElementById('theme-link');
+
+    // Список твоих тем. Просто добавляй сюда имена новых файлов.
+    const themes = [
+        'cosmic.css', 
+        'frutigeraero.css',
+        'terminal.css',
+        'winamp.css',
+        'macglass.css',
+        'main.css'
+    ];
+
+    // Функция, которая применяет тему
+    function applyTheme(themeName) {
+        themeLink.href = `styles/themes/${themeName}`;
+        console.log(`Theme applied: ${themeName}`);
+    }
+
+    // Функция, которая сохраняет и переключает тему
+    function switchTheme() {
+        // Получаем текущий индекс из памяти (или 0, если его нет)
+        let currentThemeIndex = Number(localStorage.getItem('themeIndex') || 0);
+
+        // Вычисляем следующий индекс по кругу
+        currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+
+        // Применяем новую тему
+        const newTheme = themes[currentThemeIndex];
+        applyTheme(newTheme);
+
+        // Сохраняем новый индекс в память
+        localStorage.setItem('themeIndex', currentThemeIndex);
+    }
+
+    // Вешаем обработчик на кнопку
+    themeSwitcherBtn.addEventListener('click', switchTheme);
+
+
+    // --- Загрузка темы при старте приложения ---
+    function loadInitialTheme() {
+        const savedThemeIndex = Number(localStorage.getItem('themeIndex') || 0);
+        // Проверка, чтобы индекс не выходил за рамки, если ты удалишь тему
+        const validIndex = savedThemeIndex < themes.length ? savedThemeIndex : 0;
+        
+        applyTheme(themes[validIndex]);
+        localStorage.setItem('themeIndex', validIndex); // Обновляем на случай, если был невалидный
+    }
+
+    loadInitialTheme();
 
     trackVolumeSlider.addEventListener('input', e => {
         const val = e.target.value;
@@ -433,16 +504,30 @@ document.addEventListener('DOMContentLoaded', () => {
         trackVolumeValue.textContent = `${val}%`;
         onSettingsChange();
     });
+    function updateVolume(value) {
+    const val = Math.min(200, Math.max(0, Number(value))); // Ограничиваем значение
+    masterGain.gain.setValueAtTime(val / 100, audioContext.currentTime);
+    trackVolumeValue.textContent = `${val}%`;
+    trackVolumeSlider.value = val;
+    trackVolumeInput.value = val;
+    onSettingsChange();
+}
+trackVolumeSlider.addEventListener('input', e => updateVolume(e.target.value));
+trackVolumeInput.addEventListener('change', e => updateVolume(e.target.value));
 
-    speedSlider.addEventListener('input', e => {
-        const val = e.target.value;
-        speedValue.textContent = `${val}%`;
-        if (currentSource) {
-            currentSource.playbackRate.value = val / 100;
-            playbackStartedAtCtx = audioContext.currentTime - getCurrentTime() / (val / 100);
-        }
-        onSettingsChange();
-    });
+    function updateSpeed(value) {
+    const val = Math.min(200, Math.max(50, Number(value))); // Ограничиваем значение
+    speedValue.textContent = `${val}%`;
+    if (currentSource) {
+        currentSource.playbackRate.value = val / 100;
+        playbackStartedAtCtx = audioContext.currentTime - getCurrentTime() / (val / 100);
+    }
+    speedSlider.value = val;
+    speedInput.value = val;
+    onSettingsChange();
+}
+speedSlider.addEventListener('input', e => updateSpeed(e.target.value));
+speedInput.addEventListener('change', e => updateSpeed(e.target.value));
 
     // Files/Folders Logic (с запоминанием открытых папок)
     function displayTracks(folders) {
