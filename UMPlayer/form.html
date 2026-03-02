@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>UMPlayer</title>
     <!-- ВАЖНО: Проверь, что файл player.css лежит в папке styles -->
-    <link rel="stylesheet" href="styles/player.css"> 
+    <link rel="stylesheet" href="styles/main.css"> 
+    <link id="theme-link" rel="stylesheet" href="">
 </head>
 <body>
     <div class="player-grid">
@@ -40,12 +41,14 @@
                 <div class="sliders-row">
                     <div class="control-group">
                         <label>Vol</label>
-                        <input type="range" id="track-volume-slider" min="0" max="200" value="100">
+                        <input type="range" id="track-volume-slider" min="0" max="200" value="100" step="1">
+                        <input type="number" id="track-volume-input" min="0" max="200" value="100" class="control-input">
                         <span id="track-volume-value">100%</span>
                     </div>
                     <div class="control-group">
                         <label>Speed</label>
-                        <input type="range" id="speed-slider" min="50" max="200" value="100">
+                        <input type="range" id="speed-slider" min="50" max="200" value="100" step="1">
+                        <input type="number" id="speed-input" min="50" max="200" value="100" class="control-input">
                         <span id="speed-value">100%</span>
                     </div>
                 </div>
@@ -73,6 +76,7 @@
         </div>
 
     </div>
+    <button id="theme-switcher" title="Change Theme">🎨</button>
     <script src="renderer.js"></script>
 </body>
 </html>
