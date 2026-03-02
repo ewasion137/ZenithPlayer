@@ -1,0 +1,527 @@
+/* === COSMIC THEME VARIABLES === */
+:root {
+    --bg-main: #03000a; /* Бездна космоса (очень глубокий фиолетово-черный) */
+    --panel-bg: rgba(12, 10, 32, 0.6); /* Темное стекло интерфейса */
+    --surface: rgba(26, 22, 56, 0.8); /* Фон кнопок и инпутов */
+    --accent: #d946ef; /* Космическая маджента / Розовый неон */
+    --accent-secondary: #06b6d4; /* Яркий циан (цвет звезд) */
+    --accent-gradient: linear-gradient(135deg, #d946ef 0%, #3b82f6 100%);
+    --text-main: #e2e8f0;
+    --text-dim: #8b9bb4;
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-glow: rgba(217, 70, 239, 0.4);
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* === BASE STYLES === */
+body {
+    background-color: var(--bg-main);
+    /* Эффект туманности (Nebula) на фоне */
+    background-image: 
+        radial-gradient(circle at 15% 20%, rgba(106, 13, 173, 0.15), transparent 40%),
+        radial-gradient(circle at 85% 70%, rgba(6, 182, 212, 0.15), transparent 40%),
+        radial-gradient(circle at 50% 100%, rgba(217, 70, 239, 0.1), transparent 50%),
+        /* Имитация звездной пыли через мелкий паттерн (опционально, но легко для рендера) */
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 20px 20px, 20px 20px;
+    background-position: center center;
+    
+    height: 100vh;
+    margin: 0;
+    font-family: 'Inter', 'Orbitron', system-ui, sans-serif;
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+/* === LOW-GFX MODE (Экономия ресурсов) === */
+body.low-gfx {
+    background: #050210 !important;
+}
+body.low-gfx * {
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+    background-image: none !important;
+}
+body.low-gfx #spectrogram-canvas {
+    display: none !important;
+}
+body.low-gfx .track-item:hover, 
+body.low-gfx button:hover {
+    transform: none !important;
+    background: #1a1638 !important;
+}
+
+/* === MAIN PLAYER CONTAINER === */
+.player-grid {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr; 
+    width: 100vw;
+    height: 100vh;
+    background: var(--panel-bg);
+    /* Космическое стекло */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 24px;
+    gap: 20px;
+    z-index: 10;
+    box-sizing: border-box;
+}
+
+/* === HEADER === */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+button {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text-main);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: var(--transition);
+}
+
+button:hover {
+    background: rgba(45, 35, 90, 0.8);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(217, 70, 239, 0.2);
+    color: #fff;
+}
+
+button:active {
+    transform: scale(0.96);
+}
+
+#save-settings-btn.saved {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #10b981;
+    color: #34d399;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+#optimize-btn.optimized {
+    color: #f43f5e;
+    border-color: #f43f5e;
+    background: rgba(244, 63, 94, 0.1);
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.2);
+}
+
+.search-container input {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--text-main);
+    width: 240px;
+    outline: none;
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.search-container input:focus {
+    border-color: var(--accent-secondary);
+    background: rgba(10, 15, 35, 0.9);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
+}
+
+/* === PLAYER CONTROLS === */
+#top-controls {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: rgba(5, 3, 15, 0.4);
+    padding: 18px 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+}
+
+.main-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#prev-btn, #next-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-light);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+#prev-btn::before {
+    content: ''; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-right: 8px solid var(--text-main);
+}
+#next-btn::before {
+    content: ''; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid var(--text-main);
+}
+
+#play-pause-btn {
+    width: 56px; height: 56px;
+    min-width: 56px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    /* Эффект свечения ядра */
+    box-shadow: 0 0 20px rgba(217, 70, 239, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(217, 70, 239, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+#play-pause-btn::before {
+    content: '';
+    width: 14px; height: 16px;
+    background: white;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    margin-left: 3px;
+    transition: clip-path 0.2s ease;
+}
+
+#play-pause-btn.is-playing::before {
+    clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+    margin-left: 0;
+}
+
+.controls-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sliders-row {
+    display: flex;
+    gap: 24px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-secondary); /* Названия ползунков светятся цианом */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.control-group input[type="range"] {
+    width: 160px; /* <--- ИЗМЕНИЛ ТОЛЬКО ЭТО (было 90px) */
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    -webkit-appearance: none;
+    outline: none;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent-secondary);
+    box-shadow: 0 0 8px var(--accent-secondary);
+    cursor: pointer;
+}
+
+/* Progress Slider */
+#progress-view {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#progress-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    --value: 0%;
+}
+
+/* Луч энергии как трек прогресса */
+#progress-slider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent-secondary) var(--value), rgba(255,255,255,0.05) var(--value));
+    height: 4px;
+    border-radius: 2px;
+}
+
+#progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 12px; width: 12px;
+    border-radius: 50%;
+    background: #fff;
+    margin-top: -4px;
+    box-shadow: 0 0 10px #fff, 0 0 20px var(--accent-secondary);
+    transition: transform 0.2s, background 0.2s;
+}
+
+#progress-slider:hover::-webkit-slider-thumb {
+    transform: scale(1.4);
+}
+
+#time-display {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    color: var(--text-dim);
+}
+
+/* === EQUALIZER === */
+.eq-container-wrapper {
+    background: rgba(5, 3, 15, 0.4);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+}
+
+.eq-bands {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.eq-band {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.eq-band label {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.eq-band input[type="range"] {
+    -webkit-appearance: slider-vertical;
+    width: 20px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    outline: none;
+}
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+    box-shadow: 0 0 8px var(--accent);
+}
+
+.eq-band input[type="number"] {
+    width: 40px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--accent-secondary);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+    border-radius: 4px;
+    padding: 2px 0;
+    outline: none;
+    -moz-appearance: textfield;
+    transition: var(--transition);
+}
+
+.eq-band input[type="number"]:hover,
+.eq-band input[type="number"]:focus {
+    border-color: var(--border-light);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.eq-band input[type="number"]::-webkit-outer-spin-button,
+.eq-band input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+}
+
+/* === PLAYLIST === */
+.playlist-grid-area {
+    background: rgba(5, 3, 15, 0.3);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    overflow-y: auto;
+    padding: 12px;
+    margin-top: 5px;
+}
+
+/* Скроллбар (тонкий луч) */
+.playlist-grid-area::-webkit-scrollbar {
+    width: 6px;
+}
+.playlist-grid-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+.playlist-grid-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+.playlist-grid-area::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 8px var(--accent-secondary);
+}
+
+.folder-group {
+    margin-bottom: 4px;
+}
+
+.folder-group h3 {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 14px;
+    margin: 0;
+    cursor: pointer;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border-radius: 6px;
+    transition: var(--transition);
+    user-select: none;
+}
+
+.folder-group h3:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.folder-group h3::before {
+    content: '›';
+    font-size: 16px;
+    line-height: 1;
+    margin-right: 12px;
+    transition: transform 0.2s ease;
+    color: var(--text-dim);
+}
+
+.folder-group.open h3 {
+    background: rgba(217, 70, 239, 0.1);
+    color: var(--accent);
+}
+
+.folder-group.open h3::before {
+    transform: rotate(90deg);
+    color: var(--accent);
+}
+
+.folder-tracks {
+    display: none;
+    padding-left: 12px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    margin-left: 18px;
+}
+
+.folder-group.open .folder-tracks {
+    display: block;
+}
+
+.track-item {
+    padding: 8px 12px;
+    margin: 2px 0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-dim);
+    transition: transform 0.2s ease, opacity 0.2s ease; 
+    border-left: 2px solid transparent;
+}
+
+.track-item:hover {
+    color: #fff;
+    background: rgba(6, 182, 212, 0.05);
+    transform: translateX(4px);
+}
+
+/* Активный трек - Космическое свечение */
+.track-item.playing {
+    color: #fff;
+    background: linear-gradient(90deg, rgba(217, 70, 239, 0.15) 0%, transparent 100%);
+    border-left: 2px solid var(--accent);
+    box-shadow: inset 20px 0 20px -20px rgba(217, 70, 239, 0.5);
+    font-weight: 500;
+}
+
+/* === SPECTROGRAM === */
+#spectrogram-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    opacity: 0.25;
+    pointer-events: none;
+    /* Легкая цветовая коррекция спектрограммы под космос */
+    filter: hue-rotate(280deg) saturate(150%);
+}
+
+/* === THEME SWITCHER BUTTON === */
+#theme-switcher {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 24px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    transition: var(--transition);
+}
+
+#theme-switcher:hover {
+    border-color: var(--accent);
+    background: rgba(217, 70, 239, 0.2);
+    box-shadow: 0 0 20px rgba(217, 70, 239, 0.4);
+    transform: scale(1.1) rotate(45deg); /* Вращение для эффекта портала/звезды */
+}
