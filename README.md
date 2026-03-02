@@ -12,8 +12,6 @@
 
 I would be happy if you use it and review, or give an issue for a bug.
 
-It were made by help of AI (mostly in spectogram and other)
-
 ### Made on electron, web
 
 # How to install / build
