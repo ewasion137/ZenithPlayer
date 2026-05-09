@@ -1,10 +1,15 @@
 /* === QUICK SETUP VARIABLES === */
 :root {
-    --bg-main: #050507; /* Глубокий черный */
-    --panel-bg: #0d0e15; /* Цвет панелей плейлиста и EQ */
-    --surface: #151722; /* Кнопки и инпуты */
-    --accent: #8b5cf6; /* Неоновый фиолетовый */
-    --accent-secondary: #0ea5e9; /* Голубой для контраста */
+    --bg-main: #050507;
+    /* Глубокий черный */
+    --panel-bg: #0d0e15;
+    /* Цвет панелей плейлиста и EQ */
+    --surface: #151722;
+    /* Кнопки и инпуты */
+    --accent: #8b5cf6;
+    /* Неоновый фиолетовый */
+    --accent-secondary: #0ea5e9;
+    /* Голубой для контраста */
     --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #0ea5e9 100%);
     --text-main: #f8fafc;
     --text-dim: #64748b;
@@ -18,8 +23,17 @@
 }
 
 @keyframes windowSpawn {
-    from { opacity: 0; transform: scale(0.98) translateY(10px); filter: blur(10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+    from {
+        opacity: 0;
+        transform: scale(0.98) translateY(10px);
+        filter: blur(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
 }
 
 @keyframes trackAppear {
@@ -27,6 +41,7 @@
         opacity: 0;
         transform: translateX(-20px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateX(0) scale(1);
@@ -50,18 +65,22 @@ body {
 body.low-gfx {
     background: #000 !important;
 }
+
 body.low-gfx * {
     animation: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     box-shadow: none !important;
     transition: none !important;
-    background-image: none !important; /* Отключаем градиенты */
+    background-image: none !important;
+    /* Отключаем градиенты */
 }
+
 body.low-gfx #spectrogram-canvas {
     display: none !important;
 }
-body.low-gfx .track-item:hover, 
+
+body.low-gfx .track-item:hover,
 body.low-gfx button:hover {
     transform: none !important;
     transition: var(--transition-main);
@@ -76,7 +95,7 @@ body.low-gfx button:hover {
     animation: windowSpawn var(--spawn-duration) var(--hypr-bezier) forwards;
     position: relative;
     display: grid;
-    grid-template-rows: auto auto auto 1fr; 
+    grid-template-rows: auto auto auto 1fr;
     /* Растягиваем на весь экран */
     width: 100vw;
     height: 100vh;
@@ -101,7 +120,8 @@ body.low-gfx button:hover {
     border-bottom: 1px solid var(--border-light);
 }
 
-.header-left, .header-right {
+.header-left,
+.header-right {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -175,8 +195,10 @@ button:active {
     gap: 16px;
 }
 
-#prev-btn, #next-btn {
-    width: 40px; height: 40px;
+#prev-btn,
+#next-btn {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: transparent;
     border: 1px solid transparent;
@@ -185,7 +207,8 @@ button:active {
     justify-content: center;
 }
 
-#prev-btn:hover, #next-btn:hover {
+#prev-btn:hover,
+#next-btn:hover {
     background: var(--surface);
     border-color: var(--border-light);
 }
@@ -193,15 +216,21 @@ button:active {
 /* Минималистичные стрелки */
 #prev-btn::before {
     content: '';
-    border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-right: 8px solid var(--text-main);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 8px solid var(--text-main);
 }
+
 #next-btn::before {
     content: '';
-    border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid var(--text-main);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 8px solid var(--text-main);
 }
 
 #play-pause-btn {
-    width: 54px; height: 54px;
+    width: 54px;
+    height: 54px;
     min-width: 54px;
     border-radius: 50%;
     border: none;
@@ -221,7 +250,8 @@ button:active {
 
 #play-pause-btn::before {
     content: '';
-    width: 14px; height: 16px;
+    width: 14px;
+    height: 16px;
     background: white;
     clip-path: polygon(0 0, 100% 50%, 0 100%);
     margin-left: 3px;
@@ -251,7 +281,8 @@ button:active {
 }
 
 .control-group input[type="range"] {
-    width: 160px; /* Было 90px, делаем длиннее */
+    width: 160px;
+    /* Было 90px, делаем длиннее */
     height: 4px;
     background: var(--surface);
     border-radius: 2px;
@@ -261,7 +292,8 @@ button:active {
 
 .control-group input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 10px; height: 10px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: var(--text-main);
     cursor: pointer;
@@ -293,7 +325,8 @@ button:active {
 .control-input::-webkit-inner-spin-button,
 .eq-band input[type="number"]::-webkit-outer-spin-button,
 .eq-band input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none; margin: 0;
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 /* Progress Slider */
@@ -306,19 +339,18 @@ button:active {
 .waveform-container {
     position: relative;
     width: 100%;
-    height: 40px; /* Увеличим высоту для красоты */
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    overflow: hidden;
+    height: 60px;
+    /* Сделаем чуть выше, чтобы было видно детали */
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 6px;
+    margin-top: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 #waveform-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* Чтобы клики проходили сквозь холст на слайдер */
+    /* Важно: не задаем здесь размеры в пикселях, только 100% */
 }
 
 #progress-slider {
@@ -327,27 +359,30 @@ button:active {
     left: 0;
     width: 100%;
     height: 100%;
-    margin: 0;
-    cursor: pointer;
-    background: transparent !important; /* Делаем стандартный фон прозрачным */
-    z-index: 2;
+    opacity: 0.5;
+    /* Чтобы волну было видно сквозь слайдер */
+    z-index: 5;
 }
 
 /* Настраиваем полосу прогресса, чтобы она была полупрозрачной и "заливала" волну */
 #progress-slider::-webkit-slider-runnable-track {
     background: linear-gradient(to right, var(--accent) var(--value), transparent var(--value));
     height: 100%;
-    opacity: 0.3; /* Эффект заполнения */
+    opacity: 0.3;
+    /* Эффект заполнения */
 }
 
 #progress-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    height: 0; width: 0; /* Прячем ползунок по умолчанию для минимализма */
+    height: 0;
+    width: 0;
+    /* Прячем ползунок по умолчанию для минимализма */
     transition: var(--transition);
 }
 
 #progress-slider:hover::-webkit-slider-thumb {
-    height: 14px; width: 14px;
+    height: 14px;
+    width: 14px;
     border-radius: 50%;
     background: #fff;
     margin-top: -4px;
@@ -400,6 +435,7 @@ button:active {
     outline: none;
     border: 1px solid var(--border-light);
 }
+
 .eq-band input[type="range"]::-webkit-slider-thumb {
     background: var(--accent-secondary);
     border-radius: 2px;
@@ -425,7 +461,8 @@ button:active {
 
 .eq-band input[type="number"]::-webkit-outer-spin-button,
 .eq-band input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none; margin: 0;
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 /* === PLAYLIST === */
@@ -441,14 +478,17 @@ button:active {
 .playlist-grid-area::-webkit-scrollbar {
     width: 8px;
 }
+
 .playlist-grid-area::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .playlist-grid-area::-webkit-scrollbar-thumb {
     background: var(--surface);
     border-radius: 4px;
     border: 1px solid var(--border-light);
 }
+
 .playlist-grid-area::-webkit-scrollbar-thumb:hover {
     background: var(--text-dim);
 }
@@ -483,7 +523,7 @@ button:active {
 }
 
 
-.folder-tracks > div {
+.folder-tracks>div {
     min-height: 0;
 }
 
@@ -510,26 +550,31 @@ button:active {
 /* Контейнер для треков в папке */
 .folder-tracks {
     display: grid;
-    grid-template-rows: 0fr; /* Полностью схлопнуто */
+    grid-template-rows: 0fr;
+    /* Полностью схлопнуто */
     transition: grid-template-rows 0.4s var(--hypr-bezier);
     overflow: hidden;
     /* УБИРАЕМ padding и margin отсюда, они создают фантомное пространство */
-    padding: 0; 
+    padding: 0;
     margin: 0;
     border: none;
 }
+
 /* Когда папка открыта */
 .folder-group.open .folder-tracks {
-    grid-template-rows: 1fr; /* Раскрываем */
+    grid-template-rows: 1fr;
+    /* Раскрываем */
 }
 
 /* Внутренняя обертка (обязательна для этого хака с Grid) */
 .folder-tracks-inner {
     min-height: 0;
-    padding-left: 18px; /* Все отступы теперь тут */
+    padding-left: 18px;
+    /* Все отступы теперь тут */
     margin-bottom: 10px;
     border-left: 1px solid var(--border-light);
 }
+
 /* Треки */
 .track-item {
     padding: 8px 12px;
@@ -551,9 +596,18 @@ button:active {
 }
 
 @keyframes playingPulse {
-    0% { border-left-color: var(--accent); }
-    50% { border-left-color: var(--accent-secondary); box-shadow: inset 10px 0 20px -10px var(--accent); }
-    100% { border-left-color: var(--accent); }
+    0% {
+        border-left-color: var(--accent);
+    }
+
+    50% {
+        border-left-color: var(--accent-secondary);
+        box-shadow: inset 10px 0 20px -10px var(--accent);
+    }
+
+    100% {
+        border-left-color: var(--accent);
+    }
 }
 
 .track-item:hover {
@@ -573,41 +627,44 @@ button:active {
 /* === SPECTROGRAM === */
 #spectrogram-canvas {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: -1;
     opacity: 0.15;
     pointer-events: none;
     border-radius: 16px;
     /* Убрано сглаживание для повышения FPS спектрограммы */
-    image-rendering: pixelated; 
+    image-rendering: pixelated;
 }
 
 /* === THEME SWITCHER BUTTON === */
 #theme-switcher {
-    position: fixed; /* Плавает поверх всего */
+    position: fixed;
+    /* Плавает поверх всего */
     bottom: 20px;
     right: 20px;
-    z-index: 1000; /* Выше всех элементов */
-    
+    z-index: 1000;
+    /* Выше всех элементов */
+
     width: 48px;
     height: 48px;
     border-radius: 50%;
     font-size: 24px;
     padding: 0;
-    
+
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     /* Стили из твоего дизайна */
     background: var(--surface);
     border: 1px solid var(--border-light);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
 #theme-switcher:hover {
     border-color: var(--accent);
     transform: scale(1.1) rotate(20deg);
 }
-

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -8,30 +8,44 @@ let currentWatchers = []; // Храним активные вотчеры
 let mainWindow = null;
 
 const createWindow = () => {
-  mainWindow = new BrowserWindow({
-    width: 1000, // Чуть шире для нового дизайна
-    height: 700,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true
-    }
-  });
+    mainWindow = new BrowserWindow({
+        width: 1000, // Чуть шире для нового дизайна
+        height: 700,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: false,
+            contextIsolation: true
+        }
+    });
 
-  mainWindow.loadFile('form.html');
+    mainWindow.loadFile('form.html');
 };
 
 app.whenReady().then(() => {
-  loadSettings();
-  createWindow();
+    loadSettings();
+    createWindow();
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+    globalShortcut.register('MediaPlayPause', () => {
+        mainWindow.webContents.send('global-command', 'play-pause');
+    });
+    globalShortcut.register('MediaNextTrack', () => {
+        mainWindow.webContents.send('global-command', 'next-track');
+    });
+    globalShortcut.register('MediaPreviousTrack', () => {
+        mainWindow.webContents.send('global-command', 'prev-track');
+    });
+
+    // Дополнительно: Alt + P для паузы (если нет медиа-клавиш)
+    globalShortcut.register('Alt+P', () => {
+        mainWindow.webContents.send('global-command', 'play-pause');
+    });
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+    if (process.platform !== 'darwin') app.quit();
 });
 
 function loadSettings() {
@@ -96,7 +110,7 @@ async function refreshTrackList(folderPath, scanSubfolders) {
     const folderMap = new Map();
     await findAudioFilesRecursive(folderPath, scanSubfolders, folderMap);
     const result = Array.from(folderMap, ([folder, tracks]) => ({ folder, tracks }));
-    if(mainWindow) mainWindow.webContents.send('update-track-list', result);
+    if (mainWindow) mainWindow.webContents.send('update-track-list', result);
 }
 
 // --- IPC HANDLERS ---
@@ -106,16 +120,16 @@ ipcMain.handle('dialog:openFolder', async (event, scanSubfolders) => {
     if (canceled || filePaths.length === 0) return;
 
     const folderPath = filePaths[0];
-    
+
     // Запускаем слежение
     startWatching(folderPath, scanSubfolders);
-    
+
     // Первичное сканирование
     await refreshTrackList(folderPath, scanSubfolders);
 });
 
 ipcMain.handle('get-audio-data', async (event, filePath) => {
-    try { return await fs.promises.readFile(filePath); } 
+    try { return await fs.promises.readFile(filePath); }
     catch (error) { return null; }
 });
 

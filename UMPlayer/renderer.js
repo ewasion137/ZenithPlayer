@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentTrackPath !== trackPath) return;
 
             currentTrackBuffer = audioBuffer;
-            drawWaveform(audioBuffer);
+            setTimeout(() => drawWaveform(audioBuffer), 50);
 
             // Сбрасываем таймеры
             pauseTimeSec = 0;
@@ -601,38 +601,75 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function drawWaveform(buffer) {
-        const width = waveformCanvas.width;
-        const height = waveformCanvas.height;
-        const data = buffer.getChannelData(0); // Берем левый канал
-        const step = Math.ceil(data.length / width);
-        const amp = height / 2;
+        // 1. Фикс разрешения (HD качество)
+        const dpr = window.devicePixelRatio || 1;
+        waveformCanvas.width = waveformCanvas.clientWidth * dpr;
+        waveformCanvas.height = waveformCanvas.clientHeight * dpr;
+        waveformCtx.scale(dpr, dpr);
+
+        const width = waveformCanvas.clientWidth;
+        const height = waveformCanvas.clientHeight;
+        const data = buffer.getChannelData(0);
+
+        // 2. Настройка стиля (берем акцентный цвет)
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8b5cf6';
 
         waveformCtx.clearRect(0, 0, width, height);
-        waveformCtx.beginPath();
-        waveformCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8b5cf6';
-        waveformCtx.lineWidth = 2;
 
-        for (let i = 0; i < width; i++) {
+        // Рисуем центральную линию (ось)
+        waveformCtx.beginPath();
+        waveformCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+        waveformCtx.moveTo(0, height / 2);
+        waveformCtx.lineTo(width, height / 2);
+        waveformCtx.stroke();
+
+        // 3. Рисуем столбики
+        const barWidth = 2; // Ширина одного столбика
+        const gap = 1;      // Просвет между ними
+        const step = Math.ceil(data.length / (width / (barWidth + gap)));
+        const amp = height / 2;
+
+        for (let i = 0; i < width; i += (barWidth + gap)) {
             let min = 1.0;
             let max = -1.0;
+
             for (let j = 0; j < step; j++) {
-                const datum = data[(i * step) + j];
+                const datum = data[Math.floor((i / (barWidth + gap)) * step) + j];
                 if (datum < min) min = datum;
                 if (datum > max) max = datum;
             }
-            // Рисуем вертикальную линию для каждого пикселя ширины
-            waveformCtx.moveTo(i, (1 + min) * amp);
-            waveformCtx.lineTo(i, (1 + max) * amp);
-        }
-        waveformCtx.stroke();
-    }
 
+            // Делаем цвет чуть прозрачным, чтобы выглядело мягче
+            waveformCtx.fillStyle = accentColor;
+
+            // Рисуем верхнюю и нижнюю части столбика
+            // Ограничиваем минимальную высоту в 1px, чтобы не было пустых мест
+            const x = i;
+            const y = (1 + min) * amp;
+            const w = barWidth;
+            const h = Math.max(1, (max - min) * amp);
+
+            // Скругленные столбики (опционально)
+            waveformCtx.fillRect(x, y, w, h);
+        }
+    }
+    window.electronAPI.onGlobalCommand((cmd) => {
+        if (cmd === 'play-pause') {
+            if (!currentTrackBuffer) return;
+            isPlaying ? pause() : play(pauseTimeSec);
+        } else if (cmd === 'next-track') {
+            playNextTrack();
+        } else if (cmd === 'prev-track') {
+            playPrevTrack();
+        }
+    });
     selectFolderBtn.addEventListener('click', () => window.electronAPI.selectFolder(true));
     window.electronAPI.onReceiveTracks(displayTracks);
 
     window.addEventListener('resize', () => {
         spectrogramCanvas.width = spectrogramCanvas.parentElement.clientWidth;
         spectrogramCanvas.height = spectrogramCanvas.parentElement.clientHeight;
+        if (currentTrackBuffer) drawWaveform(currentTrackBuffer);
     });
     window.dispatchEvent(new Event('resize'));
 });
