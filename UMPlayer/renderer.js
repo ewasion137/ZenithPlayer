@@ -550,15 +550,23 @@ speedInput.addEventListener('change', e => updateSpeed(e.target.value));
             const tracksUl = document.createElement('div'); 
             tracksUl.className = 'folder-tracks'; 
 
-            folderData.tracks.forEach(track => {
-                const item = document.createElement('div');
-                item.className = 'track-item';
-                if (playingPath === track.path) item.classList.add('playing');
-                item.dataset.path = track.path;
-                item.innerHTML = `<span class="track-name">${track.name}</span>`;
-                item.addEventListener('click', (e) => { e.stopPropagation(); loadAndPlayTrack(track.path, item); });
-                tracksUl.appendChild(item);
-            });
+           folderData.tracks.forEach((track, index) => { // Добавляем index
+    const item = document.createElement('div');
+    item.className = 'track-item';
+    
+    // Hyprland Stagger: каждый следующий трек ждет на 30мс дольше
+    item.style.animationDelay = `${index * 0.03}s`; 
+    
+    if (playingPath === track.path) item.classList.add('playing');
+    item.dataset.path = track.path;
+    item.innerHTML = `<span class="track-name">${track.name}</span>`;
+    
+    item.addEventListener('click', (e) => { 
+        e.stopPropagation(); 
+        loadAndPlayTrack(track.path, item); 
+    });
+    tracksUl.appendChild(item);
+});
 
             // Style for opening
             const style = document.createElement('style');

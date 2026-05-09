@@ -454,6 +454,10 @@ button:active {
     background: var(--surface);
 }
 
+.folder-tracks > div {
+    min-height: 0;
+}
+
 .folder-group h3::before {
     content: '›';
     font-size: 16px;
@@ -475,16 +479,22 @@ button:active {
 }
 
 .folder-tracks {
-    display: none;
+    display: grid;
     padding-left: 12px;
     margin-top: 4px;
     margin-bottom: 8px;
     border-left: 1px solid var(--border-light);
     margin-left: 18px; /* Выравнивание под стрелочку */
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s var(--hypr-bezier), opacity 0.4s ease;
+    opacity: 0;
+    overflow: hidden;
 }
 
 .folder-group.open .folder-tracks {
-    display: block;
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-top: 8px; /* Немного отступа при открытии */
 }
 
 /* Треки */
