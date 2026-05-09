@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>UMPlayer</title>
     <!-- ВАЖНО: Проверь, что файл player.css лежит в папке styles -->
-    <link rel="stylesheet" href="styles/main.css"> 
+    <link rel="stylesheet" href="styles/main.css">
     <link id="theme-link" rel="stylesheet" href="">
 </head>
+
 <body>
     <div class="player-grid">
         <canvas id="spectrogram-canvas"></canvas>
@@ -16,13 +18,13 @@
             <div class="header-left">
                 <button id="select-folder-btn">📂 Open Folder</button>
             </div>
-            
+
             <div class="search-container">
                 <input type="text" id="search-input" placeholder="Search tracks...">
             </div>
 
             <div class="header-right">
-                <button id="optimize-btn" title="Toggle Visuals">GFX: ON</button> 
+                <button id="optimize-btn" title="Toggle Visuals">GFX: ON</button>
                 <button id="save-settings-btn" title="Save settings">💾 Save</button>
                 <button id="reset-settings-btn" title="Reset">Reset</button>
             </div>
@@ -36,13 +38,14 @@
                 <button id="play-pause-btn" title="Play/Pause (Space)"></button>
                 <button id="next-btn" title="Next Track"></button>
             </div>
-            
+
             <div class="controls-column">
                 <div class="sliders-row">
                     <div class="control-group">
                         <label>Vol</label>
                         <input type="range" id="track-volume-slider" min="0" max="200" value="100" step="1">
-                        <input type="number" id="track-volume-input" min="0" max="200" value="100" class="control-input">
+                        <input type="number" id="track-volume-input" min="0" max="200" value="100"
+                            class="control-input">
                         <span id="track-volume-value">100%</span>
                     </div>
                     <div class="control-group">
@@ -52,9 +55,12 @@
                         <span id="speed-value">100%</span>
                     </div>
                 </div>
-                
+
                 <div id="progress-view">
-                    <input type="range" id="progress-slider" min="0" max="1000" value="0">
+                    <div class="waveform-container">
+                        <canvas id="waveform-canvas"></canvas>
+                        <input type="range" id="progress-slider" min="0" max="1000" value="0">
+                    </div>
                     <div id="time-display">
                         <span>00:00</span>
                         <span>00:00</span>
@@ -65,7 +71,7 @@
 
         <!-- EQ -->
         <div class="eq-container-wrapper">
-             <div class="eq-bands"></div>
+            <div class="eq-bands"></div>
         </div>
 
         <!-- PLAYLIST -->
@@ -79,4 +85,5 @@
     <button id="theme-switcher" title="Change Theme">🎨</button>
     <script src="renderer.js"></script>
 </body>
+
 </html>
