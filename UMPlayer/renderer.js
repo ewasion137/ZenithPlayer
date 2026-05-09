@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    document.body.classList.add('app-loading');
+    setTimeout(() => {
+        document.body.classList.remove('app-loading');
+    }, 1000);
     
     // --- Audio Context ---
     const audioContext = new AudioContext();
@@ -549,24 +553,38 @@ speedInput.addEventListener('change', e => updateSpeed(e.target.value));
 
             const tracksUl = document.createElement('div'); 
             tracksUl.className = 'folder-tracks'; 
+            const tracksInner = document.createElement('div');
+tracksInner.className = 'folder-tracks-inner';
 
-           folderData.tracks.forEach((track, index) => { // Добавляем index
+           folderData.tracks.forEach((track, index) => {
     const item = document.createElement('div');
-    item.className = 'track-item';
-    
-    // Hyprland Stagger: каждый следующий трек ждет на 30мс дольше
-    item.style.animationDelay = `${index * 0.03}s`; 
-    
+    item.className = 'track-item track-appear-effect'; // Добавляем спец-класс для анимации
+
+    // УМНЫЙ ЗАМЕР: задержка растет, но не бесконечно. 
+    // Максимум 0.4 сек, чтобы не ждать вечность внизу списка.
+    const delay = Math.min(index * 0.02, 0.4); 
+    item.style.animationDelay = `${delay}s`;
+
     if (playingPath === track.path) item.classList.add('playing');
+    
+    // Удаляем класс анимации после того, как она прошла, 
+    // чтобы при клике (смене классов) она не запустилась снова
+    setTimeout(() => {
+        item.classList.remove('track-appear-effect');
+    }, 1000);
+
     item.dataset.path = track.path;
     item.innerHTML = `<span class="track-name">${track.name}</span>`;
-    
     item.addEventListener('click', (e) => { 
         e.stopPropagation(); 
         loadAndPlayTrack(track.path, item); 
     });
     tracksUl.appendChild(item);
+    tracksInner.appendChild(item);
 });
+
+tracksUl.appendChild(tracksInner); // А внутренний див в грид-контейнер
+folderGroup.append(title, tracksUl);
 
             // Style for opening
             const style = document.createElement('style');
