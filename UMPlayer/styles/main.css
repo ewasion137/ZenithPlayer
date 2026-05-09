@@ -12,6 +12,14 @@
     --border-focus: rgba(139, 92, 246, 0.4);
     /* Анимации только для трансформаций и прозрачности (не жрут GPU) */
     --transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+    --hypr-bezier: cubic-bezier(0.05, 0.9, 0.1, 1.1);
+    --transition-main: all 0.4s var(--hypr-bezier);
+    --spawn-duration: 0.5s;
+}
+
+@keyframes windowSpawn {
+    from { opacity: 0; transform: scale(0.98) translateY(10px); filter: blur(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
 
 /* === BASE STYLES === */
