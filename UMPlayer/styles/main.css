@@ -52,10 +52,12 @@ body.low-gfx #spectrogram-canvas {
 body.low-gfx .track-item:hover, 
 body.low-gfx button:hover {
     transform: none !important;
+    transition: var(--transition-main);
 }
 
 /* === MAIN PLAYER CONTAINER === */
 .player-grid {
+    animation: windowSpawn var(--spawn-duration) var(--hypr-bezier) forwards;
     position: relative;
     display: grid;
     grid-template-rows: auto auto auto 1fr; 
@@ -104,10 +106,12 @@ button {
 button:hover {
     background: #1e2130;
     border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 button:active {
-    transform: scale(0.97);
+    transform: scale(0.95) translateY(0);
 }
 
 #save-settings-btn.saved {
@@ -205,7 +209,12 @@ button:active {
     background: white;
     clip-path: polygon(0 0, 100% 50%, 0 100%);
     margin-left: 3px;
-    transition: clip-path 0.2s ease;
+    transition: clip-path 0.3s var(--hypr-bezier), transform 0.3s var(--hypr-bezier);
+
+}
+
+#play-pause-btn:hover::before {
+    transform: scale(1.1);
 }
 
 #play-pause-btn.is-playing::before {
