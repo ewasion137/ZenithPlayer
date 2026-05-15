@@ -1,0 +1,573 @@
+/* === FRUTIGER AERO THEME VARIABLES === */
+:root {
+    --bg-main: #a8d5e5; /* Светло-голубой небесный */
+    /* Эффект прозрачного белого стекла (Aero Glass) */
+    --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(224, 247, 250, 0.45) 100%);
+    --surface: linear-gradient(180deg, #ffffff 0%, #e1f5fe 100%); /* Глянцевые кнопки */
+    --accent: #0984e3; /* Сочный синий */
+    --accent-gradient: linear-gradient(180deg, #74b9ff 0%, #0984e3 100%);
+    --accent-green: linear-gradient(180deg, #55efc4 0%, #00b894 100%);
+    --text-main: #2d3436; /* Темно-серый для читаемости на светлом */
+    --text-dim: #636e72;
+    --border-light: rgba(255, 255, 255, 0.9); /* Яркие белые рамки для эффекта стекла */
+    --border-dark: rgba(0, 168, 255, 0.3);
+    /* Глянцевый блик для кнопок */
+    --glossy-shine: inset 0 1px 2px rgba(255, 255, 255, 1), inset 0 -2px 5px rgba(0, 0, 0, 0.05);
+    --transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* === BASE STYLES === */
+body {
+    background-color: var(--bg-main);
+    /* Градиент "Небо и Трава" - классика Frutiger Aero */
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.4), transparent 25%),
+        linear-gradient(135deg, #74b9ff 0%, #81ecec 50%, #55efc4 100%);
+    height: 100vh;
+    margin: 0;
+    font-family: 'Segoe UI', 'Frutiger', Tahoma, sans-serif; /* Шрифты эпохи Web 2.0 */
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+/* === LOW-GFX MODE (Экономия ресурсов) === */
+body.low-gfx {
+    background: #e0f7fa !important;
+}
+body.low-gfx * {
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+    background-image: none !important; /* Убиваем все тяжелые градиенты */
+}
+body.low-gfx #spectrogram-canvas {
+    display: none !important;
+}
+body.low-gfx .track-item:hover, 
+body.low-gfx button:hover {
+    transform: none !important;
+    background: #b2ebf2 !important;
+}
+
+/* === MAIN PLAYER CONTAINER === */
+.player-grid {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr; 
+    width: 100vw;
+    height: 100vh;
+    background: var(--panel-bg);
+    /* Мощный блюр для эффекта Windows Aero */
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: none;
+    /* Внутреннее белое свечение по краям экрана */
+    box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.6);
+    padding: 24px;
+    gap: 20px;
+    z-index: 10;
+    box-sizing: border-box;
+}
+
+/* === HEADER === */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05); /* Легкая тень под линией */
+}
+
+.header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+button {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text-main);
+    padding: 8px 18px;
+    border-radius: 20px; /* Кнопки-таблетки */
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    text-shadow: 0 1px 0 #fff; /* Белая тень для вдавленного текста */
+    box-shadow: var(--glossy-shine), 0 2px 5px rgba(0,0,0,0.1);
+    transition: var(--transition);
+}
+
+button:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #b2ebf2 100%);
+    border-color: #81ecec;
+    box-shadow: var(--glossy-shine), 0 4px 10px rgba(0, 168, 255, 0.3);
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    background: #e1f5fe;
+}
+
+#save-settings-btn.saved {
+    background: var(--accent-green);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    border-color: #00b894;
+}
+
+#optimize-btn.optimized {
+    background: linear-gradient(180deg, #ff9ff3 0%, #feca57 100%);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    border-color: #ff9ff3;
+}
+
+.search-container input {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--border-dark);
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: var(--text-main);
+    width: 240px;
+    outline: none;
+    font-size: 13px;
+    /* Эффект вдавленности (Скевоморфизм) */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.8);
+    transition: var(--transition);
+}
+
+.search-container input:focus {
+    background: #ffffff;
+    border-color: var(--accent);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05), 0 0 8px rgba(116, 185, 255, 0.6);
+}
+
+/* === PLAYER CONTROLS === */
+#top-controls {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+    padding: 18px 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: inset 0 1px 0 #fff, 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.main-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#prev-btn, #next-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--glossy-shine), 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Темные стрелки для светлой темы */
+#prev-btn::before {
+    content: '';
+    border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-right: 8px solid var(--text-main);
+}
+#next-btn::before {
+    content: '';
+    border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid var(--text-main);
+}
+
+#play-pause-btn {
+    width: 56px; height: 56px;
+    min-width: 56px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    /* Сложная тень для глянцевого стеклянного шара */
+    box-shadow: 
+        inset 0 12px 10px rgba(255, 255, 255, 0.6), 
+        inset 0 -5px 10px rgba(0, 0, 0, 0.1), 
+        0 4px 10px rgba(9, 132, 227, 0.4);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(180deg, #81ecec 0%, #0984e3 100%);
+}
+
+#play-pause-btn::before {
+    content: '';
+    width: 16px; height: 18px;
+    background: white;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    margin-left: 4px;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); /* Тень иконки */
+    transition: clip-path 0.2s ease;
+}
+
+#play-pause-btn.is-playing::before {
+    clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+    margin-left: 0;
+}
+
+.controls-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sliders-row {
+    display: flex;
+    gap: 24px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--text-main);
+    text-shadow: 0 1px 0 #fff;
+    letter-spacing: 0.5px;
+}
+
+/* Ползунки с эффектом вдавленной канавки (скевоморфизм) */
+/* Числовой инпут для EQ и Контролов */
+.control-input,
+.eq-band input[type="number"] {
+    width: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--accent-secondary);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+    border-radius: 4px;
+    padding: 2px 0;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+/* Фокус для инпутов */
+.control-input:focus,
+.eq-band input[type="number"]:focus {
+    border-color: var(--accent-secondary);
+}
+
+/* Убираем стрелки в Chrome/Safari */
+.control-input::-webkit-outer-spin-button,
+.control-input::-webkit-inner-spin-button,
+.eq-band input[type="number"]::-webkit-outer-spin-button,
+.eq-band input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #ffffff 0%, #dcdde1 100%);
+    border: 1px solid #a4b0be;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+}
+
+/* Progress Slider */
+#progress-view {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#progress-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    background: rgba(0,0,0,0.1);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.8);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    --value: 0%;
+}
+
+#progress-slider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #00b894 var(--value), transparent var(--value));
+    height: 8px;
+    border-radius: 4px;
+}
+
+/* Глянцевый ползунок (как капля воды) */
+#progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px; width: 16px; 
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffffff 0%, #74b9ff 70%, #0984e3 100%);
+    border: 1px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    margin-top: -4px;
+    transition: transform 0.1s;
+}
+
+#progress-slider:hover::-webkit-slider-thumb {
+    transform: scale(1.2);
+}
+
+#time-display {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-weight: 600;
+    color: var(--text-dim);
+}
+
+/* === EQUALIZER === */
+.eq-container-wrapper {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: inset 0 1px 0 #fff, 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.eq-bands {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.eq-band {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.eq-band label {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-weight: bold;
+    text-shadow: 0 1px 0 #fff;
+}
+
+.eq-band input[type="range"] {
+    -webkit-appearance: slider-vertical;
+    width: 24px;
+    height: 70px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 12px;
+    outline: none;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.5);
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    background: linear-gradient(180deg, #ffffff 0%, #e1f5fe 100%);
+    border: 1px solid #0984e3;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.eq-band input[type="number"] {
+    width: 40px;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid var(--border-dark);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 4px;
+    padding: 2px 0;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.eq-band input[type="number"]:focus {
+    border-color: var(--accent);
+    background: #fff;
+}
+
+.eq-band input[type="number"]::-webkit-outer-spin-button,
+.eq-band input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+}
+
+/* === PLAYLIST === */
+.playlist-grid-area {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+    overflow-y: auto;
+    padding: 12px;
+    margin-top: 5px;
+}
+
+/* Скроллбар в стиле Windows Aero */
+.playlist-grid-area::-webkit-scrollbar {
+    width: 12px;
+}
+.playlist-grid-area::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    border-radius: 6px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+}
+.playlist-grid-area::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #e1f5fe 0%, #b2ebf2 100%);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 168, 255, 0.3);
+}
+.playlist-grid-area::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(90deg, #b2ebf2 0%, #81ecec 100%);
+}
+
+.folder-group {
+    margin-bottom: 4px;
+}
+
+.folder-group h3 {
+    font-size: 13px;
+    font-weight: bold;
+    padding: 10px 14px;
+    margin: 0;
+    cursor: pointer;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border-radius: 6px;
+    transition: var(--transition);
+    user-select: none;
+    border: 1px solid transparent;
+}
+
+.folder-group h3:hover {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.folder-group h3::before {
+    content: '›';
+    font-size: 16px;
+    line-height: 1;
+    margin-right: 12px;
+    transition: transform 0.2s ease;
+    color: var(--accent);
+}
+
+.folder-group.open h3 {
+    background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(224,247,250,0.8) 100%);
+    border-color: var(--border-light);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.folder-group.open h3::before {
+    transform: rotate(90deg);
+}
+
+.folder-tracks {
+    display: none;
+    padding-left: 12px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    border-left: 2px solid rgba(116, 185, 255, 0.4);
+    margin-left: 18px;
+}
+
+.folder-group.open .folder-tracks {
+    display: block;
+}
+
+/* Треки (Эффект выделения файла в Windows 7) */
+.track-item {
+    padding: 8px 12px;
+    margin: 2px 0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-main);
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.track-item:hover {
+    background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(224,247,250,0.9) 100%);
+    border: 1px solid #81ecec;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Активный трек */
+.track-item.playing {
+    background: linear-gradient(180deg, #dff9fb 0%, #c7ecee 100%);
+    border: 1px solid #22a6b3;
+    font-weight: bold;
+    color: #130f40;
+    box-shadow: inset 0 1px 0 #fff;
+}
+
+/* === SPECTROGRAM === */
+#spectrogram-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    opacity: 0.15; /* Спектрограмма в виде легкой дымки/волны */
+    pointer-events: none;
+    /* Убрано сглаживание для повышения FPS спектрограммы */
+    image-rendering: pixelated; 
+    /* Инвертируем или добавляем синевы если спектрограмма рисуется белым */
+    filter: hue-rotate(180deg) brightness(0.8);
+}
+
+/* === THEME SWITCHER BUTTON === */
+#theme-switcher {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 24px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Стеклянный шарик */
+    background: var(--surface);
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 
+        inset 0 8px 10px rgba(255,255,255,0.8), 
+        inset 0 -4px 6px rgba(0,0,0,0.1),
+        0 4px 10px rgba(0,0,0,0.2);
+    transition: var(--transition);
+}
+
+#theme-switcher:hover {
+    transform: scale(1.1) rotate(15deg);
+    background: linear-gradient(180deg, #ffffff 0%, #81ecec 100%);
+    box-shadow: 
+        inset 0 8px 10px rgba(255,255,255,0.8), 
+        0 6px 15px rgba(0, 168, 255, 0.4);
+}

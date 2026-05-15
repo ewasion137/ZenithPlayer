@@ -1,0 +1,136 @@
+/* === ZENITH ULTRA: THE PINNACLE OF DESIGN === */
+:root {
+    --bg-main: #020204;
+    --panel-bg: rgba(13, 14, 21, 0.7);
+    --surface: rgba(21, 23, 34, 0.6);
+    --accent: #ff007a; /* Neon Pink */
+    --accent-secondary: #00f2ff; /* Cyber Blue */
+    --accent-gradient: linear-gradient(135deg, #ff007a 0%, #7a00ff 50%, #00f2ff 100%);
+    --text-main: #ffffff;
+    --text-dim: #a0a0c0;
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-focus: rgba(255, 0, 122, 0.5);
+    --glass: blur(25px) saturate(180%);
+    --shadow-glow: 0 0 30px rgba(255, 0, 122, 0.3);
+}
+
+.title-bar {
+    background: rgba(0, 0, 0, 0.6);
+    border-bottom: 1px solid rgba(255, 0, 122, 0.2);
+}
+
+.title-text {
+    color: var(--accent);
+    text-shadow: 0 0 10px var(--accent);
+}
+
+.now-playing-container {
+    background: linear-gradient(to bottom, rgba(255, 0, 122, 0.05), transparent);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin: 0 20px;
+}
+
+.track-info h1 {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 36px;
+    letter-spacing: -2px;
+}
+
+.artwork-glow {
+    background: var(--accent-gradient);
+    opacity: 0.4;
+    filter: blur(120px);
+}
+
+body {
+    background: var(--bg-main);
+    background-image: 
+        radial-gradient(circle at 0% 0%, rgba(255, 0, 122, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(0, 242, 255, 0.1) 0%, transparent 40%);
+    border-radius: 16px;
+}
+
+.player-grid {
+    background: transparent !important;
+    backdrop-filter: var(--glass);
+    -webkit-backdrop-filter: var(--glass);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    margin: 10px;
+    height: calc(100vh - 20px);
+    width: calc(100vw - 20px);
+}
+
+#top-controls, .eq-container-wrapper, .playlist-grid-area {
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+button {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 11px;
+}
+
+button:hover {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: white;
+    box-shadow: var(--shadow-glow);
+}
+
+#play-pause-btn {
+    background: var(--accent-gradient);
+    box-shadow: var(--shadow-glow), 0 0 60px rgba(122, 0, 255, 0.2);
+}
+
+.track-item.playing {
+    background: linear-gradient(90deg, rgba(255, 0, 122, 0.3) 0%, transparent 100%);
+    border-left: 4px solid var(--accent);
+    box-shadow: inset 10px 0 20px -10px var(--accent);
+}
+
+#spectrogram-canvas {
+    opacity: 0.4;
+    filter: blur(2px);
+}
+
+/* Custom Scrollbar for Ultra */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-gradient);
+    border-radius: 10px;
+}
+
+/* Animations */
+@keyframes meshFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(122, 0, 255, 0.05) 0%, transparent 50%);
+    animation: rotate 20s linear infinite;
+    z-index: -2;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

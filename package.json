@@ -1,25 +1,25 @@
 {
-  "name": "umplayer",
-  "version": "1.0.0",
+  "name": "zenith",
+  "version": "2.1.0",
   "description": "A kick-ass audio player.",
-  "main": "script/main.js",
+  "main": "Zenith/script/main.js",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "build": {
-    "appId": "com.yourname.umplayer",
-    "productName": "UMPlayer",
+    "appId": "com.ewasion137.zenith",
+    "productName": "Zenith",
     "files": [
       "**/*",
       "!/node_modules/*"
     ],
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico"
+      "icon": "build/icon.png"
     },
     "nsis": {
       "oneClick": false,
@@ -27,7 +27,7 @@
     }
   },
   "devDependencies": {
-    "electron": "^39.0.0",
+    "electron": "^39.8.10",
     "electron-builder": "^26.0.12"
   }
 }

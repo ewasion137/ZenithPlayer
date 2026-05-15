@@ -1,0 +1,488 @@
+/* === TERMINAL THEME VARIABLES === */
+:root {
+    --bg-main: #000000; /* Абсолютно черный */
+    --panel-bg: #000000;
+    --surface: #000000;
+    --accent: #00ff00; /* Классический терминальный зеленый */
+    --accent-secondary: #00aa00; /* Темно-зеленый для неактивных элементов */
+    --text-main: #00ff00;
+    --text-dim: #008800;
+    --border-light: #00ff00; /* Строгая зеленая рамка */
+    --transition: none; /* СРАЗУ ГОВОРЮ: НЕТ АНИМАЦИЙ :) */
+}
+
+/* === BASE STYLES === */
+body {
+    background-color: var(--bg-main);
+    height: 100vh;
+    margin: 0;
+    /* Только моноширинный хакерский шрифт */
+    font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+    color: var(--text-main);
+    overflow: hidden;
+    /* Эффект старого монитора (scanlines), статичный, без анимаций */
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 0, 0.03),
+        rgba(0, 255, 0, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+}
+
+/* Строго убиваем скругления везде */
+* {
+    border-radius: 0 !important;
+    transition: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+}
+
+/* === LOW-GFX MODE === */
+/* Терминал и так легкий, но перестраховка для отключения scanlines */
+body.low-gfx {
+    background-image: none !important;
+    background-color: #000 !important;
+}
+body.low-gfx #spectrogram-canvas {
+    display: none !important;
+}
+
+/* === MAIN PLAYER CONTAINER === */
+.player-grid {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr; 
+    width: 100vw;
+    height: 100vh;
+    background: var(--panel-bg);
+    border: none;
+    padding: 24px;
+    gap: 20px;
+    z-index: 10;
+    box-sizing: border-box;
+}
+
+/* === HEADER === */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 2px dashed var(--border-light); /* Пунктирная линия терминала */
+}
+
+.header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Кнопки в виде консольных команд */
+button {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text-main);
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    font-family: inherit;
+    text-transform: uppercase;
+}
+
+button:hover {
+    background: var(--text-main);
+    color: var(--bg-main);
+}
+
+button:active {
+    /* Инверсия при нажатии вместо скейла */
+    background: var(--text-dim);
+    border-color: var(--text-dim);
+}
+
+#save-settings-btn::before { content: 'C:\\> '; }
+#optimize-btn::before { content: './'; }
+
+#save-settings-btn.saved {
+    background: var(--text-main);
+    color: var(--bg-main);
+}
+#save-settings-btn.saved::after { content: ' [OK]'; }
+
+#optimize-btn.optimized {
+    background: #ff0000;
+    color: #fff;
+    border-color: #ff0000;
+}
+
+/* Поиск - строка ввода консоли */
+.search-container input {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    padding: 8px 16px;
+    color: var(--text-main);
+    width: 240px;
+    outline: none;
+    font-size: 13px;
+    font-family: inherit;
+}
+.search-container input:focus {
+    border: 2px solid var(--text-main);
+}
+.search-container::before {
+    content: 'grep > ';
+    color: var(--text-dim);
+    margin-right: -210px;
+    position: relative;
+    left: -60px;
+    font-size: 13px;
+}
+
+/* === PLAYER CONTROLS === */
+#top-controls {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: var(--bg-main);
+    padding: 16px 20px;
+    border: 1px solid var(--border-light);
+}
+
+.main-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Предыдущий/Следующий трек ASCII стилем */
+#prev-btn, #next-btn {
+    width: auto; height: auto;
+    background: transparent;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    padding: 4px 8px;
+}
+#prev-btn::before { content: '<<'; border: none; }
+#next-btn::before { content: '>>'; border: none; }
+#prev-btn:hover, #next-btn:hover {
+    background: var(--text-main);
+    color: var(--bg-main);
+}
+
+/* Play / Pause ASCII кнопка */
+#play-pause-btn {
+    width: auto; height: auto;
+    min-width: 60px;
+    background: var(--bg-main);
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 8px;
+}
+#play-pause-btn:hover {
+    background: var(--text-main);
+    color: var(--bg-main);
+}
+#play-pause-btn::before {
+    content: '[ PLAY ]';
+    background: none; clip-path: none; margin: 0; width: auto; height: auto;
+}
+#play-pause-btn.is-playing::before {
+    content: '[ PAUSE ]';
+    background: none; clip-path: none; margin: 0;
+}
+
+.controls-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sliders-row {
+    display: flex;
+    gap: 24px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+}
+
+/* === ИНТЕГРАЦИЯ ТВОИХ ОБНОВ (Ползунки) === */
+.control-group input[type="range"] {
+    width: 160px; /* Твой новый размер */
+    height: 4px;
+    background: var(--text-dim); /* В терминале трек темный */
+    -webkit-appearance: none;
+    outline: none;
+    border: none;
+}
+
+/* Ползунок в виде жесткого прямоугольника */
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 8px; 
+    height: 16px;
+    background: var(--text-main);
+    cursor: pointer;
+}
+
+/* Progress Slider */
+#progress-view {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#progress-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    outline: none;
+    cursor: pointer;
+    --value: 0%;
+}
+
+/* Полоса загрузки (Progress bar) */
+#progress-slider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, var(--text-main) var(--value), transparent var(--value));
+    height: 6px;
+}
+
+#progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 14px; width: 6px;
+    background: var(--text-main);
+    margin-top: -4px;
+}
+
+#time-display {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+/* === EQUALIZER & НОВЫЕ ИНПУТЫ === */
+.eq-container-wrapper {
+    background: var(--bg-main);
+    padding: 16px;
+    border: 1px solid var(--border-light);
+}
+
+.eq-bands {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.eq-band {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.eq-band label {
+    font-size: 10px;
+    color: var(--text-dim);
+}
+
+.eq-band input[type="range"] {
+    -webkit-appearance: slider-vertical;
+    width: 24px;
+    height: 70px;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    outline: none;
+}
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    background: var(--text-main);
+    height: 6px;
+}
+
+/* === ИНТЕГРАЦИЯ ТВОИХ ОБНОВ (Инпуты) === */
+.control-input,
+.eq-band input[type="number"] {
+    width: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text-main);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', Courier, monospace;
+    font-weight: bold;
+    text-align: center;
+    padding: 2px 0;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.control-input:focus,
+.eq-band input[type="number"]:focus {
+    background: var(--text-main);
+    color: var(--bg-main);
+}
+
+.control-input::-webkit-outer-spin-button,
+.control-input::-webkit-inner-spin-button,
+.eq-band input[type="number"]::-webkit-outer-spin-button,
+.eq-band input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; 
+    margin: 0;
+}
+
+/* === PLAYLIST === */
+.playlist-grid-area {
+    background: var(--bg-main);
+    border: 1px solid var(--border-light);
+    overflow-y: auto;
+    padding: 12px;
+    margin-top: 5px;
+}
+
+/* Грубый скроллбар */
+.playlist-grid-area::-webkit-scrollbar { width: 14px; }
+.playlist-grid-area::-webkit-scrollbar-track {
+    background: var(--bg-main);
+    border-left: 1px solid var(--border-light);
+}
+.playlist-grid-area::-webkit-scrollbar-thumb { background: var(--border-light); }
+.playlist-grid-area::-webkit-scrollbar-thumb:hover { background: var(--text-main); }
+
+.folder-group { margin-bottom: 4px; }
+
+/* Папки как директории в консоли */
+.folder-group h3 {
+    font-size: 13px;
+    padding: 6px 10px;
+    margin: 0;
+    cursor: pointer;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    background: transparent;
+}
+
+.folder-group h3:hover {
+    background: var(--text-dim);
+    color: var(--bg-main);
+}
+
+/* ASCII иконка закрытой папки */
+.folder-group h3::before {
+    content: '[+]';
+    margin-right: 12px;
+    color: var(--text-main);
+    font-weight: bold;
+}
+
+/* ASCII иконка открытой папки */
+.folder-group.open h3::before {
+    content: '[-]';
+}
+
+.folder-group.open h3 {
+    border-bottom: 1px dashed var(--text-dim);
+}
+
+.folder-tracks {
+    display: none;
+    padding-left: 12px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    border-left: 1px dashed var(--text-dim);
+    margin-left: 22px; /* Выравнивание */
+}
+
+.folder-group.open .folder-tracks {
+    display: block;
+}
+
+/* Треки как файлы */
+.track-item {
+    padding: 4px 8px;
+    margin: 2px 0;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-dim);
+}
+
+.track-item::before {
+    content: '  ';
+    white-space: pre;
+    margin-right: 5px;
+}
+
+.track-item:hover {
+    background: var(--text-main);
+    color: var(--bg-main);
+}
+
+/* Активный трек с курсором */
+.track-item.playing {
+    color: var(--bg-main);
+    background: var(--text-main);
+    font-weight: bold;
+}
+.track-item.playing::before {
+    content: '> ';
+}
+
+/* === SPECTROGRAM === */
+#spectrogram-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    opacity: 0.15;
+    pointer-events: none;
+    image-rendering: pixelated; 
+    /* Красим спектрограмму в зелёный цвет */
+    filter: sepia(1) hue-rotate(80deg) saturate(1000%) brightness(0.8);
+}
+
+/* === THEME SWITCHER BUTTON === */
+#theme-switcher {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    background: var(--bg-main);
+    border: 2px solid var(--text-main);
+    color: var(--text-main);
+    font-family: inherit;
+    font-weight: bold;
+}
+
+#theme-switcher:hover {
+    background: var(--text-main);
+    color: var(--bg-main);
+}

@@ -1,0 +1,293 @@
+/* === MAC GLASS THEME VARIABLES === */
+:root {
+    --bg-main: #000000;
+    /* Полупрозрачное темное стекло (Apple Vibrancy Dark) */
+    --panel-bg: rgba(30, 30, 32, 0.65);
+    --surface: rgba(255, 255, 255, 0.1);
+    --surface-hover: rgba(255, 255, 255, 0.15);
+    --accent: #0A84FF; /* Фирменный синий Apple */
+    --text-main: #FFFFFF;
+    --text-dim: rgba(255, 255, 255, 0.55);
+    --border-light: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    --transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* === BASE STYLES === */
+body {
+    background-color: var(--bg-main);
+    /* Абстрактный градиент в стиле обоев macOS Sonoma/Monterey */
+    background-image: 
+        radial-gradient(circle at 10% 0%, #3a0088 0%, transparent 50%),
+        radial-gradient(circle at 90% 100%, #004d88 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, #880044 0%, transparent 50%);
+    background-size: 150% 150%;
+    height: 100vh;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+/* === LOW-GFX MODE === */
+body.low-gfx {
+    background: #1c1c1e !important;
+}
+body.low-gfx * {
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+    background-image: none !important;
+}
+body.low-gfx #spectrogram-canvas { display: none !important; }
+
+/* === MAIN PLAYER CONTAINER === */
+.player-grid {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr; 
+    width: 100vw;
+    height: 100vh;
+    background: var(--panel-bg);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    padding: 24px;
+    gap: 20px;
+    z-index: 10;
+    box-sizing: border-box;
+}
+
+/* === HEADER === */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.header-left, .header-right { display: flex; align-items: center; gap: 12px; }
+
+button {
+    background: var(--surface);
+    border: 1px solid transparent;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 2px rgba(0,0,0,0.1);
+    color: var(--text-main);
+    padding: 6px 16px;
+    border-radius: 8px; /* Скругления в стиле macOS */
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+button:hover { background: var(--surface-hover); }
+button:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.05); }
+
+#save-settings-btn.saved { background: #32D74B; color: #000; font-weight: 600; }
+#optimize-btn.optimized { background: #FF453A; color: #FFF; font-weight: 600; }
+
+.search-container input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--text-main);
+    width: 240px;
+    outline: none;
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.search-container input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3); /* Фирменный фокус Apple */
+}
+
+/* === PLAYER CONTROLS === */
+#top-controls {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 18px 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+}
+
+.main-controls { display: flex; align-items: center; gap: 16px; }
+
+#prev-btn, #next-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: none;
+}
+#prev-btn:hover, #next-btn:hover { background: var(--surface); }
+
+#prev-btn::before { content: ''; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-right: 8px solid var(--text-main); }
+#next-btn::before { content: ''; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid var(--text-main); }
+
+#play-pause-btn {
+    width: 50px; height: 50px; min-width: 50px;
+    border-radius: 50%;
+    background: var(--text-main);
+    color: #000;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+#play-pause-btn:hover { transform: scale(1.05); background: #f0f0f0; }
+#play-pause-btn::before {
+    content: ''; width: 14px; height: 16px; background: #000;
+    clip-path: polygon(0 0, 100% 50%, 0 100%); margin-left: 3px;
+    transition: clip-path 0.2s ease;
+}
+#play-pause-btn.is-playing::before {
+    clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+    margin-left: 0;
+}
+
+.controls-column { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+.sliders-row { display: flex; gap: 24px; }
+.control-group {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; font-weight: 500; color: var(--text-dim);
+}
+
+/* === ОБНОВЛЕННЫЕ ПОЛЗУНКИ (160px) И ИНПУТЫ === */
+.control-group input[type="range"] {
+    width: 160px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    -webkit-appearance: none; outline: none;
+}
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #FFF;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+
+.control-input, .eq-band input[type="number"] {
+    width: 44px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-light);
+    color: var(--text-main);
+    font-size: 12px;
+    text-align: center;
+    border-radius: 6px;
+    padding: 4px 0;
+    outline: none;
+    -moz-appearance: textfield;
+    transition: var(--transition);
+}
+.control-input:focus, .eq-band input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.2);
+}
+.control-input::-webkit-outer-spin-button, .control-input::-webkit-inner-spin-button,
+.eq-band input[type="number"]::-webkit-outer-spin-button, .eq-band input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+}
+
+/* Progress Slider */
+#progress-view { display: flex; flex-direction: column; gap: 6px; }
+#progress-slider {
+    -webkit-appearance: none; width: 100%; height: 5px;
+    background: rgba(255,255,255,0.15); border-radius: 2.5px;
+    outline: none; cursor: pointer; --value: 0%;
+}
+#progress-slider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, var(--text-main) var(--value), transparent var(--value));
+    height: 5px; border-radius: 2.5px;
+}
+#progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; height: 12px; width: 12px;
+    border-radius: 50%; background: #fff; margin-top: -3.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    opacity: 0; transition: opacity 0.2s, transform 0.2s;
+}
+#progress-slider:hover::-webkit-slider-thumb { opacity: 1; transform: scale(1.2); }
+
+#time-display {
+    display: flex; justify-content: space-between;
+    font-size: 11px; font-weight: 500; color: var(--text-dim);
+}
+
+/* === EQUALIZER === */
+.eq-container-wrapper {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 12px; padding: 16px;
+    border: 1px solid var(--border-light);
+}
+.eq-bands { display: flex; justify-content: space-between; gap: 8px; }
+.eq-band { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+.eq-band label { font-size: 11px; color: var(--text-dim); font-weight: 500; }
+.eq-band input[type="range"] {
+    -webkit-appearance: slider-vertical; width: 20px; height: 70px;
+    background: rgba(255,255,255,0.1); border-radius: 10px; outline: none;
+}
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    background: #FFF; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* === PLAYLIST === */
+.playlist-grid-area {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 12px; border: 1px solid var(--border-light);
+    overflow-y: auto; padding: 12px; margin-top: 5px;
+}
+.playlist-grid-area::-webkit-scrollbar { width: 10px; }
+.playlist-grid-area::-webkit-scrollbar-track { background: transparent; }
+.playlist-grid-area::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2); border-radius: 5px; border: 2px solid transparent; background-clip: padding-box;
+}
+
+.folder-group h3 {
+    font-size: 13px; font-weight: 600; padding: 8px 12px; margin: 0; cursor: pointer;
+    color: var(--text-main); display: flex; align-items: center;
+    border-radius: 6px; transition: var(--transition);
+}
+.folder-group h3:hover { background: var(--surface); }
+.folder-group h3::before {
+    content: '›'; font-size: 16px; margin-right: 12px;
+    transition: transform 0.2s ease; color: var(--text-dim);
+}
+.folder-group.open h3 { background: rgba(0,0,0,0.2); }
+.folder-group.open h3::before { transform: rotate(90deg); color: var(--text-main); }
+.folder-tracks { display: none; padding-left: 12px; margin-top: 4px; margin-bottom: 8px; }
+.folder-group.open .folder-tracks { display: block; }
+
+.track-item {
+    padding: 8px 12px; margin: 2px 0; border-radius: 6px;
+    display: flex; align-items: center; cursor: pointer;
+    font-size: 13px; color: var(--text-main); transition: var(--transition);
+}
+.track-item:hover { background: var(--surface); }
+.track-item.playing { background: var(--accent); color: #FFF; font-weight: 500; }
+
+/* === SPECTROGRAM & THEME SWITCHER === */
+#spectrogram-canvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1; opacity: 0.15; pointer-events: none;
+    /* Делаем спектрограмму белой/синей и мягкой */
+    filter: brightness(1.5) blur(1px);
+}
+#theme-switcher {
+    position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: rgba(30, 30, 32, 0.8);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: var(--glass-shadow);
+    color: var(--text-main); display: flex; align-items: center; justify-content: center;
+    font-size: 20px; cursor: pointer; transition: var(--transition);
+}
+#theme-switcher:hover { transform: scale(1.1); background: var(--surface-hover); }
