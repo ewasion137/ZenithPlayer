@@ -1,28 +1,71 @@
-![Platform](https://img.shields.io/badge/platform-win%20%7C%20linux-blue)
+# Zenith Player 🌌
+
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-blueviolet)
 ![License](https://img.shields.io/badge/license-MIT-orange)
+![Version](https://img.shields.io/badge/version-2.1.0-green)
 
-# ZenithPlayer
-**Zenith Player - A player, with great visuals, made listen tracks &amp; edit them.**
+**Zenith** is a high-end, indie audio player built for those who value both sound quality and aesthetic "ricing". It combines modern glassmorphism with retro-futuristic themes and springy animations inspired by the Hyprland compositor.
 
-1. You can edit music: Slow Down / Speed Up ; Equalization
-2. Visuals are beautifull (see down).
-3. FL Studio like stop: After you stop the track, it reverts to where your marker were set
-4. Automatic folder, sub-folder scanning.
-5. Equalization, speed settings are saved for every track **individually**
+---
 
-I would be happy if you use it and review, or give an issue for a bug.
+## Key Features
 
-### Made on electron, web
+- **Premium Themes**: Switch between **Zenith Ultra**, **Cosmic**, **Frutiger Aero**, **Terminal**, **Winamp**, and **MacGlass** with `Ctrl + T`.
+- **FL Studio Playback Logic**: Features a smart marker system—when you stop, the playback position reverts to your last set marker.
+- **Seamless Crossfade**: Smooth 1.5s transitions between tracks for a gapless listening experience.
+- **Hyprland Animations**: Springy, elastic UI transitions using custom bezier curves for that "premium rice" feel.
+- **Smart Album Art**: Automatic recursive searching for covers, folders, and front-art in your music directories.
+- **Per-Track Memory**: Zenith remembers your Equalizer, Volume, and Speed settings for **every single track** individually.
+- **Global Control**: Manage your music from anywhere with Global Media Keys (`Play`, `Next`, `Prev`) or `Alt + P`.
+- **Dual-Mode Minimize**: 
+    - **Left Click**: Minimize to taskbar.
+    - **Right Click**: Hide to system tray.
 
-# How to install / build
+---
 
-## 1 - Source code:
-1. Run "npm install"
-2. Run "npm run"
-   ***
-1. Run "npm run build"
+## 🛠 Installation & Development
 
-## 2 Installer - Portable
-*Just run the executable*
+### 1. Requirements
+- [Node.js](https://nodejs.org/) installed on your system.
 
-<img width="1920" height="1031" alt="image" src="https://github.com/user-attachments/assets/c4b66406-6a4e-47a0-a88f-58696f293ef2" />
+### 2. Setup
+```bash
+# Clone the repository
+git clone https://github.com/ewasion137/ZenithPlayer.git
+
+# Install dependencies
+npm install
+
+# Run the app
+npm start
+```
+
+### 3. Build (Release)
+To create a production-ready installer for your current OS:
+```bash
+npm run build
+```
+
+---
+
+## 🎮 Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `Space` | Play / Pause |
+| `Alt + P` | Global Play / Pause |
+| `Alt + Right` | Next Track |
+| `Alt + Left` | Previous Track |
+| `Ctrl + T` | Switch Theme |
+| `Ctrl + F` | Focus Search |
+
+---
+
+## 🐧 Linux Support
+Zenith is fully compatible with **GNU/Linux**. It features cross-platform path handling and optimized file watching for non-recursive file systems. 
+
+*Note: Hyprland-style animations work best with a compositor enabled.*
+
+---
+
+*Made with love (and some caffeine) for the community.*

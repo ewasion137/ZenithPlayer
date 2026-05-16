@@ -1,3 +1,13 @@
+// if you see this, you're prob the only one
+// hi
+// fuck you
+// lmao
+// ai code, i dont even complain
+// it works, IT WORKS EVEN ON LINUX!
+
+// Im sorry but id like to interject, but the thing you are refering to as 'Linux' is actually GNU slash Linux...
+// ok ill stfu
+
 document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('app-loading');
     setTimeout(() => {
@@ -8,7 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioContext = new AudioContext();
     const masterGain = audioContext.createGain();
     const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 512;
+    analyser.fftSize = 256; // Меньше бинов = больше FPS
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
     const eqFrequencies = [60, 170, 350, 1000, 3500, 10000, 14000];
     const eqFilters = eqFrequencies.map(freq => {
@@ -113,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 play(pauseTimeSec);
             }
         }
-        
+
         if (e.ctrlKey && e.code === 'KeyT') {
             switchTheme();
         }
@@ -133,14 +144,35 @@ document.addEventListener('DOMContentLoaded', () => {
     prevBtn.addEventListener('click', playPrevTrack);
     nextBtn.addEventListener('click', playNextTrack);
 
-    // 4. Window Controls
-    document.getElementById('win-min').addEventListener('click', () => window.electronAPI.minimize());
-    document.getElementById('win-max').addEventListener('click', () => window.electronAPI.maximize());
+    // window controls
+    const minBtn = document.getElementById('win-min');
+    minBtn.addEventListener('click', () => window.electronAPI.minimize('taskbar'));
+    minBtn.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        window.electronAPI.minimize('tray');
+    });
+
+    document.getElementById('win-max').addEventListener('click', () => {
+        document.body.classList.add('hypr-pop');
+        window.electronAPI.maximize();
+        setTimeout(() => document.body.classList.remove('hypr-pop'), 800);
+    });
     document.getElementById('win-close').addEventListener('click', () => window.electronAPI.close());
 
+    // global shortcuts from main
+    window.electronAPI.onGlobalCommand((cmd) => {
+        console.log('[engine] key:', cmd);
+        if (cmd === 'play-pause') {
+            const btn = document.getElementById('play-pause-btn');
+            if (btn) btn.click();
+        } else if (cmd === 'next') {
+            playNextTrack();
+        } else if (cmd === 'prev') {
+            playPrevTrack();
+        }
+    });
 
-    // --- Audio Functions ---
-
+    // sound engine stuff
     function play(offsetSeconds) {
         if (!currentTrackBuffer) return;
         if (currentSource) currentSource.stop();
@@ -210,12 +242,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadAndPlayTrack(trackPath, trackElement) {
-        // 1. Снимаем подсветку со старого трека
+        // 1. Crossfade: плавно гасим старый трек, если он играл
+        if (isPlaying) {
+            fadeOutAndStop();
+        } else {
+            stopSource();
+        }
+
+        // 2. Снимаем подсветку со старого трека
         if (currentPlayingElement) currentPlayingElement.classList.remove('playing');
 
-        stopSource(); // Останавливаем всё, что играло
-
-        // 2. Сразу обновляем состояние (чтобы не было путаницы)
+        // 3. Подготовка
         currentTrackPath = trackPath;
         currentPlayingElement = trackElement;
         currentTrackBuffer = null;
@@ -224,22 +261,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update labels
         currentTrackNameLabel.textContent = trackElement.querySelector('.track-name').textContent;
-        const folderName = trackElement.closest('.folder-group').querySelector('h3').textContent;
+        const folderNode = trackElement.closest('.folder-group');
+        const folderName = folderNode ? folderNode.querySelector('h3').textContent : 'Unknown';
         currentTrackFolderLabel.textContent = folderName;
+
+        // Ищем обложку
+        updateAlbumArt(trackPath);
 
         const savedSettings = await window.electronAPI.getTrackSettings(trackPath);
         applySettings(savedSettings);
 
         try {
             const rawData = await window.electronAPI.getAudioData(trackPath);
-
-            // ПРОВЕРКА: если пользователь уже выбрал другой трек, пока этот грузился - отменяем
             if (currentTrackPath !== trackPath) return;
             if (!rawData) throw new Error("Failed to get audio data");
 
             const audioBuffer = await audioContext.decodeAudioData(rawData.buffer);
-
-            // ЕЩЕ ОДНА ПРОВЕРКА: на случай если декодинг был долгим
             if (currentTrackPath !== trackPath) return;
 
             currentTrackBuffer = audioBuffer;
@@ -250,18 +287,44 @@ document.addEventListener('DOMContentLoaded', () => {
             playbackStartSec = 0;
             progressSlider.value = 0;
 
-            // 3. ВОТ КЛЮЧЕВОЙ МОМЕНТ: Подсвечиваем трек только СЕЙЧАС, когда все готово.
+            // 4. Подсвечиваем и запускаем
             trackElement.classList.add('playing');
-
             play(0);
-
         } catch (err) {
-            console.error("Error loading track:", err);
-            timeDisplay.innerHTML = `<span>Error</span>`;
-            // Если была ошибка, убираем подсветку
-            if (currentPlayingElement === trackElement) {
-                trackElement.classList.remove('playing');
-            }
+            console.error("Playback error:", err);
+            timeDisplay.innerHTML = '<span>Error</span>';
+        }
+    }
+
+    function fadeOutAndStop() {
+        if (!currentSource) return;
+        const oldSource = currentSource;
+        const oldGain = audioContext.createGain();
+        oldGain.connect(masterGain);
+        oldSource.disconnect();
+        oldSource.connect(oldGain);
+        const fadeTime = 1.0;
+        oldGain.gain.setValueAtTime(oldGain.gain.value, audioContext.currentTime);
+        oldGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + fadeTime);
+        setTimeout(() => {
+            try { oldSource.stop(); } catch (e) { }
+            oldSource.disconnect();
+            oldGain.disconnect();
+        }, fadeTime * 1000);
+        currentSource = null;
+        isPlaying = false;
+        stopRenderLoop();
+    }
+
+    async function updateAlbumArt(trackPath) {
+        const artData = await window.electronAPI.getAlbumArt(trackPath);
+        const glowEl = document.querySelector('.artwork-glow');
+        if (artData) {
+            glowEl.style.backgroundImage = `url(${artData})`;
+            glowEl.style.opacity = '0.6';
+        } else {
+            glowEl.style.backgroundImage = '';
+            glowEl.style.opacity = '0.2';
         }
     }
 
@@ -315,404 +378,403 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     progressSlider.addEventListener('input', e => {
-        if (!currentTrackBuffer) return;
-        const time = (e.target.value / 1000) * currentTrackBuffer.duration;
-        timeDisplay.innerHTML = `<span>${formatTime(time)}</span><span>${formatTime(currentTrackBuffer.duration)}</span>`;
-        progressSlider.style.setProperty('--value', (e.target.value / 10) + '%');
-    });
+    if (!currentTrackBuffer) return;
+    const time = (e.target.value / 1000) * currentTrackBuffer.duration;
+    timeDisplay.innerHTML = `<span>${formatTime(time)}</span><span>${formatTime(currentTrackBuffer.duration)}</span>`;
+    progressSlider.style.setProperty('--value', (e.target.value / 10) + '%');
+});
 
-    // --- Settings & UI ---
+// --- Settings & UI ---
 
-    function onSettingsChange() {
-        if (isApplyingSettings || !currentTrackPath) return;
-        const eqValues = [];
-        eqContainer.querySelectorAll('input[type="range"]').forEach(sl => eqValues.push(Number(sl.value)));
+function onSettingsChange() {
+    if (isApplyingSettings || !currentTrackPath) return;
+    const eqValues = [];
+    eqContainer.querySelectorAll('input[type="range"]').forEach(sl => eqValues.push(Number(sl.value)));
 
-        window.electronAPI.saveTrackSettings({
-            trackPath: currentTrackPath,
-            settings: {
-                volume: Number(trackVolumeSlider.value),
-                speed: Number(speedSlider.value),
-                eq: eqValues
-            }
-        });
-    }
-
-    saveSettingsBtn.addEventListener('click', () => {
-        if (!currentTrackPath) return;
-        onSettingsChange();
-        saveSettingsBtn.classList.add('saved');
-        saveSettingsBtn.textContent = 'Saved!';
-        setTimeout(() => {
-            saveSettingsBtn.classList.remove('saved');
-            saveSettingsBtn.textContent = 'Save';
-        }, 1500);
-    });
-
-    resetSettingsBtn.addEventListener('click', () => {
-        if (!currentTrackPath) return;
-        applySettings(null);
-        onSettingsChange();
-    });
-
-    function applySettings(settings) {
-        isApplyingSettings = true;
-        const defaults = { volume: 100, speed: 100, eq: [0, 0, 0, 0, 0, 0, 0] };
-        const final = { ...defaults, ...settings };
-
-        trackVolumeSlider.value = final.volume;
-        trackVolumeValue.textContent = `${final.volume}%`;
-        masterGain.gain.setValueAtTime(final.volume / 100, audioContext.currentTime);
-
-        speedSlider.value = final.speed;
-        speedValue.textContent = `${final.speed}%`;
-        if (currentSource) currentSource.playbackRate.value = final.speed / 100;
-
-        const eqRanges = eqContainer.querySelectorAll('input[type="range"]');
-        const eqNums = eqContainer.querySelectorAll('input[type="number"]');
-        eqRanges.forEach((slider, i) => {
-            slider.value = final.eq[i];
-            eqNums[i].value = final.eq[i];
-            eqFilters[i].gain.setValueAtTime(final.eq[i], audioContext.currentTime);
-        });
-        setTimeout(() => { isApplyingSettings = false; }, 50);
-    }
-
-    // --- Optimization & Search ---
-
-    optimizeBtn.addEventListener('click', () => {
-        visualsEnabled = !visualsEnabled;
-        if (visualsEnabled) {
-            document.body.classList.remove('low-gfx');
-            optimizeBtn.textContent = 'GFX: ON';
-            optimizeBtn.classList.remove('optimized');
-            startRenderLoop();
-        } else {
-            document.body.classList.add('low-gfx');
-            optimizeBtn.textContent = 'GFX: OFF';
-            optimizeBtn.classList.add('optimized');
-            stopRenderLoop();
-            if (optimizeInterval) clearInterval(optimizeInterval);
-            optimizeInterval = setInterval(() => { if (isPlaying) updateSimpleUI(); }, 500);
+    window.electronAPI.saveTrackSettings({
+        trackPath: currentTrackPath,
+        settings: {
+            volume: Number(trackVolumeSlider.value),
+            speed: Number(speedSlider.value),
+            eq: eqValues
         }
     });
+}
 
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        const tracks = document.querySelectorAll('.track-item');
-        tracks.forEach(track => {
-            const name = track.querySelector('.track-name').textContent.toLowerCase();
-            track.style.display = name.includes(query) ? 'flex' : 'none';
-        });
-        document.querySelectorAll('.folder-group').forEach(group => {
-            const visibleTracks = group.querySelectorAll('.track-item[style="display: flex;"]');
-            if (visibleTracks.length > 0 && query.length > 0) group.classList.add('open');
-        });
+saveSettingsBtn.addEventListener('click', () => {
+    if (!currentTrackPath) return;
+    onSettingsChange();
+    saveSettingsBtn.classList.add('saved');
+    saveSettingsBtn.textContent = 'Saved!';
+    setTimeout(() => {
+        saveSettingsBtn.classList.remove('saved');
+        saveSettingsBtn.textContent = 'Save';
+    }, 1500);
+});
+
+resetSettingsBtn.addEventListener('click', () => {
+    if (!currentTrackPath) return;
+    applySettings(null);
+    onSettingsChange();
+});
+
+function applySettings(settings) {
+    isApplyingSettings = true;
+    const defaults = { volume: 100, speed: 100, eq: [0, 0, 0, 0, 0, 0, 0] };
+    const final = { ...defaults, ...settings };
+
+    trackVolumeSlider.value = final.volume;
+    trackVolumeValue.textContent = `${final.volume}%`;
+    masterGain.gain.setValueAtTime(final.volume / 100, audioContext.currentTime);
+
+    speedSlider.value = final.speed;
+    speedValue.textContent = `${final.speed}%`;
+    if (currentSource) currentSource.playbackRate.value = final.speed / 100;
+
+    const eqRanges = eqContainer.querySelectorAll('input[type="range"]');
+    const eqNums = eqContainer.querySelectorAll('input[type="number"]');
+    eqRanges.forEach((slider, i) => {
+        slider.value = final.eq[i];
+        eqNums[i].value = final.eq[i];
+        eqFilters[i].gain.setValueAtTime(final.eq[i], audioContext.currentTime);
     });
+    setTimeout(() => { isApplyingSettings = false; }, 50);
+}
 
-    // --- Rendering ---
+// --- Optimization & Search ---
 
-    function startRenderLoop() {
-        if (!animationFrameId && visualsEnabled) animationFrameId = requestAnimationFrame(render);
+optimizeBtn.addEventListener('click', () => {
+    visualsEnabled = !visualsEnabled;
+    if (visualsEnabled) {
+        document.body.classList.remove('low-gfx');
+        optimizeBtn.textContent = 'GFX: ON';
+        optimizeBtn.classList.remove('optimized');
+        startRenderLoop();
+    } else {
+        document.body.classList.add('low-gfx');
+        optimizeBtn.textContent = 'GFX: OFF';
+        optimizeBtn.classList.add('optimized');
+        stopRenderLoop();
+        if (optimizeInterval) clearInterval(optimizeInterval);
+        optimizeInterval = setInterval(() => { if (isPlaying) updateSimpleUI(); }, 500);
     }
-    function stopRenderLoop() {
-        if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; }
-    }
+});
 
-    function render() {
-        if (!currentTrackBuffer || !visualsEnabled) return;
-        updateSimpleUI(); // Двигаем ползунок
-        drawSpectrogram();
-        if (isPlaying) animationFrameId = requestAnimationFrame(render);
-    }
-
-    function updateSimpleUI() {
-        const currentTime = getCurrentTime(); // Тут уже учитывается pauseTimeSec
-        if (!isDraggingSlider && currentTrackBuffer) {
-            const progress = (currentTime / currentTrackBuffer.duration) * 1000;
-            progressSlider.value = progress;
-            progressSlider.style.setProperty('--value', (progress / 10) + '%');
-            timeDisplay.innerHTML = `<span>${formatTime(currentTime)}</span><span>${formatTime(currentTrackBuffer.duration)}</span>`;
-        }
-    }
-
-    function drawSpectrogram() {
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-        analyser.getByteFrequencyData(dataArray);
-        
-        spectrogramCtx.clearRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height);
-        
-        const barWidth = (spectrogramCanvas.width / bufferLength) * 1.5;
-        let x = 0;
-        
-        // Mirror effect for "WOW"
-        const centerX = spectrogramCanvas.width / 2;
-        
-        for (let i = 0; i < bufferLength; i++) {
-            const barHeight = (dataArray[i] / 255) * spectrogramCanvas.height * 0.8;
-            const hue = (i / bufferLength * 360) + (Date.now() / 50) % 360;
-            
-            // Dynamic gradient
-            const gradient = spectrogramCtx.createLinearGradient(0, spectrogramCanvas.height, 0, spectrogramCanvas.height - barHeight);
-            gradient.addColorStop(0, `hsla(${hue}, 100%, 50%, 0.1)`);
-            gradient.addColorStop(0.5, `hsla(${hue}, 100%, 50%, 0.5)`);
-            gradient.addColorStop(1, `hsla(${hue + 40}, 100%, 70%, 0.8)`);
-            
-            spectrogramCtx.fillStyle = gradient;
-            
-            // Draw symmetric bars
-            spectrogramCtx.fillRect(centerX + x, spectrogramCanvas.height - barHeight, barWidth, barHeight);
-            spectrogramCtx.fillRect(centerX - x - barWidth, spectrogramCanvas.height - barHeight, barWidth, barHeight);
-            
-            x += barWidth + 2;
-            if (centerX + x > spectrogramCanvas.width) break;
-        }
-        
-        // Add a subtle glow pulse to the whole window based on bass
-        const bass = dataArray.slice(0, 10).reduce((a, b) => a + b, 0) / 10;
-        const glowOpacity = (bass / 255) * 0.3;
-        document.body.style.boxShadow = `inset 0 0 ${bass / 2}px rgba(255, 0, 122, ${glowOpacity})`;
-    }
-
-    // --- Helpers ---
-
-    function getCurrentTime() {
-        if (!currentSource || !isPlaying) return pauseTimeSec;
-        const rate = currentSource.playbackRate.value;
-        let time = (audioContext.currentTime - playbackStartedAtCtx) * rate;
-        if (time > currentTrackBuffer.duration) return currentTrackBuffer.duration;
-        return Math.max(0, time);
-    }
-
-    function formatTime(sec) {
-        const m = Math.floor(sec / 60) || 0;
-        const s = Math.floor(sec % 60) || 0;
-        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    }
-
-    function updateUIState() {
-        playPauseBtn.classList.toggle('is-playing', isPlaying);
-    }
-
-    const themeSwitcherBtn = document.getElementById('theme-switcher');
-    const themeLink = document.getElementById('theme-link');
-
-    // Список твоих тем. Просто добавляй сюда имена новых файлов.
-    const themes = [
-        'ultra.css',
-        'cosmic.css',
-        'frutigeraero.css',
-        'terminal.css',
-        'winamp.css',
-        'macglass.css',
-        'main.css'
-    ];
-
-    // Функция, которая применяет тему
-    function applyTheme(themeName) {
-        if (themeName === 'main.css') {
-            themeLink.href = `styles/main.css`;
-        } else {
-            themeLink.href = `styles/themes/${themeName}`;
-        }
-        console.log(`Theme applied: ${themeName}`);
-    }
-
-    // Функция, которая сохраняет и переключает тему
-    function switchTheme() {
-        // Получаем текущий индекс из памяти (или 0, если его нет)
-        let currentThemeIndex = Number(localStorage.getItem('themeIndex') || 0);
-
-        // Вычисляем следующий индекс по кругу
-        currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-
-        // Применяем новую тему
-        const newTheme = themes[currentThemeIndex];
-        applyTheme(newTheme);
-
-        // Сохраняем новый индекс в память
-        localStorage.setItem('themeIndex', currentThemeIndex);
-    }
-
-    // Вешаем обработчик на кнопку
-    themeSwitcherBtn.addEventListener('click', switchTheme);
-
-
-    // --- Загрузка темы при старте приложения ---
-    function loadInitialTheme() {
-        const savedThemeIndex = Number(localStorage.getItem('themeIndex') || 0);
-        // Проверка, чтобы индекс не выходил за рамки, если ты удалишь тему
-        const validIndex = savedThemeIndex < themes.length ? savedThemeIndex : 0;
-
-        applyTheme(themes[validIndex]);
-        localStorage.setItem('themeIndex', validIndex); // Обновляем на случай, если был невалидный
-    }
-
-    loadInitialTheme();
-
-    trackVolumeSlider.addEventListener('input', e => {
-        const val = e.target.value;
-        masterGain.gain.setValueAtTime(val / 100, audioContext.currentTime);
-        trackVolumeValue.textContent = `${val}%`;
-        onSettingsChange();
+searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    const tracks = document.querySelectorAll('.track-item');
+    tracks.forEach(track => {
+        const name = track.querySelector('.track-name').textContent.toLowerCase();
+        track.style.display = name.includes(query) ? 'flex' : 'none';
     });
-    function updateVolume(value) {
-        const val = Math.min(200, Math.max(0, Number(value))); // Ограничиваем значение
-        masterGain.gain.setValueAtTime(val / 100, audioContext.currentTime);
-        trackVolumeValue.textContent = `${val}%`;
-        trackVolumeSlider.value = val;
-        trackVolumeInput.value = val;
-        onSettingsChange();
-    }
-    trackVolumeSlider.addEventListener('input', e => updateVolume(e.target.value));
-    trackVolumeInput.addEventListener('change', e => updateVolume(e.target.value));
-
-    function updateSpeed(value) {
-        const val = Math.min(200, Math.max(50, Number(value))); // Ограничиваем значение
-        speedValue.textContent = `${val}%`;
-        if (currentSource) {
-            currentSource.playbackRate.value = val / 100;
-            playbackStartedAtCtx = audioContext.currentTime - getCurrentTime() / (val / 100);
-        }
-        speedSlider.value = val;
-        speedInput.value = val;
-        onSettingsChange();
-    }
-    speedSlider.addEventListener('input', e => updateSpeed(e.target.value));
-    speedInput.addEventListener('change', e => updateSpeed(e.target.value));
-
-    // Files/Folders Logic (с запоминанием открытых папок)
-    function displayTracks(folders) {
-        const openFolders = new Set();
-        document.querySelectorAll('.folder-group.open h3').forEach(h3 => openFolders.add(h3.textContent));
-        const playingPath = currentTrackPath;
-
-        trackListContainer.innerHTML = '';
-        if (!folders || folders.length === 0) return;
-
-        folders.forEach(folderData => {
-            const folderGroup = document.createElement('div');
-            folderGroup.className = 'folder-group';
-            const folderName = folderData.folder.split(/\\|\//).pop();
-            const title = document.createElement('h3');
-            title.textContent = folderName;
-            if (openFolders.has(folderName)) folderGroup.classList.add('open');
-            title.addEventListener('click', () => folderGroup.classList.toggle('open'));
-
-            const tracksUl = document.createElement('div');
-            tracksUl.className = 'folder-tracks';
-            const tracksInner = document.createElement('div');
-            tracksInner.className = 'folder-tracks-inner';
-
-            folderData.tracks.forEach((track, index) => {
-                const item = document.createElement('div');
-                item.className = 'track-item track-appear-effect'; // Добавляем спец-класс для анимации
-
-                // УМНЫЙ ЗАМЕР: задержка растет, но не бесконечно. 
-                // Максимум 0.4 сек, чтобы не ждать вечность внизу списка.
-                const delay = Math.min(index * 0.02, 0.4);
-                item.style.animationDelay = `${delay}s`;
-
-                if (playingPath === track.path) item.classList.add('playing');
-
-                // Удаляем класс анимации после того, как она прошла, 
-                // чтобы при клике (смене классов) она не запустилась снова
-                setTimeout(() => {
-                    item.classList.remove('track-appear-effect');
-                }, 1000);
-
-                item.dataset.path = track.path;
-                item.innerHTML = `<span class="track-name">${track.name}</span>`;
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    loadAndPlayTrack(track.path, item);
-                });
-                tracksInner.appendChild(item);
-            })
-
-            tracksUl.appendChild(tracksInner); // А внутренний див в грид-контейнер
-            folderGroup.append(title, tracksUl);
-
-            // Style for opening
-            const style = document.createElement('style');
-            style.textContent = `.folder-group.open .folder-tracks { display: block !important; }`;
-            if (!document.getElementById('folder-style')) { style.id = 'folder-style'; document.head.appendChild(style); }
-
-            trackListContainer.appendChild(folderGroup);
-        });
-        if (searchInput.value) searchInput.dispatchEvent(new Event('input'));
-    }
-
-    function drawWaveform(buffer) {
-        // 1. Фикс разрешения (HD качество)
-        const dpr = window.devicePixelRatio || 1;
-        waveformCanvas.width = waveformCanvas.clientWidth * dpr;
-        waveformCanvas.height = waveformCanvas.clientHeight * dpr;
-        waveformCtx.scale(dpr, dpr);
-
-        const width = waveformCanvas.clientWidth;
-        const height = waveformCanvas.clientHeight;
-        const data = buffer.getChannelData(0);
-
-        // 2. Настройка стиля (берем акцентный цвет)
-        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8b5cf6';
-
-        waveformCtx.clearRect(0, 0, width, height);
-
-        // Рисуем центральную линию (ось)
-        waveformCtx.beginPath();
-        waveformCtx.strokeStyle = 'rgba(255,255,255,0.1)';
-        waveformCtx.moveTo(0, height / 2);
-        waveformCtx.lineTo(width, height / 2);
-        waveformCtx.stroke();
-
-        // 3. Рисуем столбики
-        const barWidth = 2; // Ширина одного столбика
-        const gap = 1;      // Просвет между ними
-        const step = Math.ceil(data.length / (width / (barWidth + gap)));
-        const amp = height / 2;
-
-        for (let i = 0; i < width; i += (barWidth + gap)) {
-            let min = 1.0;
-            let max = -1.0;
-
-            for (let j = 0; j < step; j++) {
-                const datum = data[Math.floor((i / (barWidth + gap)) * step) + j];
-                if (datum < min) min = datum;
-                if (datum > max) max = datum;
-            }
-
-            // Делаем цвет чуть прозрачным, чтобы выглядело мягче
-            waveformCtx.fillStyle = accentColor;
-
-            // Рисуем верхнюю и нижнюю части столбика
-            // Ограничиваем минимальную высоту в 1px, чтобы не было пустых мест
-            const x = i;
-            const y = (1 + min) * amp;
-            const w = barWidth;
-            const h = Math.max(1, (max - min) * amp);
-
-            // Скругленные столбики (опционально)
-            waveformCtx.fillRect(x, y, w, h);
-        }
-    }
-    window.electronAPI.onGlobalCommand((cmd) => {
-        if (cmd === 'play-pause') {
-            if (!currentTrackBuffer) return;
-            isPlaying ? pause() : play(pauseTimeSec);
-        } else if (cmd === 'next-track') {
-            playNextTrack();
-        } else if (cmd === 'prev-track') {
-            playPrevTrack();
-        }
+    document.querySelectorAll('.folder-group').forEach(group => {
+        const visibleTracks = group.querySelectorAll('.track-item[style="display: flex;"]');
+        if (visibleTracks.length > 0 && query.length > 0) group.classList.add('open');
     });
-    selectFolderBtn.addEventListener('click', () => window.electronAPI.selectFolder(true));
-    window.electronAPI.onReceiveTracks(displayTracks);
+});
+
+// --- Rendering ---
+
+function startRenderLoop() {
+    if (!animationFrameId && visualsEnabled) animationFrameId = requestAnimationFrame(render);
+}
+function stopRenderLoop() {
+    if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; }
+}
+
+let lastRenderTime = 0;
+function render(timestamp) {
+    if (!currentTrackBuffer || !visualsEnabled) return;
+
+    // Ограничиваем до ~45 FPS для экономии GPU
+    if (timestamp - lastRenderTime < 22) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+    }
+    lastRenderTime = timestamp;
+
+    updateSimpleUI(); // Двигаем ползунок
+    drawSpectrogram();
+    if (isPlaying) animationFrameId = requestAnimationFrame(render);
+}
+
+function updateSimpleUI() {
+    const currentTime = getCurrentTime(); // Тут уже учитывается pauseTimeSec
+    if (!isDraggingSlider && currentTrackBuffer) {
+        const progress = (currentTime / currentTrackBuffer.duration) * 1000;
+        progressSlider.value = progress;
+        progressSlider.style.setProperty('--value', (progress / 10) + '%');
+        timeDisplay.innerHTML = `<span>${formatTime(currentTime)}</span><span>${formatTime(currentTrackBuffer.duration)}</span>`;
+    }
+}
+
+function drawSpectrogram() {
+    analyser.getByteFrequencyData(dataArray);
+    const bufferLength = dataArray.length;
+
+    spectrogramCtx.clearRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height);
+
+    const barWidth = (spectrogramCanvas.width / bufferLength) * 1.8;
+    const centerX = spectrogramCanvas.width / 2;
+    const timeFactor = (Date.now() / 50) % 360;
+
+    // Рисуем один раз общим цветом или градиентом, если возможно, 
+    // но для "WOW" эффекта оставим цикл, просто оптимизируем его.
+
+    spectrogramCtx.lineCap = 'round';
+
+    for (let i = 0; i < bufferLength; i++) {
+        const barHeight = (dataArray[i] / 255) * spectrogramCanvas.height * 0.7;
+        if (barHeight < 2) continue; // Пропускаем тихие бины
+
+        const hue = (i / bufferLength * 360) + timeFactor;
+        spectrogramCtx.fillStyle = `hsla(${hue}, 80%, 60%, 0.6)`;
+
+        // Вместо тяжелых градиентов используем простые Rect
+        spectrogramCtx.fillRect(centerX + (i * (barWidth + 2)), spectrogramCanvas.height - barHeight, barWidth, barHeight);
+        spectrogramCtx.fillRect(centerX - (i * (barWidth + 2)) - barWidth, spectrogramCanvas.height - barHeight, barWidth, barHeight);
+    }
+
+    // Оптимизируем пульсацию: меняем только прозрачность спец-слоя
+    const bass = dataArray[0] + dataArray[1] + dataArray[2]; // Быстрый замер баса
+    const glowEl = document.querySelector('.artwork-glow');
+    if (glowEl) {
+        glowEl.style.opacity = (bass / 765) * 0.6;
+        glowEl.style.transform = `scale(${1 + (bass / 1500)}) rotate(${timeFactor / 10}deg)`;
+    }
+}
+
+// --- Helpers ---
+
+function getCurrentTime() {
+    if (!currentSource || !isPlaying) return pauseTimeSec;
+    const rate = currentSource.playbackRate.value;
+    let time = (audioContext.currentTime - playbackStartedAtCtx) * rate;
+    if (time > currentTrackBuffer.duration) return currentTrackBuffer.duration;
+    return Math.max(0, time);
+}
+
+function formatTime(sec) {
+    const m = Math.floor(sec / 60) || 0;
+    const s = Math.floor(sec % 60) || 0;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function updateUIState() {
+    playPauseBtn.classList.toggle('is-playing', isPlaying);
+}
+
+const themeSwitcherBtn = document.getElementById('theme-switcher');
+const themeLink = document.getElementById('theme-link');
+
+// Список твоих тем. Просто добавляй сюда имена новых файлов.
+const themes = [
+    'ultra.css',
+    'cosmic.css',
+    'frutigeraero.css',
+    'terminal.css',
+    'winamp.css',
+    'macglass.css',
+    'main.css'
+];
+
+// Функция, которая применяет тему
+function applyTheme(themeName) {
+    if (themeName === 'main.css') {
+        themeLink.href = `styles/main.css`;
+    } else {
+        themeLink.href = `styles/themes/${themeName}`;
+    }
+    console.log(`Theme applied: ${themeName}`);
+}
+
+// Функция, которая сохраняет и переключает тему
+function switchTheme() {
+    // Получаем текущий индекс из памяти (или 0, если его нет)
+    let currentThemeIndex = Number(localStorage.getItem('themeIndex') || 0);
+
+    // Вычисляем следующий индекс по кругу
+    currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+
+    // Применяем новую тему
+    const newTheme = themes[currentThemeIndex];
+    applyTheme(newTheme);
+
+    // Перерисовываем вейвформу с новым цветом
+    setTimeout(() => {
+        if (currentTrackBuffer) drawWaveform(currentTrackBuffer);
+    }, 100);
+
+    // Сохраняем новый индекс в память
+    localStorage.setItem('themeIndex', currentThemeIndex);
+}
+
+// Вешаем обработчик на кнопку
+themeSwitcherBtn.addEventListener('click', switchTheme);
+
+
+// --- Загрузка темы при старте приложения ---
+function loadInitialTheme() {
+    const savedThemeIndex = Number(localStorage.getItem('themeIndex') || 0);
+    // Проверка, чтобы индекс не выходил за рамки, если ты удалишь тему
+    const validIndex = savedThemeIndex < themes.length ? savedThemeIndex : 0;
+
+    applyTheme(themes[validIndex]);
+    localStorage.setItem('themeIndex', validIndex); // Обновляем на случай, если был невалидный
+}
+
+loadInitialTheme();
+
+trackVolumeSlider.addEventListener('input', e => {
+    const val = e.target.value;
+    masterGain.gain.setValueAtTime(val / 100, audioContext.currentTime);
+    trackVolumeValue.textContent = `${val}%`;
+    onSettingsChange();
+});
+function updateVolume(value) {
+    const val = Math.min(200, Math.max(0, Number(value))); // Ограничиваем значение
+    masterGain.gain.setValueAtTime(val / 100, audioContext.currentTime);
+    trackVolumeValue.textContent = `${val}%`;
+    trackVolumeSlider.value = val;
+    trackVolumeInput.value = val;
+    onSettingsChange();
+}
+trackVolumeSlider.addEventListener('input', e => updateVolume(e.target.value));
+trackVolumeInput.addEventListener('change', e => updateVolume(e.target.value));
+
+function updateSpeed(value) {
+    const val = Math.min(200, Math.max(50, Number(value))); // Ограничиваем значение
+    speedValue.textContent = `${val}%`;
+    if (currentSource) {
+        currentSource.playbackRate.value = val / 100;
+        playbackStartedAtCtx = audioContext.currentTime - getCurrentTime() / (val / 100);
+    }
+    speedSlider.value = val;
+    speedInput.value = val;
+    onSettingsChange();
+}
+speedSlider.addEventListener('input', e => updateSpeed(e.target.value));
+speedInput.addEventListener('change', e => updateSpeed(e.target.value));
+
+// Files/Folders Logic (с запоминанием открытых папок)
+function displayTracks(folders) {
+    const openFolders = new Set();
+    document.querySelectorAll('.folder-group.open h3').forEach(h3 => openFolders.add(h3.textContent));
+    const playingPath = currentTrackPath;
+
+    trackListContainer.innerHTML = '';
+    if (!folders || folders.length === 0) return;
+
+    folders.forEach(folderData => {
+        const folderGroup = document.createElement('div');
+        folderGroup.className = 'folder-group';
+        const folderName = folderData.folder.split(/\\|\//).pop();
+        const title = document.createElement('h3');
+        title.textContent = folderName;
+        if (openFolders.has(folderName)) folderGroup.classList.add('open');
+        title.addEventListener('click', () => folderGroup.classList.toggle('open'));
+
+        const tracksUl = document.createElement('div');
+        tracksUl.className = 'folder-tracks';
+        const tracksInner = document.createElement('div');
+        tracksInner.className = 'folder-tracks-inner';
+
+        folderData.tracks.forEach((track, index) => {
+            const item = document.createElement('div');
+            item.className = 'track-item track-appear-effect'; // Добавляем спец-класс для анимации
+
+            // УМНЫЙ ЗАМЕР: задержка растет, но не бесконечно. 
+            // Максимум 0.4 сек, чтобы не ждать вечность внизу списка.
+            const delay = Math.min(index * 0.02, 0.4);
+            item.style.animationDelay = `${delay}s`;
+
+            if (playingPath === track.path) item.classList.add('playing');
+
+            // Удаляем класс анимации после того, как она прошла, 
+            // чтобы при клике (смене классов) она не запустилась снова
+            setTimeout(() => {
+                item.classList.remove('track-appear-effect');
+            }, 1000);
+
+            item.dataset.path = track.path;
+            item.innerHTML = `<span class="track-name">${track.name}</span>`;
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                loadAndPlayTrack(track.path, item);
+            });
+            tracksInner.appendChild(item);
+        })
+
+        tracksUl.appendChild(tracksInner); // А внутренний див в грид-контейнер
+        folderGroup.append(title, tracksUl);
+
+        // Style for opening
+        const style = document.createElement('style');
+        style.textContent = `.folder-group.open .folder-tracks { display: block !important; }`;
+        if (!document.getElementById('folder-style')) { style.id = 'folder-style'; document.head.appendChild(style); }
+
+        trackListContainer.appendChild(folderGroup);
+    });
+    if (searchInput.value) searchInput.dispatchEvent(new Event('input'));
+}
+
+function drawWaveform(buffer) {
+    // 1. Фикс разрешения (HD качество)
+    const dpr = window.devicePixelRatio || 1;
+    waveformCanvas.width = waveformCanvas.clientWidth * dpr;
+    waveformCanvas.height = waveformCanvas.clientHeight * dpr;
+    waveformCtx.scale(dpr, dpr);
+
+    const width = waveformCanvas.clientWidth;
+    const height = waveformCanvas.clientHeight;
+    const data = buffer.getChannelData(0);
+
+    // 2. Настройка стиля (берем актуальный акцентный цвет темы)
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8b5cf6';
+
+    waveformCtx.clearRect(0, 0, width, height);
+
+    // Рисуем центральную линию (ось)
+    waveformCtx.beginPath();
+    waveformCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+    waveformCtx.moveTo(0, height / 2);
+    waveformCtx.lineTo(width, height / 2);
+    waveformCtx.stroke();
+
+    // 3. Рисуем столбики
+    const barWidth = 2; // Ширина одного столбика
+    const gap = 1;      // Просвет между ними
+    const step = Math.ceil(data.length / (width / (barWidth + gap)));
+    const amp = height / 2;
+
+    for (let i = 0; i < width; i += (barWidth + gap)) {
+        let min = 1.0;
+        let max = -1.0;
+
+        for (let j = 0; j < step; j++) {
+            const datum = data[Math.floor((i / (barWidth + gap)) * step) + j];
+            if (datum < min) min = datum;
+            if (datum > max) max = datum;
+        }
+
+        // Делаем цвет чуть прозрачным, чтобы выглядело мягче
+        waveformCtx.fillStyle = accentColor;
+
+        // Рисуем верхнюю и нижнюю части столбика
+        // Ограничиваем минимальную высоту в 1px, чтобы не было пустых мест
+        const x = i;
+        const y = (1 + min) * amp;
+        const w = barWidth;
+        const h = Math.max(1, (max - min) * amp);
+
+        // Скругленные столбики (опционально)
+        waveformCtx.fillRect(x, y, w, h);
+    }
+}
+selectFolderBtn.addEventListener('click', () => window.electronAPI.selectFolder(true));
+window.electronAPI.onReceiveTracks(displayTracks);
 
     window.addEventListener('resize', () => {
-        spectrogramCanvas.width = spectrogramCanvas.parentElement.clientWidth;
-        spectrogramCanvas.height = spectrogramCanvas.parentElement.clientHeight;
         if (currentTrackBuffer) drawWaveform(currentTrackBuffer);
     });
     window.dispatchEvent(new Event('resize'));

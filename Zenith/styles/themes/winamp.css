@@ -10,6 +10,8 @@
     --border-light: #595973;
     --border-dark: #0f0f14;
     --transition: none; /* Никаких современных анимаций */
+    --title-bg: #21212c;
+    --title-text: #dfdfdf;
 }
 
 /* === BASE STYLES === */
@@ -35,7 +37,7 @@ body.low-gfx #spectrogram-canvas { display: none !important; }
 .player-grid {
     position: relative;
     display: grid;
-    grid-template-rows: auto auto auto 1fr; 
+    grid-template-rows: auto auto auto auto 1fr; 
     width: 100vw;
     height: 100vh;
     background: var(--panel-bg);

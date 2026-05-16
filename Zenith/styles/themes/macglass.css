@@ -11,6 +11,8 @@
     --border-light: rgba(255, 255, 255, 0.1);
     --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     --transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --title-bg: rgba(30, 30, 32, 0.8);
+    --title-text: #fff;
 }
 
 /* === BASE STYLES === */
@@ -47,7 +49,7 @@ body.low-gfx #spectrogram-canvas { display: none !important; }
 .player-grid {
     position: relative;
     display: grid;
-    grid-template-rows: auto auto auto 1fr; 
+    grid-template-rows: auto auto auto auto 1fr; 
     width: 100vw;
     height: 100vh;
     background: var(--panel-bg);

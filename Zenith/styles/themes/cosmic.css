@@ -11,6 +11,8 @@
     --border-light: rgba(255, 255, 255, 0.08);
     --border-glow: rgba(217, 70, 239, 0.4);
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --title-bg: rgba(3, 0, 10, 0.8);
+    --title-text: var(--accent);
 }
 
 /* === BASE STYLES === */
@@ -59,7 +61,7 @@ body.low-gfx button:hover {
 .player-grid {
     position: relative;
     display: grid;
-    grid-template-rows: auto auto auto 1fr; 
+    grid-template-rows: auto auto auto auto 1fr; 
     width: 100vw;
     height: 100vh;
     background: var(--panel-bg);

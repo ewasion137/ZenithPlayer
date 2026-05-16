@@ -9,6 +9,8 @@
     --text-dim: #008800;
     --border-light: #00ff00; /* Строгая зеленая рамка */
     --transition: none; /* СРАЗУ ГОВОРЮ: НЕТ АНИМАЦИЙ :) */
+    --title-bg: #000;
+    --title-text: #00ff00;
 }
 
 /* === BASE STYLES === */
@@ -52,7 +54,7 @@ body.low-gfx #spectrogram-canvas {
 .player-grid {
     position: relative;
     display: grid;
-    grid-template-rows: auto auto auto 1fr; 
+    grid-template-rows: auto auto auto auto 1fr; 
     width: 100vw;
     height: 100vh;
     background: var(--panel-bg);
