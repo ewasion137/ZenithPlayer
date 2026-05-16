@@ -63,3 +63,6 @@ npm run build
 
 ## 🐧 Linux Support
 Zenith is fully compatible with **GNU/Linux**. It features cross-platform path handling and optimized file watching for non-recursive file systems. 
+
+
+<img width="1920" height="1034" alt="image" src="https://github.com/user-attachments/assets/7c495769-59f3-4855-a7f9-16f3c22830a2" />
