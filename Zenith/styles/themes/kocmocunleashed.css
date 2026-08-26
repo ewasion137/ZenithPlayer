@@ -1,64 +1,53 @@
-/* === KOCMOC UNLEASHED THEME (Geometry Dash Cherry Team) === */
+/* === KOCMOC UNLEASHED (CHERRY TEAM) THEME === */
 :root {
-    --bg-main: #010103;
-    --panel-bg: rgba(5, 5, 8, 0.88);
-    --surface: rgba(14, 15, 22, 0.9);
-    --surface-hover: rgba(26, 28, 40, 0.95);
+    --bg-main: #000002;
+    /* Черная дыра / Сингулярность */
+    --panel-bg: rgba(6, 6, 9, 0.78);
+    /* Монолитный композит */
+    --surface: rgba(16, 17, 24, 0.85);
+    --surface-hover: rgba(30, 32, 45, 0.95);
     
-    /* Цвета Сингулярности и Аккреционного диска */
-    --accent: #ffffff; /* Ослепляющий белый центр */
-    --accent-fire: #ff7700; /* Огненный ореол дыры */
-    --accent-prism: #00f0ff; /* Радужное преломление гравитации */
-    --accent-secondary: #ff3366; /* Неоновый призматический акцент */
-    
-    /* Градиент аккреционного диска KOCMOC */
-    --accent-gradient: linear-gradient(135deg, #ffffff 0%, #ff8800 45%, #ff0055 75%, #00f0ff 100%);
-    --singularity-glow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 120, 0, 0.4), 0 0 60px rgba(0, 240, 255, 0.2);
+    /* Ослепительно белое ядро и фотонное кольцо */
+    --accent: #ffffff;
+    --accent-secondary: #e2e8f0;
+    --accent-glow: rgba(255, 255, 255, 0.85);
+    --accent-gradient: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
     
     --text-main: #ffffff;
-    --text-dim: #7f8599;
+    --text-dim: #71717a;
     --border-light: rgba(255, 255, 255, 0.12);
-    --border-singularity: rgba(255, 255, 255, 0.7);
+    --border-focus: #ffffff;
     
-    --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Жесткие механические переходы */
+    --transition: all 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
     --hypr-bezier: cubic-bezier(0.05, 0.9, 0.1, 1.05);
-    
     --title-bg: rgba(2, 2, 4, 0.9);
     --title-text: #ffffff;
+    --kocmoc-bloom: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 25px rgba(255, 255, 255, 0.4);
 }
 
 /* === BASE STYLES & EVENT HORIZON BACKGROUND === */
 body {
     background-color: var(--bg-main);
-    /* Гравитационная линза / Черная дыра на фоне */
+    /* Ослепительное свечение горизонта снизу + диск черной дыры */
     background-image: 
-        radial-gradient(circle at 50% 50%, #000000 0%, #000000 18%, transparent 19%),
-        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9) 19%, rgba(255, 140, 0, 0.6) 24%, rgba(255, 0, 85, 0.3) 32%, rgba(0, 240, 255, 0.15) 45%, transparent 65%),
-        radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.04) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(255, 60, 0, 0.05) 0%, transparent 45%);
+        radial-gradient(ellipse 120% 60% at 50% 105%, rgba(255, 255, 255, 0.95) 0%, rgba(220, 230, 255, 0.4) 25%, rgba(0, 0, 0, 0.95) 60%, #000002 100%),
+        radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 40%),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.01) 0px, rgba(255, 255, 255, 0.01) 1px, transparent 1px, transparent 40px);
     background-attachment: fixed;
     height: 100vh;
     margin: 0;
-    font-family: 'Orbitron', 'Inter', system-ui, sans-serif;
+    font-family: 'Orbitron', 'Inter', system-ui, -apple-system, sans-serif;
     color: var(--text-main);
     overflow: hidden;
     user-select: none;
 }
 
-/* Эффект шума и космических частиц */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.015) 0px, transparent 1px, transparent 2px);
-    pointer-events: none;
-    z-index: 999;
-}
-
 /* === LOW-GFX MODE === */
 body.low-gfx {
-    background: #020203 !important;
+    background: #000000 !important;
 }
+
 body.low-gfx * {
     animation: none !important;
     backdrop-filter: none !important;
@@ -67,7 +56,19 @@ body.low-gfx * {
     transition: none !important;
     background-image: none !important;
 }
-body.low-gfx #spectrogram-canvas { display: none !important; }
+
+body.low-gfx #spectrogram-canvas {
+    display: none !important;
+}
+
+body.low-gfx .player-grid, 
+body.low-gfx #top-controls, 
+body.low-gfx .eq-container-wrapper, 
+body.low-gfx .playlist-grid-area,
+body.low-gfx .now-playing-container {
+    background: #08080a !important;
+    border: 1px solid #333333 !important;
+}
 
 /* === TITLE BAR === */
 .title-bar {
@@ -76,10 +77,10 @@ body.low-gfx #spectrogram-canvas { display: none !important; }
     align-items: center;
     height: 32px;
     background: var(--title-bg);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 1px 15px rgba(255, 255, 255, 0.05);
     z-index: 9999;
     position: relative;
-    backdrop-filter: blur(12px);
 }
 
 .title-bar-drag {
@@ -87,7 +88,7 @@ body.low-gfx #spectrogram-canvas { display: none !important; }
     height: 100%;
     display: flex;
     align-items: center;
-    padding-left: 12px;
+    padding-left: 14px;
     -webkit-app-region: drag;
     gap: 10px;
 }
@@ -97,8 +98,8 @@ body.low-gfx #spectrogram-canvas { display: none !important; }
     font-weight: 900;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: #fff;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 120, 0, 0.5);
+    color: var(--title-text);
+    text-shadow: var(--kocmoc-bloom);
 }
 
 .window-controls {
@@ -112,27 +113,39 @@ body.low-gfx #spectrogram-canvas { display: none !important; }
     height: 100%;
     background: transparent !important;
     border: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--text-dim);
     transition: var(--transition);
 }
-.win-btn:hover { background: rgba(255, 255, 255, 0.1) !important; color: #fff; }
-.win-close:hover { background: #ff0055 !important; color: #fff; box-shadow: 0 0 15px #ff0055; }
 
-/* === MAIN CONTAINER === */
+.win-btn:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #fff;
+}
+
+.win-close:hover {
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: var(--kocmoc-bloom);
+}
+
+/* === MAIN PLAYER CONTAINER === */
 .player-grid {
     position: relative;
     display: grid;
     grid-template-rows: auto auto auto auto 1fr;
     width: 100vw;
-    height: calc(100vh - 32px);
+    height: 100vh;
     background: var(--panel-bg);
-    backdrop-filter: blur(25px) saturate(160%);
-    -webkit-backdrop-filter: blur(25px) saturate(160%);
-    padding: 22px;
+    backdrop-filter: blur(24px) brightness(0.9);
+    -webkit-backdrop-filter: blur(24px) brightness(0.9);
+    border: none;
+    padding: 24px;
     gap: 18px;
     z-index: 10;
     box-sizing: border-box;
-    border-top: 1px solid var(--border-light);
 }
 
 /* === HEADER === */
@@ -150,68 +163,64 @@ body.low-gfx #spectrogram-canvas { display: none !important; }
     gap: 12px;
 }
 
-/* Острые геометрические кнопки Cherry Team */
 button {
     background: var(--surface);
-    border: 1px solid var(--border-light);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: var(--text-main);
     padding: 8px 16px;
     border-radius: 2px;
     cursor: pointer;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     transition: var(--transition);
-    position: relative;
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
 }
 
 button:hover {
-    background: var(--surface-hover);
-    border-color: #fff;
-    color: #fff;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(255, 140, 0, 0.2);
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
     transform: translateY(-1px);
 }
 
 button:active {
     transform: scale(0.97);
+    background: #cccccc;
 }
 
 #save-settings-btn.saved {
-    background: #00ffaa;
-    color: #000;
-    border-color: #00ffaa;
-    box-shadow: 0 0 15px #00ffaa;
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+    box-shadow: var(--kocmoc-bloom);
 }
 
 #optimize-btn.optimized {
-    color: #fff;
-    border-color: #ff0055;
-    background: rgba(255, 0, 85, 0.3);
-    box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-color: #ffffff;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.4);
 }
 
 .search-container input {
-    background: var(--surface);
+    background: rgba(0, 0, 0, 0.6);
     border: 1px solid var(--border-light);
     border-radius: 2px;
     padding: 8px 16px;
-    color: #fff;
+    color: #ffffff;
     width: 240px;
     outline: none;
     font-size: 12px;
     font-family: inherit;
-    letter-spacing: 1px;
     transition: var(--transition);
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
 }
 
 .search-container input:focus {
-    border-color: #fff;
-    background: #000;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+    border-color: #ffffff;
+    background: rgba(10, 10, 15, 0.9);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
 }
 
 /* === NOW PLAYING === */
@@ -223,20 +232,21 @@ button:active {
     text-align: center;
     position: relative;
     overflow: hidden;
-    min-height: 110px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.4) 100%);
-    border: 1px solid var(--border-light);
     border-radius: 4px;
+    min-height: 120px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .artwork-glow {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 120%;
-    height: 120%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(255, 120, 0, 0.15) 30%, rgba(0, 240, 255, 0.08) 60%, transparent 80%);
-    filter: blur(40px);
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 70%);
+    filter: blur(60px);
+    opacity: 0.6;
     z-index: -1;
     pointer-events: none;
 }
@@ -247,8 +257,8 @@ button:active {
     font-weight: 900;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #fff;
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 120, 0, 0.5), 0 0 45px rgba(0, 240, 255, 0.3);
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px rgba(255, 255, 255, 0.5);
 }
 
 .track-info p {
@@ -256,20 +266,20 @@ button:active {
     color: var(--text-dim);
     margin: 6px 0 0;
     text-transform: uppercase;
-    letter-spacing: 3px;
-    font-weight: 600;
+    letter-spacing: 4px;
+    font-weight: 700;
 }
 
-/* === TOP CONTROLS === */
+/* === PLAYER CONTROLS === */
 #top-controls {
     display: flex;
     align-items: center;
     gap: 24px;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(10, 10, 14, 0.7);
     padding: 18px 24px;
     border-radius: 4px;
-    border: 1px solid var(--border-light);
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .main-controls {
@@ -287,60 +297,61 @@ button:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
 }
 
 #prev-btn:hover, #next-btn:hover {
-    border-color: #fff;
-    background: var(--surface-hover);
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+    background: #ffffff;
+    border-color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
 }
+
+#prev-btn:hover::before { border-right-color: #000000; }
+#next-btn:hover::before { border-left-color: #000000; }
 
 #prev-btn::before {
     content: '';
     border-top: 5px solid transparent;
     border-bottom: 5px solid transparent;
-    border-right: 8px solid #fff;
+    border-right: 8px solid #ffffff;
 }
 
 #next-btn::before {
     content: '';
     border-top: 5px solid transparent;
     border-bottom: 5px solid transparent;
-    border-left: 8px solid #fff;
+    border-left: 8px solid #ffffff;
 }
 
-/* Кнопка Play/Pause — Ядро Сингулярности */
+/* Play/Pause Button - Космическое ядро */
 #play-pause-btn {
     width: 58px;
     height: 58px;
     min-width: 58px;
-    border-radius: 50%;
-    border: 2px solid #fff;
-    background: #000;
+    border-radius: 2px;
+    border: 1px solid #ffffff;
+    background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #000000;
     cursor: pointer;
-    box-shadow: var(--singularity-glow);
+    box-shadow: var(--kocmoc-bloom), inset 0 0 10px rgba(0, 0, 0, 0.2);
     transition: var(--transition);
 }
 
 #play-pause-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 25px #fff, 0 0 50px #ff7700, 0 0 75px #00f0ff;
+    transform: scale(1.06);
+    box-shadow: 0 0 20px #ffffff, 0 0 45px rgba(255, 255, 255, 0.8);
 }
 
 #play-pause-btn::before {
     content: '';
-    width: 14px;
-    height: 16px;
-    background: #fff;
+    width: 15px;
+    height: 17px;
+    background: #000000;
     clip-path: polygon(0 0, 100% 50%, 0 100%);
     margin-left: 3px;
-    box-shadow: 0 0 8px #fff;
-    transition: clip-path 0.2s ease;
+    transition: clip-path 0.2s ease, transform 0.2s ease;
 }
 
 #play-pause-btn.is-playing::before {
@@ -366,8 +377,8 @@ button:active {
     gap: 10px;
     font-size: 11px;
     font-weight: 700;
+    color: #ffffff;
     letter-spacing: 1px;
-    color: var(--text-dim);
     text-transform: uppercase;
 }
 
@@ -384,21 +395,21 @@ button:active {
     -webkit-appearance: none;
     width: 10px;
     height: 14px;
-    background: #fff;
     border-radius: 1px;
-    box-shadow: 0 0 10px #fff, 0 0 15px var(--accent-fire);
+    background: #ffffff;
+    box-shadow: 0 0 10px #ffffff;
     cursor: pointer;
 }
 
 .control-input,
 .eq-band input[type="number"] {
     width: 44px;
-    background: var(--surface);
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid var(--border-light);
-    color: #fff;
+    color: #ffffff;
     font-size: 11px;
     font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
+    font-weight: bold;
     text-align: center;
     border-radius: 2px;
     padding: 3px 0;
@@ -408,8 +419,8 @@ button:active {
 
 .control-input:focus,
 .eq-band input[type="number"]:focus {
-    border-color: #fff;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    border-color: #ffffff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
 .control-input::-webkit-outer-spin-button,
@@ -420,34 +431,44 @@ button:active {
     margin: 0;
 }
 
-/* === WAVEFORM & CENTERED PLAYHEAD LINE (ПО ЦЕНТРУ ВЕЙФОРМЫ) === */
+/* === WAVEFORM & BLINDING WHITE PROGRESS BAR === */
 #progress-view {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    width: 100%;
 }
 
 .waveform-container {
     position: relative;
     width: 100%;
-    height: 64px;
-    background: rgba(0, 0, 0, 0.6);
+    height: 60px;
+    background: rgba(0, 0, 0, 0.85);
     border-radius: 2px;
-    margin-top: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    margin-top: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     overflow: hidden;
     box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9);
+}
+
+/* Свечение на дне контейнера вейвформы в стиле вспышки KOCMOC */
+.waveform-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    pointer-events: none;
 }
 
 #waveform-canvas {
     width: 100%;
     height: 100%;
-    display: block;
-    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+    filter: brightness(1.3) contrast(1.2);
 }
 
-/* Прогресс слайдер наложен ровно по всей вейформе */
+/* Ползунок и линия прогресса (ослепительно белая по центру вейвформы) */
 #progress-slider {
     position: absolute;
     top: 0;
@@ -455,43 +476,47 @@ button:active {
     width: 100%;
     height: 100%;
     margin: 0;
-    padding: 0;
     background: transparent;
     -webkit-appearance: none;
     outline: none;
-    cursor: pointer;
     z-index: 10;
+    cursor: pointer;
+    --value: 0%;
 }
 
-/* Полупрозрачная гравитационная заливка пройденного трека */
+/* Ослепительно белая заливка пройденного трека */
 #progress-slider::-webkit-slider-runnable-track {
     height: 100%;
-    background: linear-gradient(to right, rgba(255, 120, 0, 0.15) 0%, rgba(255, 255, 255, 0.25) var(--value), transparent var(--value));
+    background: linear-gradient(to right, 
+        rgba(255, 255, 255, 0.25) 0%, 
+        rgba(255, 255, 255, 0.35) var(--value), 
+        transparent var(--value)
+    );
+    border-right: 2px solid #ffffff;
 }
 
-/* Вертикальный лазерный луч сингулярности по всей высоте точно по центру вейформы */
+/* Лазерный ослепительно белый ползунок-маркер прямо по центру */
 #progress-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 2px;
-    height: 64px; /* Ровно во всю высоту контейнера вейформы */
+    width: 3px;
+    height: 60px;
     background: #ffffff;
     box-shadow: 
-        0 0 8px #ffffff,
-        0 0 16px #ff7700,
-        0 0 24px #00f0ff,
-        -1px 0 4px #ff0055,
-        1px 0 4px #00f0ff;
-    cursor: col-resize;
-    position: relative;
-    top: 0;
+        0 0 10px #ffffff,
+        0 0 20px #ffffff,
+        0 0 35px rgba(255, 255, 255, 0.9);
+    cursor: ew-resize;
+    border: none;
+    border-radius: 0;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 #progress-slider:hover::-webkit-slider-thumb {
-    width: 3px;
+    width: 5px;
     box-shadow: 
-        0 0 12px #ffffff,
-        0 0 25px #ff8800,
-        0 0 35px #00f0ff;
+        0 0 15px #ffffff,
+        0 0 30px #ffffff,
+        0 0 50px #ffffff;
 }
 
 #time-display {
@@ -500,16 +525,16 @@ button:active {
     font-size: 11px;
     font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
-    color: var(--text-dim);
+    color: #ffffff;
     letter-spacing: 1px;
 }
 
 /* === EQUALIZER === */
 .eq-container-wrapper {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(10, 10, 14, 0.7);
     border-radius: 4px;
     padding: 16px;
-    border: 1px solid var(--border-light);
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .eq-bands {
@@ -528,35 +553,35 @@ button:active {
 
 .eq-band label {
     font-size: 10px;
-    color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
+    color: #a1a1aa;
     font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
 }
 
 .eq-band input[type="range"] {
     -webkit-appearance: slider-vertical;
     width: 20px;
     height: 70px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.6);
     border-radius: 2px;
     outline: none;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-light);
 }
 
 .eq-band input[type="range"]::-webkit-slider-thumb {
     background: #ffffff;
     border-radius: 1px;
-    box-shadow: 0 0 10px #fff, 0 0 15px var(--accent-fire);
+    box-shadow: 0 0 8px #ffffff;
 }
 
 /* === PLAYLIST === */
 .playlist-grid-area {
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(5, 5, 8, 0.65);
     border-radius: 4px;
-    border: 1px solid var(--border-light);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     overflow-y: auto;
     padding: 12px;
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
 .playlist-grid-area::-webkit-scrollbar {
@@ -564,17 +589,17 @@ button:active {
 }
 
 .playlist-grid-area::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .playlist-grid-area::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 1px;
+    border-radius: 0;
 }
 
 .playlist-grid-area::-webkit-scrollbar-thumb:hover {
-    background: #fff;
-    box-shadow: 0 0 10px #fff;
+    background: #ffffff;
+    box-shadow: 0 0 10px #ffffff;
 }
 
 .folder-group {
@@ -583,55 +608,63 @@ button:active {
 
 .folder-group h3 {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 1px;
-    padding: 8px 12px;
+    padding: 9px 12px;
     margin: 0;
     cursor: pointer;
-    color: var(--text-dim);
+    color: #ffffff;
     display: flex;
     align-items: center;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid transparent;
     border-radius: 2px;
     transition: var(--transition);
-    text-transform: uppercase;
 }
 
 .folder-group h3:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .folder-group h3::before {
     content: '▶';
-    font-size: 9px;
+    font-size: 10px;
     margin-right: 10px;
     transition: transform 0.2s ease;
-    color: var(--text-dim);
+    color: #71717a;
 }
 
 .folder-group.open h3 {
-    color: #fff;
     background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .folder-group.open h3::before {
     transform: rotate(90deg);
-    color: #fff;
-    text-shadow: 0 0 8px #fff;
+    color: #ffffff;
+    text-shadow: 0 0 8px #ffffff;
 }
 
 .folder-tracks {
-    display: none;
-    padding-left: 14px;
-    margin-top: 4px;
-    margin-bottom: 8px;
-    border-left: 1px solid rgba(255, 255, 255, 0.15);
-    margin-left: 16px;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s var(--hypr-bezier);
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
 }
 
 .folder-group.open .folder-tracks {
-    display: block;
+    grid-template-rows: 1fr;
+}
+
+.folder-tracks-inner {
+    min-height: 0;
+    padding-left: 16px;
+    margin-bottom: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .track-item {
@@ -643,31 +676,28 @@ button:active {
     cursor: pointer;
     font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.5px;
-    color: var(--text-dim);
+    color: #a1a1aa;
     transition: var(--transition);
     border-left: 2px solid transparent;
 }
 
 .track-item:hover {
-    color: #fff;
     background: rgba(255, 255, 255, 0.06);
-    transform: translateX(6px);
-    border-left-color: rgba(255, 255, 255, 0.5);
-}
-
-/* Активный трек - эффект черной дыры */
-.track-item.playing {
     color: #ffffff;
-    font-weight: 700;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 120, 0, 0.1) 50%, transparent 100%);
-    border-left: 3px solid #ffffff;
-    box-shadow: inset 15px 0 20px -10px rgba(255, 255, 255, 0.5);
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    transform: translateX(8px);
+    transform: translateX(4px);
 }
 
-/* === SPECTROGRAM CANVAS === */
+/* Активный трек - ослепительный лазерный акцент */
+.track-item.playing {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0%, transparent 100%);
+    border-left: 3px solid #ffffff;
+    color: #ffffff;
+    font-weight: 800;
+    box-shadow: inset 15px 0 20px -15px #ffffff;
+    transform: translateX(6px);
+}
+
+/* === SPECTROGRAM === */
 #spectrogram-canvas {
     position: absolute;
     top: 0;
@@ -675,13 +705,13 @@ button:active {
     width: 100%;
     height: 100%;
     z-index: -1;
-    opacity: 0.22;
+    opacity: 0.28;
     pointer-events: none;
-    /* Высокий контраст и призматический оттенок сингулярности */
-    filter: contrast(180%) brightness(1.2) drop-shadow(0 0 10px rgba(255, 140, 0, 0.4));
+    /* Монохромно-белый спектр со строгим контрастом */
+    filter: grayscale(100%) contrast(200%) brightness(1.4);
 }
 
-/* === FLOATING THEME SWITCHER BUTTON === */
+/* === THEME SWITCHER BUTTON === */
 #theme-switcher {
     position: fixed;
     bottom: 24px;
@@ -689,21 +719,23 @@ button:active {
     z-index: 1000;
     width: 48px;
     height: 48px;
-    border-radius: 50%;
+    border-radius: 2px;
     font-size: 20px;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #000;
-    border: 2px solid #fff;
-    box-shadow: var(--singularity-glow);
-    color: #fff;
-    cursor: pointer;
+    background: #000000;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
     transition: var(--transition);
+    cursor: pointer;
 }
 
 #theme-switcher:hover {
-    transform: scale(1.15) rotate(90deg);
-    box-shadow: 0 0 25px #fff, 0 0 45px #ff7700, 0 0 60px #00f0ff;
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0 0 25px #ffffff;
+    transform: scale(1.1) rotate(90deg);
 }

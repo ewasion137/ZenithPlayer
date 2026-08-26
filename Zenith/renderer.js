@@ -575,7 +575,8 @@ const themes = [
     'terminal.css',
     'winamp.css',
     'macglass.css',
-    'main.css'
+    'main.css',
+    'kocmocunleashed.css'
 ];
 
 // Функция, которая применяет тему
