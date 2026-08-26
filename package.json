@@ -1,7 +1,7 @@
 {
   "name": "zenith",
-  "version": "2.1.0",
-  "description": "A kick-ass audio player.",
+  "version": "2.2.0",
+  "description": "Music player (files from your drive) made on Electron.",
   "main": "Zenith/script/main.js",
   "scripts": {
     "start": "electron .",
