@@ -1,19 +1,17 @@
 /* ==========================================================================
-   THEME: KOCMOC UNLEASHED (CHERRY TEAM / MONOCHROME SINGULARITY)
+   THEME: KOCMOC UNLEASHED (CHERRY TEAM / GD EXTREME MONOCHROME / BLACK HOLE)
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Syne:wght@700;800&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,900;1,900&family=JetBrains+Mono:wght@500;800&family=Syncopate:wght@700&display=swap');
 
-/* === СЕЙСМИЧЕСКОЕ ДРОЖАНИЕ И ИСКРИВЛЕНИЕ ЧЕРНОЙ ДЫРЫ === */
-@keyframes blackhole-tremble {
-    0% { transform: translate(-50%, -50%) translate(0px, 0px) scale(1); }
-    15% { transform: translate(-50%, -50%) translate(-2px, 1.5px) scale(1.012); }
-    30% { transform: translate(-50%, -50%) translate(2px, -1px) scale(0.992); }
-    45% { transform: translate(-50%, -50%) translate(-1.5px, -2px) scale(1.018); }
-    60% { transform: translate(-50%, -50%) translate(2.5px, 1px) scale(0.996); }
-    75% { transform: translate(-50%, -50%) translate(-1px, 2px) scale(1.008); }
-    90% { transform: translate(-50%, -50%) translate(1.5px, -1.5px) scale(1.002); }
-    100% { transform: translate(-50%, -50%) translate(0px, 0px) scale(1); }
+/* === АНИМАЦИИ АККРЕЦИОННОГО ДИСКА И ВРАЩЕНИЯ МАТЕРИИ === */
+@keyframes black-hole-pulse {
+    0%, 100% {
+        box-shadow: 0 0 35px rgba(255, 255, 255, 0.8), 0 0 80px rgba(255, 255, 255, 0.4), inset 0 0 25px #ffffff;
+    }
+    50% {
+        box-shadow: 0 0 55px rgba(255, 255, 255, 1), 0 0 120px rgba(255, 255, 255, 0.6), inset 0 0 40px #ffffff;
+    }
 }
 
 @keyframes accretion-spin {
@@ -21,108 +19,84 @@
     100% { transform: rotate(360deg); }
 }
 
-@keyframes photon-strobe {
-    0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 35px #ffffff) blur(2px); }
-    50% { opacity: 1; filter: drop-shadow(0 0 70px #ffffff) drop-shadow(0 0 120px rgba(255,255,255,0.8)) blur(1px); }
+@keyframes accretion-spin-reverse {
+    0% { transform: rotate(360deg) scale(1.15); }
+    100% { transform: rotate(0deg) scale(1.15); }
+}
+
+@keyframes debris-float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(180deg); }
 }
 
 :root {
     --bg-main: #000000;
-    --panel-bg: rgba(5, 5, 6, 0.82);
-    --surface: rgba(18, 18, 22, 0.9);
+    --panel-bg: rgba(3, 3, 5, 0.92);
+    --surface: #0a0a0d;
     --accent: #ffffff;
-    --accent-secondary: #888894;
-    --accent-dim: #33333d;
-    --accent-gradient: linear-gradient(180deg, #ffffff 0%, #71717a 100%);
+    --accent-secondary: #8b8b99;
+    --accent-dim: #3a3a45;
+    --accent-gradient: linear-gradient(135deg, #ffffff 0%, #737373 50%, #000000 100%);
     --text-main: #ffffff;
-    --text-dim: #737380;
-    --border-light: rgba(255, 255, 255, 0.22);
+    --text-dim: #848494;
+    --border-light: rgba(255, 255, 255, 0.25);
     --border-focus: #ffffff;
-    --kocmoc-glow: 0 0 20px rgba(255, 255, 255, 0.75), 0 0 40px rgba(255, 255, 255, 0.35);
-    --transition: 0.1s cubic-bezier(0, 0, 0.2, 1);
+    --photon-glow: 0 0 15px #ffffff, 0 0 30px rgba(255, 255, 255, 0.6);
+    --singularity-shadow: 0 10px 40px rgba(0, 0, 0, 1), 0 0 20px rgba(255, 255, 255, 0.15);
+    --transition: 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
-/* === ФОН: ГИГАНТСКАЯ ЧЕРНАЯ ДЫРА И ГРАВИТАЦИОННОЕ ЛИНЗИРОВАНИЕ === */
+/* === ФОН: ГРАВИТАЦИОННАЯ ЛИНЗА, ЧЕРНАЯ ДЫРА И ЛЕТАЮЩИЕ ОСКОЛКИ === */
 body {
-    font-family: 'Syne', -apple-system, sans-serif;
-    background-color: #000000;
-    color: #ffffff;
-    position: relative;
-    overflow: hidden;
+    font-family: 'Montserrat', -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    background-image: 
+        /* Летающие осколки материи вокруг дыры */
+        radial-gradient(1.5px 1.5px at 15% 25%, #fff, transparent),
+        radial-gradient(2px 2px at 30% 70%, #aaa, transparent),
+        radial-gradient(1px 1px at 75% 30%, #fff, transparent),
+        radial-gradient(2.5px 2.5px at 85% 65%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 60% 85%, #888, transparent),
+        radial-gradient(2px 2px at 45% 15%, #fff, transparent),
+        /* Горизонт событий и свечение аккреционного диска Гаргантюа */
+        radial-gradient(ellipse 70% 30% at 50% 50%, rgba(255, 255, 255, 0.18) 0%, transparent 60%),
+        radial-gradient(circle 350px at 50% 50%, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0.95) 70%, #000 100%),
+        /* Гравитационный прогиб пространства */
+        linear-gradient(180deg, #000000 0%, #08080c 50%, #000000 100%);
+    background-size: 800px 800px, 600px 600px, 900px 900px, 700px 700px, 500px 500px, 650px 650px, 100% 100%, 100% 100%, 100% 100%;
 }
 
-/* 1. Гравитационное искажение и аккреционный диск */
-body::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 42%;
-    width: 680px;
-    height: 680px;
-    border-radius: 50%;
-    /* Фотонное кольцо и световая воронка */
-    background: radial-gradient(circle, #000000 52%, rgba(255, 255, 255, 0.9) 53%, rgba(255, 255, 255, 0.15) 62%, transparent 72%);
-    box-shadow: 
-        0 0 100px 30px rgba(255, 255, 255, 0.4),
-        inset 0 0 80px 20px #000000;
-    pointer-events: none;
-    z-index: 0;
-    animation: blackhole-tremble 0.22s infinite linear, photon-strobe 4s infinite ease-in-out;
-}
-
-/* 2. Вращающееся кольцо горизонта событий */
-body::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 42%;
-    width: 820px;
-    height: 380px;
-    margin-top: -190px;
-    margin-left: -410px;
-    border-radius: 50%;
-    border-top: 4px solid rgba(255, 255, 255, 0.95);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-    filter: blur(4px) drop-shadow(0 0 30px #ffffff);
-    pointer-events: none;
-    z-index: 0;
-    transform-origin: center center;
-    animation: accretion-spin 16s linear infinite, blackhole-tremble 0.22s infinite linear;
-}
-
-/* === СПЕКТРОГРАММА: МОНОХРОМНЫЙ УЛЬТРА-КОНТРАСТ === */
 #spectrogram-canvas {
     opacity: 0.35;
     filter: grayscale(100%) contrast(300%) brightness(1.5);
 }
 
-/* === TITLE BAR: СКОШЕННЫЙ ХЕДЕР ДЕМОН-УРОВНЯ === */
+/* === TITLE BAR: СТРОГИЙ МОНОХРОМНЫЙ ХЕДЕР === */
 .title-bar {
-    background: rgba(0, 0, 0, 0.92);
-    border-bottom: 2px solid #ffffff;
     height: 34px;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    background: #000000;
+    border-bottom: 2px solid #ffffff;
+    box-shadow: 0 4px 25px rgba(255, 255, 255, 0.15);
 }
 
 .title-text {
-    font-family: 'Orbitron', monospace;
-    font-size: 13px;
-    font-weight: 900;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
     letter-spacing: 4px;
     color: #ffffff;
-    text-shadow: var(--kocmoc-glow);
+    text-shadow: var(--photon-glow);
 }
 
-.title-text::after {
-    content: ' [UNLEASHED]';
-    color: #71717a;
+.title-text::before {
+    content: '◈ KOCMOC // ';
+    color: #888899;
 }
 
 .win-btn {
-    font-family: 'Space Mono', monospace;
-    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
     color: #ffffff;
-    border-left: 1px solid #222;
 }
 
 .win-btn:hover {
@@ -136,90 +110,107 @@ body::after {
     color: #000000 !important;
 }
 
-/* === NOW PLAYING: ТЕХНИЧЕСКИЙ БОКС С ШИПАМИ (CHERRY TEAM STYLE) === */
+/* === NOW PLAYING: МОДУЛЬ СИНГУЛЯРНОСТИ (BLACK HOLE ENGINE) === */
 .now-playing-container {
-    background: var(--panel-bg);
-    backdrop-filter: blur(20px);
-    border: 2px solid #ffffff;
-    border-radius: 0;
-    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
-    box-shadow: 0 0 35px rgba(255, 255, 255, 0.25), inset 0 0 25px rgba(0, 0, 0, 0.9);
-    position: relative;
-}
-
-.now-playing-container::before {
-    content: '/// TOP 1 EXTREME DEMON // VERIFIED BY ARSHADOW';
-    position: absolute;
-    top: 4px; right: 28px;
-    font-family: 'Space Mono', monospace;
-    font-size: 8px;
-    color: #71717a;
-    letter-spacing: 2px;
-}
-
-/* Обложка: монохромная сингулярность в титановой рамке */
-.cover-wrapper {
-    width: 86px;
-    height: 86px;
-    border-radius: 0;
-    border: 2px solid #ffffff;
-    box-shadow: var(--kocmoc-glow);
     background: #000000;
-    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    border: 2px solid #ffffff;
+    border-radius: 0px;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2), inset 0 0 30px rgba(255, 255, 255, 0.05);
+    position: relative;
+    padding: 22px 26px;
+}
+
+/* Обложка трека: черная дыра с вращающимся диском и осколками */
+.cover-wrapper {
+    width: 95px;
+    height: 95px;
+    min-width: 95px;
+    border-radius: 50%;
+    background: #000000;
+    border: 2px solid #ffffff;
+    position: relative;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.9), inset 0 0 20px #000000;
+    animation: black-hole-pulse 4s infinite ease-in-out;
+}
+
+/* Внешнее кольцо аккреции (Accretion Disc Lensing) */
+.cover-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -12px; left: -12px; right: -12px; bottom: -12px;
+    border-radius: 50%;
+    border: 2px dashed rgba(255, 255, 255, 0.8);
+    border-left-color: transparent;
+    border-right-color: transparent;
+    animation: accretion-spin 8s linear infinite;
+    pointer-events: none;
+}
+
+/* Вращающиеся обломки и пыль вокруг горизонта событий */
+.cover-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -20px; left: -20px; right: -20px; bottom: -20px;
+    border-radius: 50%;
+    border: 1px dotted rgba(255, 255, 255, 0.5);
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+    animation: accretion-spin-reverse 12s linear infinite;
+    pointer-events: none;
 }
 
 #current-track-artwork {
-    filter: grayscale(100%) contrast(160%) brightness(1.1);
+    border-radius: 50%;
+    filter: grayscale(100%) contrast(160%) brightness(0.85);
 }
 
 .artwork-glow {
-    filter: blur(50px) grayscale(100%);
+    filter: blur(50px);
     opacity: 0.5;
     background-color: #ffffff;
 }
 
 .track-info h1 {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
-    font-size: 24px;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
     letter-spacing: 1px;
-    text-transform: uppercase;
     color: #ffffff;
-    text-shadow: var(--kocmoc-glow);
+    text-transform: uppercase;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
 }
 
 .track-info p {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: #a1a1aa;
-    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 800;
+    color: #888899;
     letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
-/* === УПРАВЛЕНИЕ: МЕХАНИЧЕСКИЕ КЛАВИШИ УРОВНЯ === */
+/* === УПРАВЛЕНИЕ: БЛОКИ CHERRY TEAM С РУБЛЕНЫМИ ГРАНЯМИ === */
 #top-controls {
-    background: var(--panel-bg);
-    backdrop-filter: blur(20px);
+    background: #000000;
     border: 2px solid #ffffff;
-    border-radius: 0;
-    clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+    border-radius: 0px;
+    clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
     box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
 }
 
 #prev-btn, #next-btn {
     width: 42px;
     height: 42px;
-    border-radius: 0;
-    background: #000000;
-    border: 2px solid #ffffff;
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-    transition: all 0.08s ease;
+    border-radius: 0px;
+    background: #08080c;
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 #prev-btn:hover, #next-btn:hover {
     background: #ffffff;
-    box-shadow: var(--kocmoc-glow);
-    transform: scale(1.05);
+    box-shadow: var(--photon-glow);
 }
 
 #prev-btn::before { border-right-color: #ffffff; }
@@ -228,44 +219,40 @@ body::after {
 #prev-btn:hover::before { border-right-color: #000000; }
 #next-btn:hover::before { border-left-color: #000000; }
 
-/* Кнопка Play: Орб сингулярности */
+/* Кнопка Play: Ядро фотонной сингулярности */
 #play-pause-btn {
     width: 52px;
     height: 52px;
-    border-radius: 0;
-    background: #000000;
+    border-radius: 0px;
+    background: #ffffff;
     border: 2px solid #ffffff;
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-    box-shadow: 0 0 25px #ffffff, inset 0 0 10px #ffffff;
-    transition: all 0.08s ease;
+    box-shadow: var(--photon-glow), 0 0 50px rgba(255, 255, 255, 0.8);
+    transform: rotate(45deg);
+    transition: all 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
 #play-pause-btn::before {
-    background: #ffffff;
+    background: #000000;
+    transform: rotate(-45deg);
 }
 
 #play-pause-btn:hover {
-    background: #ffffff;
-    transform: scale(1.1) rotate(90deg);
-    box-shadow: 0 0 45px #ffffff, 0 0 80px rgba(255, 255, 255, 0.8);
-}
-
-#play-pause-btn:hover::before {
-    background: #000000;
+    transform: rotate(45deg) scale(1.12);
+    box-shadow: 0 0 35px #ffffff, 0 0 70px rgba(255, 255, 255, 1);
 }
 
 .control-group label {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 9px;
     font-weight: 700;
     color: #ffffff;
     letter-spacing: 2px;
 }
 
 .control-group input[type="range"] {
-    background: #18181b;
+    background: #111116;
     height: 4px;
-    border: 1px solid #ffffff;
+    border: 1px solid #444455;
     border-radius: 0;
 }
 
@@ -274,159 +261,164 @@ body::after {
     height: 12px;
     border-radius: 0;
     background: #ffffff;
-    box-shadow: 0 0 10px #ffffff;
+    box-shadow: var(--photon-glow);
     border: none;
     transform: rotate(45deg);
-    cursor: pointer;
 }
 
 .control-input, .eq-band input[type="number"] {
+    font-family: 'JetBrains Mono', monospace;
     background: #000000;
     border: 1px solid #ffffff;
     color: #ffffff;
-    font-family: 'Space Mono', monospace;
     border-radius: 0;
-    font-weight: 700;
+    font-weight: 800;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
-/* === ВОЛНОВАЯ ФОРМА: ЛАЗЕРНЫЙ СЕЙСМОГРАФ === */
+/* === ВОЛНОВАЯ ФОРМА: ФОТОННЫЙ СПЕКТР ГОРИЗОНТА СОБЫТИЙ === */
 .waveform-container {
     background: #000000;
     border: 2px solid #ffffff;
-    border-radius: 0;
-    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
+    border-radius: 0px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.9);
 }
 
 #waveform-canvas {
-    filter: drop-shadow(0 0 6px #ffffff) contrast(200%);
+    filter: drop-shadow(0 0 8px #ffffff) contrast(180%);
 }
 
 #time-display {
-    font-family: 'Space Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
     color: #ffffff;
+    letter-spacing: 1px;
 }
 
-/* === ЭКВАЛАЙЗЕР: АМПЛИТУДНЫЕ ПИКИ СИНГУЛЯРНОСТИ === */
+/* === ЭКВАЛАЙЗЕР: СТРУКТУРНЫЕ БАРЫ CHERRY TEAM === */
 .eq-container-wrapper {
-    background: var(--panel-bg);
-    backdrop-filter: blur(20px);
+    background: #000000;
     border: 2px solid #ffffff;
-    border-radius: 0;
+    border-radius: 0px;
     box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
 }
 
 .eq-header-label {
-    font-family: 'Orbitron', monospace;
+    font-family: 'Syncopate', sans-serif;
     font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 3px;
+    font-weight: 700;
     color: #ffffff;
-    text-shadow: var(--kocmoc-glow);
+    letter-spacing: 3px;
+    text-shadow: var(--photon-glow);
+}
+
+.eq-header-label::before {
+    content: '▲ ';
 }
 
 .eq-band label {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    color: #a1a1aa;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: #888899;
 }
 
 .eq-band input[type="range"] {
-    background: #000000;
+    background: #050508;
     border: 1px solid #ffffff;
     border-radius: 0;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
-/* === РАЗДЕЛИТЕЛЬ: ЧИСТЫЙ ЛАЗЕРНЫЙ ЛУЧ === */
+/* === РАЗДЕЛИТЕЛЬ: ГРАВИТАЦИОННАЯ СТРУНА === */
 .resizer-bar {
-    width: 3px;
-    background: #27272a;
+    width: 2px;
+    background: #2b2b36;
 }
 
 .resizer-bar:hover, .resizer-bar.resizing {
     background: #ffffff;
-    box-shadow: 0 0 20px #ffffff, 0 0 40px #ffffff;
+    box-shadow: 0 0 20px #ffffff;
 }
 
-/* === САЙДБАР: НАВИГАЦИЯ ПО ДЕМОН-ЛИСТУ === */
+/* === САЙДБАР: НАВИГАЦИОННЫЙ КАТАЛОГ СЕКЦИЙ УРОВНЯ === */
 .explorer-sidebar {
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(25px);
+    background: #000000;
     border-left: 2px solid #ffffff;
 }
 
 .explorer-header {
-    background: #09090b;
+    background: #050508;
     border-bottom: 2px solid #ffffff;
 }
 
 .explorer-title {
-    font-family: 'Orbitron', monospace;
-    font-weight: 900;
+    font-family: 'Syncopate', sans-serif;
     font-size: 11px;
+    font-weight: 700;
     letter-spacing: 2px;
     color: #ffffff;
-    text-shadow: var(--kocmoc-glow);
+    text-shadow: var(--photon-glow);
 }
 
 .explorer-header button {
-    background: #000000;
-    border: 1px solid #ffffff;
-    border-radius: 0;
-    color: #ffffff;
-    font-family: 'Space Mono', monospace;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 10px;
     font-weight: 700;
-    text-transform: uppercase;
+    background: #000000;
+    border: 1.5px solid #ffffff;
+    border-radius: 0px;
+    color: #ffffff;
 }
 
 .explorer-header button:hover {
     background: #ffffff;
     color: #000000;
-    box-shadow: 0 0 15px #ffffff;
+    box-shadow: var(--photon-glow);
 }
 
 .folder-group h3 {
-    font-family: 'Space Mono', monospace;
-    background: #09090b;
-    border: 1px solid #27272a;
-    border-radius: 0;
-    color: #d4d4d8;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
     font-size: 11px;
     text-transform: uppercase;
+    background: #08080c;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0px;
+    color: #ffffff;
 }
 
 .folder-group.open h3 {
-    color: #000000;
     background: #ffffff;
+    color: #000000;
     border-color: #ffffff;
-    font-weight: 700;
-    box-shadow: 0 0 15px #ffffff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
 .track-item {
-    font-family: 'Space Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
     font-size: 11px;
-    border-radius: 0;
-    color: #71717a;
-    border-left: 2px solid transparent;
+    border-radius: 0px;
+    color: #888899;
 }
 
 .track-item:hover {
-    background: #18181b;
+    background: #111116;
     color: #ffffff;
     padding-left: 14px;
 }
 
 .track-item.playing {
-    background: #ffffff;
+    background: #ffffff !important;
     color: #000000 !important;
-    font-weight: 700;
-    border-left: 4px solid #000000;
+    border-left: none;
+    font-weight: 800;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
 }
 
-/* === STATUS BAR: ТЕЛЕМЕТРИЯ ГОРИЗОНТА СОБЫТИЙ === */
+/* === STATUS BAR: ТЕЛЕМЕТРИЯ ВЕРИФИКАЦИИ === */
 .status-bar {
     height: 30px;
     background: #000000;
@@ -434,65 +426,75 @@ body::after {
 }
 
 .status-btn {
-    font-family: 'Space Mono', monospace;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 9px;
     font-weight: 700;
-    color: #71717a;
+    color: #ffffff;
 }
 
 .status-btn:hover {
     background: #ffffff;
     color: #000000;
+    box-shadow: 0 0 10px #ffffff;
 }
 
 .status-search input {
-    background: #09090b;
-    border: 1px solid #ffffff;
-    border-radius: 0;
+    background: #050508;
+    border: 1.5px solid #ffffff;
+    border-radius: 0px;
     color: #ffffff;
-    font-family: 'Space Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
 }
 
 .status-search input:focus {
-    box-shadow: 0 0 15px #ffffff;
+    box-shadow: var(--photon-glow);
 }
 
 .status-tag {
-    font-family: 'Space Mono', monospace;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
     color: #ffffff;
-    text-shadow: var(--kocmoc-glow);
+    text-shadow: var(--photon-glow);
 }
 
-/* === МОДАЛЬНОЕ ОКНО === */
+/* === МОДАЛЬНОЕ ОКНО: ШЛЮЗ СИНГУЛЯРНОСТИ === */
 .modal-content {
     background: #000000;
     border: 2px solid #ffffff;
-    border-radius: 0;
-    box-shadow: 0 0 50px rgba(255, 255, 255, 0.4);
+    border-radius: 0px;
+    box-shadow: 0 0 60px rgba(255, 255, 255, 0.4);
 }
 
 .modal-header h3 {
-    font-family: 'Orbitron', monospace;
-    font-weight: 900;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
     color: #ffffff;
-    letter-spacing: 2px;
+    text-shadow: var(--photon-glow);
 }
 
 .modal-body input {
-    background: #09090b;
-    border: 1px solid #ffffff;
-    border-radius: 0;
+    background: #000000;
+    border: 1.5px solid #ffffff;
+    border-radius: 0px;
+    color: #ffffff;
+    font-family: 'JetBrains Mono', monospace;
 }
 
 .modal-actions button {
     background: #000000;
-    border: 1px solid #ffffff;
-    border-radius: 0;
-    font-family: 'Space Mono', monospace;
+    border: 1.5px solid #ffffff;
+    border-radius: 0px;
+    color: #ffffff;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 10px;
     font-weight: 700;
 }
 
 .modal-actions button:hover {
     background: #ffffff;
     color: #000000;
-    box-shadow: 0 0 15px #ffffff;
+    box-shadow: var(--photon-glow);
 }
