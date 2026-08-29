@@ -1,25 +1,432 @@
-/* === FRUTIGER AERO (AQUA GLOSS) === */
+/* ==========================================================================
+   THEME: FRUTIGER AERO (AQUA GLOSS / VISTA AERO GLASS / NOSTALGIA FOR THE FUTURE)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,400;0,500;0,700;1,400&family=Comfortaa:wght@700&display=swap');
+
 :root {
-    --bg-main: #031424;
-    --panel-bg: rgba(8, 32, 56, 0.75);
-    --surface: rgba(16, 56, 96, 0.75);
-    --accent: #00d2d3;
-    --accent-secondary: #54a0ff;
-    --accent-gradient: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%);
+    /* Палитра: Лазурная вода, чистое небо, тропический аквамарин и солнечный блик */
+    --bg-main: #06233d;
+    --panel-bg: rgba(14, 52, 92, 0.45);
+    --surface: rgba(255, 255, 255, 0.18);
+    --surface-glass: rgba(255, 255, 255, 0.25);
+    --accent: #00d2ff;
+    --accent-secondary: #38ef7d;
+    --accent-glow: rgba(0, 210, 255, 0.6);
+    --accent-gradient: linear-gradient(180deg, #56ccf2 0%, #2f80ed 100%);
     --text-main: #ffffff;
-    --text-dim: #70a1ff;
-    --border-light: rgba(84, 160, 255, 0.2);
-    --border-focus: #00d2d3;
-    --title-bg: rgba(3, 20, 36, 0.9);
-    --title-text: #00d2d3;
+    --text-dim: #b8e2f8;
+    --border-light: rgba(255, 255, 255, 0.4);
+    --border-focus: #00d2ff;
+    
+    /* Тот самый классический двухтоновый блик эпохи Aqua/Aero */
+    --aero-sheen: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.65) 0%,
+        rgba(255, 255, 255, 0.2) 48%,
+        rgba(255, 255, 255, 0) 49%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    --aero-shadow: 
+        0 12px 30px rgba(0, 45, 90, 0.45),
+        inset 0 1px 2px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 4px rgba(0, 30, 60, 0.3);
+    --gel-button-shadow: 
+        0 6px 15px rgba(0, 140, 255, 0.45),
+        inset 0 2px 3px #ffffff,
+        inset 0 -3px 5px rgba(0, 40, 90, 0.4);
+    --transition: 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* === ФОН: СОЛНЕЧНЫЙ ОКЕАН, ЛАЗУРНЫЙ НЕБОСВОД И ПУЗЫРИ ВОДЫ === */
 body {
+    font-family: 'Ubuntu', 'Segoe UI', -apple-system, sans-serif;
+    background-color: var(--bg-main);
     background-image: 
-        radial-gradient(circle at 30% 20%, rgba(0, 210, 211, 0.18), transparent 50%),
-        radial-gradient(circle at 70% 80%, rgba(84, 160, 255, 0.15), transparent 50%);
+        /* Мыльные водяные пузыри на фоне */
+        radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.05) 15%, transparent 22%),
+        radial-gradient(circle at 88% 75%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.03) 12%, transparent 18%),
+        radial-gradient(circle at 65% 25%, rgba(56, 239, 125, 0.2) 0%, transparent 40%),
+        /* Солнечный луч и глубина океана */
+        radial-gradient(circle at 50% 0%, #00e5ff 0%, #0072ff 45%, #05244a 85%, #021226 100%);
+    background-size: 100% 100%;
 }
 
 #spectrogram-canvas {
-    filter: hue-rotate(150deg) saturate(160%);
+    opacity: 0.3;
+    filter: hue-rotate(160deg) saturate(220%) brightness(1.2);
+}
+
+/* === TITLE BAR: СТЕКЛО AERO С ГЛЯНЦЕВЫМ БЛИКОМ === */
+.title-bar {
+    height: 36px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(20, 90, 160, 0.5) 100%);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 4px 15px rgba(0, 20, 50, 0.3);
+}
+
+.title-text {
+    font-family: 'Comfortaa', 'Ubuntu', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 50, 100, 0.8), 0 0 10px rgba(0, 210, 255, 0.8);
+}
+
+.win-btn {
+    border-radius: 8px;
+    margin: 4px 3px;
+    height: 24px;
+    width: 32px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+.win-btn:hover {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(0, 180, 255, 0.6) 100%);
+    box-shadow: 0 0 12px rgba(0, 210, 255, 0.6), inset 0 1px 2px #fff;
+    transform: translateY(-1px);
+}
+
+.win-close:hover {
+    background: linear-gradient(180deg, #ff7675 0%, #d63031 100%) !important;
+}
+
+/* === NOW PLAYING: АКРИЛОВЫЙ ВОДНЫЙ МОДУЛЬ === */
+.now-playing-container {
+    background: var(--panel-bg);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    border-radius: 24px;
+    box-shadow: var(--aero-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Верхняя глянцевая пленка (Dual-Tone Glare) */
+.now-playing-container::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 50%;
+    background: var(--aero-sheen);
+    pointer-events: none;
+    border-radius: 22px 22px 100px 100px / 22px 22px 20px 20px;
+}
+
+/* Обложка: глянцевый кристаллический кейс */
+.cover-wrapper {
+    width: 90px;
+    height: 90px;
+    border-radius: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 10px 25px rgba(0, 30, 80, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Диагональный солнечный блик на обложке */
+.cover-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.45) 50%, transparent 60%);
+    pointer-events: none;
+}
+
+.artwork-glow {
+    filter: blur(40px);
+    opacity: 0.6;
+}
+
+.track-info h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 30, 70, 0.6), 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+.track-info p {
+    font-size: 13px;
+    font-weight: 500;
+    color: #b3ecff;
+    text-shadow: 0 1px 3px rgba(0, 30, 70, 0.5);
+}
+
+/* === УПРАВЛЕНИЕ: ГЕЛЕВЫЕ АКВА-КНОПКИ (AQUA GEL ORBS) === */
+#top-controls {
+    background: var(--panel-bg);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    border-radius: 24px;
+    box-shadow: var(--aero-shadow);
+    position: relative;
+}
+
+#prev-btn, #next-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 20%, #e0f7ff 0%, #56ccf2 40%, #1572b6 90%, #0c4d80 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.8);
+    box-shadow: var(--gel-button-shadow);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    transform: scale(1.08) translateY(-2px);
+    background: radial-gradient(circle at 50% 15%, #ffffff 0%, #70e1ff 40%, #1e88e5 90%, #105999 100%);
+    box-shadow: 0 10px 20px rgba(0, 160, 255, 0.6), inset 0 2px 4px #fff;
+}
+
+#prev-btn:active, #next-btn:active {
+    transform: scale(0.96) translateY(1px);
+    box-shadow: inset 0 3px 6px rgba(0, 20, 50, 0.6);
+}
+
+/* Главная кнопка воспроизведения: легендарная изумрудно-лазурная сфера */
+#play-pause-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 15%, #ffffff 0%, #56ccf2 35%, #00c6ff 60%, #0072ff 90%, #004da3 100%);
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 8px 25px rgba(0, 180, 255, 0.65), inset 0 3px 4px #ffffff, inset 0 -4px 6px rgba(0, 30, 80, 0.5);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 210, 255, 0.85), inset 0 3px 4px #ffffff;
+}
+
+.control-group label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #e0f2fe;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0, 40, 80, 0.5);
+}
+
+/* Слайдеры в виде стеклянных трубок с водой */
+.control-group input[type="range"] {
+    background: linear-gradient(180deg, rgba(0, 30, 60, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+    height: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 30%, #ffffff 0%, #00d2ff 50%, #0066cc 100%);
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 3px 8px rgba(0, 50, 120, 0.5), inset 0 1px 2px #fff;
+    cursor: pointer;
+}
+
+.control-input, .eq-band input[type="number"] {
+    background: rgba(0, 30, 60, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* === ВОЛНОВАЯ ФОРМА: ЛАЗУРНАЯ АКВАТОРИЯ === */
+.waveform-container {
+    background: linear-gradient(180deg, rgba(3, 20, 45, 0.7) 0%, rgba(10, 60, 110, 0.4) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 14px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 40, 80, 0.3);
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 6px #00d2ff);
+}
+
+#time-display {
+    font-weight: 700;
+    color: #e0f7ff;
+    text-shadow: 0 1px 3px rgba(0, 40, 80, 0.6);
+}
+
+/* === ЭКВАЛАЙЗЕР: СТЕКЛЯННЫЕ КОЛБЫ С ВОДОЙ === */
+.eq-container-wrapper {
+    background: var(--panel-bg);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    border-radius: 24px;
+    box-shadow: var(--aero-shadow);
+}
+
+.eq-header-label {
+    font-family: 'Comfortaa', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 50, 100, 0.6), 0 0 10px rgba(0, 210, 255, 0.8);
+}
+
+.eq-band input[type="range"] {
+    background: linear-gradient(180deg, rgba(0, 25, 55, 0.6) 0%, rgba(0, 180, 255, 0.2) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+/* === РАЗДЕЛИТЕЛЬ: КРИСТАЛЬНЫЙ РЕЛЬС === */
+.resizer-bar {
+    width: 4px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: #00d2ff;
+    box-shadow: 0 0 15px #00d2ff, 0 0 25px rgba(255, 255, 255, 0.8);
+}
+
+/* === САЙДБАР: ГЛЯНЦЕВЫЙ АКРИЛОВЫЙ ДОК === */
+.explorer-sidebar {
+    background: rgba(8, 38, 70, 0.65);
+    backdrop-filter: blur(35px) saturate(200%);
+    -webkit-backdrop-filter: blur(35px) saturate(200%);
+    border-left: 1.5px solid rgba(255, 255, 255, 0.35);
+}
+
+.explorer-header {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.explorer-title {
+    font-family: 'Comfortaa', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 40, 80, 0.8);
+}
+
+.explorer-header button {
+    background: radial-gradient(circle at 50% 20%, #ffffff 0%, #56ccf2 60%, #1572b6 100%);
+    border: 1px solid #ffffff;
+    border-radius: 12px;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0, 100, 200, 0.4), inset 0 1px 2px #fff;
+}
+
+.explorer-header button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0, 180, 255, 0.6), inset 0 1px 2px #fff;
+}
+
+.folder-group h3 {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 12px;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 30, 60, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.folder-group.open h3 {
+    background: linear-gradient(180deg, #56ccf2 0%, #2f80ed 100%);
+    border-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 150, 255, 0.5), inset 0 1px 2px #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 30, 80, 0.6);
+}
+
+.track-item {
+    border-radius: 10px;
+    color: #e0f2fe;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.track-item:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    padding-left: 14px;
+}
+
+.track-item.playing {
+    background: linear-gradient(90deg, rgba(0, 210, 255, 0.45) 0%, rgba(56, 239, 125, 0.25) 100%);
+    border-left: 4px solid #ffffff;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+/* === STATUS BAR: АКРИЛОВЫЙ ФУТЕР === */
+.status-bar {
+    height: 32px;
+    background: linear-gradient(180deg, rgba(14, 52, 92, 0.7) 0%, rgba(6, 30, 56, 0.9) 100%);
+    backdrop-filter: blur(25px);
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.status-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+}
+
+.status-search input {
+    background: rgba(0, 25, 50, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 12px;
+    color: #ffffff;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.status-search input:focus {
+    border-color: #00d2ff;
+    box-shadow: 0 0 12px rgba(0, 210, 255, 0.6), inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.status-tag {
+    font-weight: 700;
+    color: #38ef7d;
+    text-shadow: 0 0 8px rgba(56, 239, 125, 0.6);
+}
+
+/* === МОДАЛЬНОЕ ОКНО: AERO GLASS DIALOG === */
+.modal-content {
+    background: rgba(10, 45, 80, 0.8);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    box-shadow: 0 25px 60px rgba(0, 20, 50, 0.8), var(--aero-shadow);
+}
+
+.modal-header h3 {
+    font-family: 'Comfortaa', sans-serif;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.modal-body input {
+    background: rgba(0, 25, 55, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 12px;
+}
+
+.modal-actions button {
+    background: radial-gradient(circle at 50% 20%, #ffffff 0%, #56ccf2 60%, #1572b6 100%);
+    border: 1.5px solid #ffffff;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: var(--gel-button-shadow);
 }
