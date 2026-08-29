@@ -788,6 +788,38 @@ document.addEventListener('DOMContentLoaded', () => {
         rpcBtn.classList.remove('saved');
     });
 
+    const resizer = document.getElementById('sidebar-resizer');
+    const sidebar = document.getElementById('explorer-sidebar');
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        resizer.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        // Вычисляем ширину справа налево
+        const newWidth = document.body.clientWidth - e.clientX;
+        if (newWidth >= 200 && newWidth <= 650) {
+            sidebar.style.width = `${newWidth}px`;
+            // Перерисовываем вейвформу, так как ширина левой панели изменилась
+            if (currentTrackBuffer) drawWaveform(currentTrackBuffer);
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            resizer.classList.remove('resizing');
+            document.body.style.cursor = 'default';
+            document.body.style.userSelect = 'auto';
+            if (currentTrackBuffer) drawWaveform(currentTrackBuffer);
+        }
+    });
+
     function drawWaveform(buffer) {
         // 1. Фикс разрешения (HD качество)
         const dpr = window.devicePixelRatio || 1;
