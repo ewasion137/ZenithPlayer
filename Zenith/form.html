@@ -28,12 +28,17 @@
 
         <!-- LEFT: MAIN PLAYER STAGE -->
         <div class="player-stage">
-            <!-- NOW PLAYING HERO -->
+            <!-- NOW PLAYING HERO (SPOTIFY STYLE) -->
             <div class="now-playing-container">
                 <div class="artwork-glow"></div>
-                <div class="track-info">
-                    <h1 id="current-track-name">Zenith Player</h1>
-                    <p id="current-track-folder">Select a track from explorer</p>
+                <div class="now-playing-content">
+                    <div class="cover-wrapper">
+                        <img id="current-track-artwork" src="icon.png" alt="Cover">
+                    </div>
+                    <div class="track-info">
+                        <h1 id="current-track-name">Zenith Player</h1>
+                        <p id="current-track-folder">Select a track or paste a link</p>
+                    </div>
                 </div>
             </div>
 
@@ -84,14 +89,18 @@
         <!-- RESIZER -->
         <div id="sidebar-resizer" class="resizer-bar" title="Drag to resize"></div>
 
-        <!-- RIGHT: EXPLORER -->
+        <!-- RIGHT: EXPLORER SIDEBAR -->
         <div class="explorer-sidebar" id="explorer-sidebar">
             <div class="explorer-header">
                 <span class="explorer-title">EXPLORER</span>
-                <button id="select-folder-btn" title="Open Folder">📂 Open Folder</button>
+                <div class="explorer-actions">
+                    <button id="add-url-btn" title="Add YouTube / Spotify URL">🔗 + URL</button>
+                    <button id="select-folder-btn" title="Open Folder">📂 Open</button>
+                </div>
             </div>
             <div class="track-list-container">
-                <div id="track-list"></div>
+                <div id="web-tracks-section"></div>
+                <div id="local-tracks-section"></div>
             </div>
         </div>
     </div>
@@ -107,7 +116,7 @@
 
         <div class="status-center">
             <div class="status-search">
-                <input type="text" id="search-input" placeholder="🔍 Search in playlist...">
+                <input type="text" id="search-input" placeholder="🔍 Search or paste URL...">
             </div>
         </div>
 
@@ -117,7 +126,25 @@
         </div>
     </div>
 
-    <!-- 4. DISCORD RPC MODAL -->
+    <!-- 4. URL STREAM MODAL -->
+    <div id="url-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Play from YouTube / Spotify</h3>
+                <button id="close-url-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label for="web-url-input">Track URL or Search Query:</label>
+                <input type="text" id="web-url-input" placeholder="https://music.youtube.com/... or song name">
+                <div id="url-status-text" class="rpc-status-container"></div>
+                <div class="modal-actions">
+                    <button id="url-submit-btn">Load & Play</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. DISCORD RPC MODAL -->
     <div id="rpc-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">

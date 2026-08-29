@@ -59,6 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const playPauseBtn = document.getElementById('play-pause-btn');
     const prevBtn = document.getElementById('prev-btn'); // New
     const nextBtn = document.getElementById('next-btn'); // New
+    const addUrlBtn = document.getElementById('add-url-btn');
+    const urlModal = document.getElementById('url-modal');
+    const closeUrlModal = document.getElementById('close-url-modal');
+    const webUrlInput = document.getElementById('web-url-input');
+    const urlSubmitBtn = document.getElementById('url-submit-btn');
+    const urlStatusText = document.getElementById('url-status-text');
 
     const trackVolumeSlider = document.getElementById('track-volume-slider');
     const trackVolumeValue = document.getElementById('track-volume-value');
@@ -72,7 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const currentTrackNameLabel = document.getElementById('current-track-name');
     const currentTrackFolderLabel = document.getElementById('current-track-folder');
-
+    const currentTrackArtwork = document.getElementById('current-track-artwork');
+    const webTracksSection = document.getElementById('web-tracks-section');
+    const localTracksSection = document.getElementById('local-tracks-section');
     const selectFolderBtn = document.getElementById('select-folder-btn');
     const waveformCanvas = document.getElementById('waveform-canvas');
     const waveformCtx = waveformCanvas.getContext('2d');
@@ -214,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: currentMetadata.title || currentTrackNameLabel.textContent,
             artist: currentMetadata.artist || '',
             album: currentMetadata.album || '',
+            picture: currentMetadata.picture || null, // <--- Передаем картинку
             status: 'playing',
             startTimestamp: Math.floor(now - (offsetSeconds * 1000)),
             endTimestamp: Math.floor(now + (remainingSec * 1000))
@@ -231,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: currentMetadata.title || currentTrackNameLabel.textContent,
             artist: currentMetadata.artist || '',
             album: currentMetadata.album || '',
+            picture: currentMetadata.picture || null, // <--- Передаем картинку
             status: 'paused'
         });
         stopSource();
@@ -292,13 +302,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Обложка из тегов
+        // Ставим четкую картинку в квадратный блок + размытие на фон
         const glowEl = document.querySelector('.artwork-glow');
         if (meta.picture) {
-            glowEl.style.backgroundImage = `url(${meta.picture})`;
-            glowEl.style.opacity = '0.6';
+            if (currentTrackArtwork) currentTrackArtwork.src = meta.picture;
+            glowEl.style.backgroundImage = `url("${meta.picture}")`;
+            glowEl.style.opacity = '0.4';
         } else {
+            if (currentTrackArtwork) currentTrackArtwork.src = 'icon.png';
             glowEl.style.backgroundImage = '';
-            glowEl.style.opacity = '0.2';
+            glowEl.style.opacity = '0.1';
         }
 
         const savedSettings = await window.electronAPI.getTrackSettings(trackPath);
@@ -470,6 +483,211 @@ document.addEventListener('DOMContentLoaded', () => {
             eqFilters[i].gain.setValueAtTime(final.eq[i], audioContext.currentTime);
         });
         setTimeout(() => { isApplyingSettings = false; }, 50);
+    }
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const val = searchInput.value.trim();
+            if (val.startsWith('http://') || val.startsWith('https://')) {
+                webUrlInput.value = val;
+                urlSubmitBtn.click();
+                searchInput.value = '';
+            }
+        }
+    });
+    // --- Web Stream / URL Integration ---
+    let savedWebTracks = [];
+
+    async function initWebTracks() {
+        savedWebTracks = await window.electronAPI.getSavedWebTracks();
+        renderWebTracksGroup();
+    }
+    initWebTracks();
+
+    addUrlBtn.addEventListener('click', () => {
+        urlModal.classList.remove('hidden');
+        webUrlInput.focus();
+    });
+
+    closeUrlModal.addEventListener('click', () => urlModal.classList.add('hidden'));
+
+    urlSubmitBtn.addEventListener('click', async () => {
+        const input = webUrlInput.value.trim();
+        if (!input) return;
+
+        urlStatusText.textContent = 'Resolving & downloading stream...';
+        urlStatusText.className = 'rpc-status-container status-connecting';
+
+        const result = await window.electronAPI.resolveWebTrack(input);
+        if (!result.success) {
+            urlStatusText.textContent = 'Error: ' + result.error;
+            urlStatusText.className = 'rpc-status-container status-disconnected';
+            return;
+        }
+
+        // Сохраняем в список
+        const existingIndex = savedWebTracks.findIndex(t => t.url === result.url);
+        const trackObj = {
+            id: result.trackId,
+            url: result.url,
+            name: result.title,
+            artist: result.artist,
+            picture: result.picture
+        };
+
+        if (existingIndex > -1) {
+            savedWebTracks[existingIndex] = trackObj;
+        } else {
+            savedWebTracks.unshift(trackObj);
+        }
+        window.electronAPI.saveWebTracks(savedWebTracks);
+        renderWebTracksGroup();
+
+        urlModal.classList.add('hidden');
+        webUrlInput.value = '';
+        urlStatusText.textContent = '';
+
+        // Играем трек
+        playWebTrackBuffer(result, trackObj);
+    });
+
+    // Отрисовка веб-треков в своей секции
+    function renderWebTracksGroup() {
+        if (!webTracksSection) return;
+        if (savedWebTracks.length === 0) {
+            webTracksSection.innerHTML = '';
+            return;
+        }
+
+        webTracksSection.innerHTML = `
+        <div class="folder-group open" id="web-folder-group">
+            <h3>🌐 Online Streams (${savedWebTracks.length})</h3>
+            <div class="folder-tracks" style="display: block;">
+                <div class="folder-tracks-inner" id="web-tracks-list"></div>
+            </div>
+        </div>
+    `;
+
+        webTracksSection.querySelector('h3').addEventListener('click', () => {
+            document.getElementById('web-folder-group').classList.toggle('open');
+        });
+
+        const listInner = webTracksSection.querySelector('#web-tracks-list');
+        savedWebTracks.forEach(track => {
+            const item = document.createElement('div');
+            item.className = 'track-item';
+            if (currentTrackPath === track.url) item.classList.add('playing');
+            item.innerHTML = `<span class="track-name">${track.artist} - ${track.name}</span>`;
+            item.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                timeDisplay.innerHTML = '<span>Streaming...</span>';
+                const res = await window.electronAPI.resolveWebTrack(track.url);
+                if (res.success) playWebTrackBuffer(res, track, item);
+            });
+            listInner.appendChild(item);
+        });
+    }
+
+    // Отрисовка локальных папок в своей секции
+    function displayTracks(folders) {
+        const openFolders = new Set();
+        document.querySelectorAll('#local-tracks-section .folder-group.open h3').forEach(h3 => openFolders.add(h3.textContent));
+        const playingPath = currentTrackPath;
+
+        localTracksSection.innerHTML = '';
+        if (!folders || folders.length === 0) return;
+
+        folders.forEach(folderData => {
+            const folderGroup = document.createElement('div');
+            folderGroup.className = 'folder-group';
+            const folderName = folderData.folder.split(/\\|\//).pop();
+            const title = document.createElement('h3');
+            title.textContent = folderName;
+            if (openFolders.has(folderName)) folderGroup.classList.add('open');
+            title.addEventListener('click', () => folderGroup.classList.toggle('open'));
+
+            const tracksUl = document.createElement('div');
+            tracksUl.className = 'folder-tracks';
+            const tracksInner = document.createElement('div');
+            tracksInner.className = 'folder-tracks-inner';
+
+            folderData.tracks.forEach((track, index) => {
+                const item = document.createElement('div');
+                item.className = 'track-item track-appear-effect';
+
+                const delay = Math.min(index * 0.02, 0.4);
+                item.style.animationDelay = `${delay}s`;
+
+                if (playingPath === track.path) item.classList.add('playing');
+
+                setTimeout(() => item.classList.remove('track-appear-effect'), 1000);
+
+                item.dataset.path = track.path;
+                item.innerHTML = `<span class="track-name">${track.name}</span>`;
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    loadAndPlayTrack(track.path, item);
+                });
+                tracksInner.appendChild(item);
+            });
+
+            tracksUl.appendChild(tracksInner);
+            folderGroup.append(title, tracksUl);
+            localTracksSection.appendChild(folderGroup);
+        });
+
+        if (searchInput.value) searchInput.dispatchEvent(new Event('input'));
+    }
+
+    // Воспроизведение полученного веб-потока через AudioContext
+    async function playWebTrackBuffer(resolvedData, trackObj, elementNode = null) {
+        if (isPlaying) fadeOutAndStop();
+        else stopSource();
+
+        if (currentPlayingElement) currentPlayingElement.classList.remove('playing');
+        if (elementNode) {
+            currentPlayingElement = elementNode;
+            elementNode.classList.add('playing');
+        }
+
+        currentTrackPath = resolvedData.url;
+        currentMetadata = {
+            title: resolvedData.title,
+            artist: resolvedData.artist,
+            album: 'Online Stream',
+            picture: resolvedData.picture
+        };
+
+        currentTrackNameLabel.textContent = resolvedData.title;
+        currentTrackFolderLabel.textContent = resolvedData.artist;
+
+        const glowEl = document.querySelector('.artwork-glow');
+        if (resolvedData.picture) {
+            if (currentTrackArtwork) currentTrackArtwork.src = resolvedData.picture;
+            glowEl.style.backgroundImage = `url("${resolvedData.picture}")`;
+            glowEl.style.opacity = '0.4';
+        } else {
+            if (currentTrackArtwork) currentTrackArtwork.src = 'icon.png';
+            glowEl.style.backgroundImage = '';
+            glowEl.style.opacity = '0.1';
+        }
+
+        const savedSettings = await window.electronAPI.getTrackSettings(resolvedData.url);
+        applySettings(savedSettings);
+
+        try {
+            const audioBuffer = await audioContext.decodeAudioData(resolvedData.audioData.buffer);
+            currentTrackBuffer = audioBuffer;
+            drawWaveform(audioBuffer);
+
+            pauseTimeSec = 0;
+            playbackStartSec = 0;
+            progressSlider.value = 0;
+
+            play(0);
+        } catch (err) {
+            console.error("Web audio decode error:", err);
+            timeDisplay.innerHTML = '<span>Decode Error</span>';
+        }
     }
 
     // --- Optimization & Search ---
@@ -746,68 +964,6 @@ document.addEventListener('DOMContentLoaded', () => {
     speedSlider.addEventListener('input', e => updateSpeed(e.target.value));
     speedInput.addEventListener('change', e => updateSpeed(e.target.value));
 
-    // Files/Folders Logic (с запоминанием открытых папок)
-    function displayTracks(folders) {
-        const openFolders = new Set();
-        document.querySelectorAll('.folder-group.open h3').forEach(h3 => openFolders.add(h3.textContent));
-        const playingPath = currentTrackPath;
-
-        trackListContainer.innerHTML = '';
-        if (!folders || folders.length === 0) return;
-
-        folders.forEach(folderData => {
-            const folderGroup = document.createElement('div');
-            folderGroup.className = 'folder-group';
-            const folderName = folderData.folder.split(/\\|\//).pop();
-            const title = document.createElement('h3');
-            title.textContent = folderName;
-            if (openFolders.has(folderName)) folderGroup.classList.add('open');
-            title.addEventListener('click', () => folderGroup.classList.toggle('open'));
-
-            const tracksUl = document.createElement('div');
-            tracksUl.className = 'folder-tracks';
-            const tracksInner = document.createElement('div');
-            tracksInner.className = 'folder-tracks-inner';
-
-            folderData.tracks.forEach((track, index) => {
-                const item = document.createElement('div');
-                item.className = 'track-item track-appear-effect'; // Добавляем спец-класс для анимации
-
-                // УМНЫЙ ЗАМЕР: задержка растет, но не бесконечно. 
-                // Максимум 0.4 сек, чтобы не ждать вечность внизу списка.
-                const delay = Math.min(index * 0.02, 0.4);
-                item.style.animationDelay = `${delay}s`;
-
-                if (playingPath === track.path) item.classList.add('playing');
-
-                // Удаляем класс анимации после того, как она прошла, 
-                // чтобы при клике (смене классов) она не запустилась снова
-                setTimeout(() => {
-                    item.classList.remove('track-appear-effect');
-                }, 1000);
-
-                item.dataset.path = track.path;
-                item.innerHTML = `<span class="track-name">${track.name}</span>`;
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    loadAndPlayTrack(track.path, item);
-                });
-                tracksInner.appendChild(item);
-            })
-
-            tracksUl.appendChild(tracksInner); // А внутренний див в грид-контейнер
-            folderGroup.append(title, tracksUl);
-
-            // Style for opening
-            const style = document.createElement('style');
-            style.textContent = `.folder-group.open .folder-tracks { display: block !important; }`;
-            if (!document.getElementById('folder-style')) { style.id = 'folder-style'; document.head.appendChild(style); }
-
-            trackListContainer.appendChild(folderGroup);
-        });
-        if (searchInput.value) searchInput.dispatchEvent(new Event('input'));
-    }
-
     const rpcModal = document.getElementById('rpc-modal');
     const rpcBtn = document.getElementById('discord-rpc-btn');
     const closeRpcBtn = document.getElementById('close-rpc-modal');
@@ -966,7 +1122,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         waveformCtx.restore();
     }
-
+    (async () => {
+        const savedId = localStorage.getItem('discord_client_id');
+        if (savedId) {
+            const res = await window.electronAPI.initDiscordRPC(savedId);
+            if (res.success) {
+                rpcStatusText.textContent = 'Connected';
+                rpcStatusText.className = 'status-connected';
+                rpcBtn.classList.add('saved');
+                const quick = document.getElementById('rpc-quick-status');
+                if (quick) quick.textContent = 'RPC: ON';
+            }
+        }
+    })();
 
     selectFolderBtn.addEventListener('click', () => window.electronAPI.selectFolder(true));
     window.electronAPI.onReceiveTracks(displayTracks);

@@ -9,7 +9,9 @@
 const { app, BrowserWindow, ipcMain, dialog, globalShortcut, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const play = require('play-dl');
 const musicMetadata = require('music-metadata');
+const ytdl = require('@distube/ytdl-core');
 const DiscordRPC = require('discord-rpc');
 
 let rpcClient = null;
@@ -107,6 +109,158 @@ function createTray() {
     tray.setContextMenu(contextMenu);
     tray.on('double-click', () => mainWindow.show());
 }
+
+const YTDlpWrap = require('yt-dlp-wrap').default;
+const ytDlpBinaryPath = path.join(app.getPath('userData'), process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp');
+let ytDlp = null;
+
+async function getEngine() {
+    if (ytDlp && fs.existsSync(ytDlpBinaryPath)) return ytDlp;
+    
+    if (!fs.existsSync(ytDlpBinaryPath)) {
+        console.log('[Zenith] Downloading official yt-dlp engine...');
+        await YTDlpWrap.downloadFromGithub(ytDlpBinaryPath);
+        console.log('[Zenith] yt-dlp ready!');
+    }
+    ytDlp = new YTDlpWrap(ytDlpBinaryPath);
+    return ytDlp;
+}
+
+// Хранилище веб-треков
+const webTracksPath = path.join(app.getPath('userData'), 'zenith-web-tracks.json');
+function loadWebTracks() {
+    try {
+        if (fs.existsSync(webTracksPath)) return JSON.parse(fs.readFileSync(webTracksPath, 'utf8'));
+    } catch (e) { }
+    return [];
+}
+
+ipcMain.handle('get-saved-web-tracks', () => loadWebTracks());
+
+ipcMain.on('save-web-tracks', (event, tracks) => {
+    try { fs.writeFileSync(webTracksPath, JSON.stringify(tracks, null, 2)); }
+    catch (e) { console.error(e); }
+});
+
+const { Innertube, UniversalCache } = require('youtubei.js');
+let ytClient = null;
+
+async function getYT() {
+    if (!ytClient) {
+        ytClient = await Innertube.create({
+            cache: new UniversalCache(true),
+            retrieve_player: true
+        });
+    }
+    return ytClient;
+}
+
+const INVIDIOUS_INSTANCES = [
+    'https://invidious.privacydev.net',
+    'https://inv.nadeko.net',
+    'https://vid.puffyan.us',
+    'https://invidious.nerdvpn.de',
+    'https://yt.drgnz.club'
+];
+
+// Надежные парсеры ссылок
+function parseYouTubeId(input) {
+    if (!input) return null;
+    const str = input.trim();
+    if (/^[a-zA-Z0-9_-]{11}$/.test(str)) return str;
+
+    const match = str.match(/(?:[?&]v=|\/embed\/|\/shorts\/|\/v\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+    return match ? match[1] : null;
+}
+
+function parseSpotifyId(input) {
+    if (!input) return null;
+    const match = input.trim().match(/spotify\.com\/track\/([a-zA-Z0-9]+)/i);
+    return match ? match[1] : null;
+}
+
+// Резолвер треков (1 вызов yt-dlp + нативный fetch потока)
+ipcMain.handle('stream:resolve-url', async (event, urlOrQuery) => {
+    try {
+        const engine = await getEngine();
+        const rawInput = urlOrQuery.trim();
+        let targetUrl = rawInput;
+        let spotifyTitle = null;
+        let spotifyArtist = null;
+        let spotifyCover = null;
+
+        const ytId = parseYouTubeId(rawInput);
+        const spId = parseSpotifyId(rawInput);
+
+        if (spId) {
+            // === 1. SPOTIFY URL ===
+            try {
+                const spRes = await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/track/${spId}`);
+                if (spRes.ok) {
+                    const spData = await spRes.json();
+                    spotifyTitle = spData.title;
+                    spotifyArtist = spData.author_name;
+                    spotifyCover = spData.thumbnail_url;
+                }
+            } catch (e) { }
+
+            const query = `${spotifyArtist || ''} ${spotifyTitle || ''}`.trim() || spId;
+            targetUrl = `ytsearch1:${query}`;
+        } else if (ytId) {
+            // === 2. YOUTUBE / MUSIC.YOUTUBE ===
+            targetUrl = `https://www.youtube.com/watch?v=${ytId}`;
+        } else {
+            // === 3. ПОИСК ПО ТЕКСТУ ===
+            targetUrl = `ytsearch1:${rawInput}`;
+        }
+
+        // 1. Получаем полные метаданные и прямой URL потока за 1 запрос
+        const jsonDump = await engine.execPromise([
+            targetUrl,
+            '--dump-json',
+            '--no-warnings',
+            '--extractor-args', 'youtube:player_client=android,ios',
+            '-f', 'ba/b'
+        ]);
+
+        const meta = JSON.parse(jsonDump);
+        const title = spotifyTitle || (meta.title || 'Unknown Track').replace(/\s*\(Official.*?\)|\[Official.*?\]|\s*\(Lyrics\)|\s*\(Audio\)/gi, '').trim();
+        const artist = spotifyArtist || meta.uploader || meta.channel || 'Online Stream';
+        const picture = spotifyCover || meta.thumbnail || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : null);
+
+        if (!meta.url) {
+            throw new Error("Direct audio stream URL not found");
+        }
+
+        // 2. Скачиваем аудиодорожку напрямую через нативный fetch (быстро и без pipe-ошибок)
+        const audioRes = await fetch(meta.url, {
+            headers: meta.http_headers || {
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36'
+            }
+        });
+
+        if (!audioRes.ok) {
+            throw new Error(`Direct audio stream download failed: ${audioRes.status}`);
+        }
+
+        const arrayBuf = await audioRes.arrayBuffer();
+        const audioBuffer = Buffer.from(arrayBuf);
+
+        return {
+            success: true,
+            trackId: `web:${meta.id || ytId || Date.now()}`,
+            url: rawInput,
+            title,
+            artist,
+            picture,
+            audioData: audioBuffer
+        };
+    } catch (err) {
+        console.error("Stream Resolve Error:", err);
+        return { success: false, error: err.message || 'Stream download failed' };
+    }
+});
+
 
 function registerShortcuts() {
     // keys
@@ -311,20 +465,28 @@ ipcMain.handle('discord-rpc:init', async (event, clientId) => {
 ipcMain.on('discord-rpc:update', (event, data) => {
     if (!rpcClient || !isRpcConnected) return;
 
-    const activity = {
-        details: data.title ? (data.artist ? `${data.artist} - ${data.title}` : data.title) : 'Listening to Music',
-        state: data.status === 'playing' ? (data.album || 'Playing') : 'Paused',
-        largeImageKey: 'zenith_logo', // Задай имя ассета в Discord Dev Portal или оставь
-        largeImageText: 'Zenith Player',
-        instance: false
-    };
+    try {
+        const activity = {
+            details: data.title ? (data.artist ? `${data.artist} - ${data.title}` : data.title) : 'Listening to Music',
+            state: data.status === 'playing' ? (data.album || 'Playing') : 'Paused',
+            instance: false
+        };
 
-    if (data.status === 'playing' && data.startTimestamp && data.endTimestamp) {
-        activity.startTimestamp = data.startTimestamp;
-        activity.endTimestamp = data.endTimestamp;
+        // Если это прямая HTTPS-обложка (YouTube / Spotify / Web)
+        if (data.picture && typeof data.picture === 'string' && data.picture.startsWith('http')) {
+            activity.largeImageKey = data.picture;
+            activity.largeImageText = data.album || data.title || 'Zenith Player';
+        }
+
+        if (data.status === 'playing' && data.startTimestamp && data.endTimestamp) {
+            activity.startTimestamp = data.startTimestamp;
+            activity.endTimestamp = data.endTimestamp;
+        }
+
+        rpcClient.setActivity(activity).catch(err => console.warn('RPC setActivity error:', err.message));
+    } catch (e) {
+        console.error('RPC Update error:', e);
     }
-
-    rpcClient.setActivity(activity).catch(console.error);
 });
 
 ipcMain.on('discord-rpc:clear', () => {
