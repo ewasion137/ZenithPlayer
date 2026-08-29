@@ -1,129 +1,25 @@
-/* === FRUTIGER AERO: THE ULTIMATE SKEUOMORPHISM === */
+/* === FRUTIGER AERO (AQUA GLOSS) === */
 :root {
-    --bg-main: #54a0ff;
-    --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(220, 240, 255, 0.4) 100%);
-    --surface: linear-gradient(to bottom, #ffffff 0%, #f1f2f6 50%, #dfe4ea 51%, #ced6e0 100%);
-    --accent: #2e86de;
-    --accent-secondary: #00d2d3;
-    --accent-gradient: linear-gradient(180deg, #54a0ff 0%, #2e86de 100%);
-    --text-main: #2f3542;
-    --text-dim: #57606f;
-    --border-light: rgba(255, 255, 255, 0.9);
-    --border-glass: 1px solid rgba(255, 255, 255, 0.8);
-    --title-bg: linear-gradient(to bottom, #ffffff 0%, #e1f5fe 100%);
-    --title-text: #0984e3;
+    --bg-main: #031424;
+    --panel-bg: rgba(8, 32, 56, 0.75);
+    --surface: rgba(16, 56, 96, 0.75);
+    --accent: #00d2d3;
+    --accent-secondary: #54a0ff;
+    --accent-gradient: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%);
+    --text-main: #ffffff;
+    --text-dim: #70a1ff;
+    --border-light: rgba(84, 160, 255, 0.2);
+    --border-focus: #00d2d3;
+    --title-bg: rgba(3, 20, 36, 0.9);
+    --title-text: #00d2d3;
 }
 
 body {
-    background: url('https://www.transparenttextures.com/patterns/cubes.png'), linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%);
-    background-attachment: fixed;
-    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background-image: 
+        radial-gradient(circle at 30% 20%, rgba(0, 210, 211, 0.18), transparent 50%),
+        radial-gradient(circle at 70% 80%, rgba(84, 160, 255, 0.15), transparent 50%);
 }
 
-body::after {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: 
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 10%),
-        radial-gradient(circle at 80% 70%, rgba(255,255,255,0.3) 0%, transparent 15%),
-        radial-gradient(circle at 50% 10%, rgba(255,255,255,0.2) 0%, transparent 20%);
-    pointer-events: none;
-    z-index: 100;
-}
-
-.title-bar {
-    border-bottom: 1px solid rgba(0, 132, 227, 0.3);
-    box-shadow: 0 1px 5px rgba(0,0,0,0.1);
-}
-
-.player-grid {
-    background: var(--panel-bg) !important;
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.5) !important;
-    box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.5), 0 20px 50px rgba(0, 0, 0, 0.2) !important;
-    grid-template-rows: auto auto auto auto 1fr !important;
-    margin: 15px;
-    height: calc(100vh - 30px);
-    width: calc(100vw - 30px);
-    border-radius: 20px;
-}
-
-#top-controls, .eq-container-wrapper, .playlist-grid-area, .now-playing-container {
-    background: rgba(255, 255, 255, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.6) !important;
-    border-radius: 15px !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05), inset 0 1px 0 #fff !important;
-}
-
-.now-playing-container {
-    background: radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, transparent 100%) !important;
-}
-
-.artwork-glow {
-    background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0) 70%) !important;
-    filter: blur(50px) !important;
-    opacity: 0.5 !important;
-}
-
-.track-info h1 {
-    color: #0984e3;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
-    font-size: 32px;
-}
-
-button {
-    background: var(--surface) !important;
-    border: 1px solid #a4b0be !important;
-    border-radius: 50px !important;
-    color: #2f3542 !important;
-    font-weight: 700 !important;
-    text-transform: none !important;
-    box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgba(0,0,0,0.1) !important;
-    transition: all 0.2s ease !important;
-}
-
-button:hover {
-    background: linear-gradient(to bottom, #ffffff 0%, #e1f5fe 100%) !important;
-    border-color: #2e86de !important;
-    transform: translateY(-1px) !important;
-}
-
-#play-pause-btn {
-    background: var(--accent-gradient) !important;
-    border: 2px solid #fff !important;
-    box-shadow: 0 5px 15px rgba(46, 134, 222, 0.4), inset 0 10px 10px rgba(255,255,255,0.3) !important;
-}
-
-#play-pause-btn::before {
-    background: white !important;
-}
-
-.track-item {
-    border-radius: 10px !important;
-    margin: 4px 0 !important;
-    transition: all 0.2s !important;
-}
-
-.track-item:hover {
-    background: rgba(255, 255, 255, 0.5) !important;
-    transform: translateX(10px) !important;
-}
-
-.track-item.playing {
-    background: var(--accent-gradient) !important;
-    color: white !important;
-    box-shadow: 0 4px 10px rgba(46, 134, 222, 0.3) !important;
-}
-
-/* Scrollbars */
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(to right, #74b9ff, #2e86de) !important;
-    border: 2px solid rgba(255,255,255,0.8) !important;
-    border-radius: 10px !important;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(0,0,0,0.05) !important;
+#spectrogram-canvas {
+    filter: hue-rotate(150deg) saturate(160%);
 }
