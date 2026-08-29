@@ -1,26 +1,442 @@
-/* === WINAMP CLASSIC === */
+/* ==========================================================================
+   THEME: WINAMP CLASSIC (WINAMP 2.91 / WINDOWS XP ERA / 1998-2004 BASE SKIN)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@500;700&display=swap');
+
 :root {
-    --bg-main: #101014;
-    --panel-bg: rgba(28, 28, 38, 0.85);
-    --surface: rgba(48, 48, 64, 0.85);
+    --bg-main: #14161d;
+    --panel-bg: #292d38;
+    --surface: #1e212b;
+    --lcd-bg: #000000;
     --accent: #00ff00;
-    --accent-secondary: #ff9900;
-    --accent-gradient: linear-gradient(135deg, #00ff00 0%, #ff9900 100%);
-    --text-main: #e2e8f0;
-    --text-dim: #8a8a9e;
-    --border-light: rgba(255, 255, 255, 0.1);
-    --border-focus: #ff9900;
-    --title-bg: rgba(18, 18, 26, 0.95);
-    --title-text: #00ff00;
+    --accent-amber: #ff9900;
+    --accent-secondary: #00cc00;
+    --accent-gradient: linear-gradient(180deg, #383e4d 0%, #1e2129 100%);
+    --text-main: #00ff00;
+    --text-dim: #727b91;
+    --border-light: #444b5c;
+    --border-dark: #0f1015;
+    
+    /* Классические Win32 3D-фаски */
+    --winamp-bevel-out: 
+        inset 1px 1px 0px #5c657a,
+        inset -1px -1px 0px #12141a,
+        1px 1px 3px rgba(0, 0, 0, 0.9);
+    --winamp-bevel-in: 
+        inset 1px 1px 2px #0a0b0e,
+        inset -1px -1px 0px #4d5568;
+    --transition: 0.05s ease;
 }
 
+/* === ФОН: РЕБРИСТЫЙ МЕТАЛЛ КОРПУСА === */
 body {
+    font-family: 'Tahoma', 'Segoe UI', sans-serif;
+    background-color: var(--bg-main);
     background-image: 
-        linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(255,255,255,0.02) 25%, transparent 25%);
-    background-size: 6px 6px;
+        /* Ребристая металлическая сетка шасси */
+        repeating-linear-gradient(
+            0deg,
+            #191b22 0px,
+            #191b22 1px,
+            #222530 1px,
+            #222530 2px
+        );
+    color: #e2e8f0;
 }
 
 #spectrogram-canvas {
-    filter: sepia(1) hue-rotate(60deg) saturate(500%);
+    opacity: 0.35;
+    filter: sepia(1) hue-rotate(65deg) saturate(700%) contrast(150%);
+}
+
+/* === TITLE BAR: ШАПКА ГЛАВНОГО МОДУЛЯ С МОЛНИЕЙ === */
+.title-bar {
+    height: 26px;
+    min-height: 26px;
+    background: linear-gradient(90deg, #101218 0%, #303746 50%, #101218 100%);
+    border-bottom: 2px solid #000;
+    box-shadow: inset 0 1px 0 #5f6b85;
+}
+
+.title-text {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    letter-spacing: 1.5px;
+    color: #00e600;
+    text-shadow: 0 0 4px rgba(0, 230, 0, 0.6);
+}
+
+.title-text::before {
+    content: '⚡ WINAMP';
+    color: var(--accent-amber);
+    margin-right: 6px;
+    font-weight: bold;
+}
+
+.win-btn {
+    width: 24px;
+    height: 18px;
+    margin: 4px 2px;
+    background: linear-gradient(180deg, #444c5c 0%, #252a35 100%);
+    box-shadow: var(--winamp-bevel-out);
+    border-radius: 1px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #e2e8f0;
+}
+
+.win-btn:active {
+    box-shadow: var(--winamp-bevel-in);
+    transform: translateY(1px);
+}
+
+.win-close:hover {
+    background: #c82333;
+    color: #fff;
+}
+
+/* === NOW PLAYING: ГЛАВНЫЙ LCD-ДИСПЛЕЙ WINAMP === */
+.now-playing-container {
+    background: #1b1d26;
+    border: 2px solid #3c4454;
+    box-shadow: var(--winamp-bevel-out);
+    border-radius: 2px;
+    padding: 12px;
+}
+
+/* Имитация зеленого пиксельного дисплея */
+.now-playing-content {
+    background: var(--lcd-bg);
+    border: 2px solid #0a0b0e;
+    box-shadow: var(--winamp-bevel-in);
+    padding: 10px;
+    border-radius: 2px;
+}
+
+.cover-wrapper {
+    width: 74px;
+    height: 74px;
+    border-radius: 2px;
+    border: 2px solid #3c4454;
+    box-shadow: var(--winamp-bevel-out);
+    background: #000;
+}
+
+#current-track-artwork {
+    border-radius: 0;
+    image-rendering: pixelated;
+}
+
+.artwork-glow {
+    display: none;
+}
+
+.track-info h1 {
+    font-family: 'VT323', monospace;
+    font-size: 24px;
+    color: #00ff00;
+    letter-spacing: 1px;
+    text-shadow: 0 0 6px rgba(0, 255, 0, 0.7);
+}
+
+.track-info h1::before {
+    content: '1. ';
+    color: var(--accent-amber);
+}
+
+.track-info p {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: #00aa00;
+    letter-spacing: 0.5px;
+}
+
+.track-info p::after {
+    content: ' [ 128 kbps - 44.1 kHz ]';
+    color: var(--accent-amber);
+}
+
+/* === УПРАВЛЕНИЕ: МЕТАЛЛИЧЕСКИЕ КНОПКИ ПЛЕЙБЕКА === */
+#top-controls {
+    background: var(--panel-bg);
+    border: 2px solid #3c4454;
+    box-shadow: var(--winamp-bevel-out);
+    border-radius: 2px;
+    padding: 12px 16px;
+}
+
+#prev-btn, #next-btn {
+    width: 36px;
+    height: 32px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #444c5c 0%, #20242e 100%);
+    box-shadow: var(--winamp-bevel-out);
+    border: 1px solid #1b1e26;
+}
+
+#prev-btn:active, #next-btn:active {
+    box-shadow: var(--winamp-bevel-in);
+    background: #1b1e26;
+}
+
+#prev-btn::before { border-right-color: #d1d5db; }
+#next-btn::before { border-left-color: #d1d5db; }
+
+/* Кнопка Play */
+#play-pause-btn {
+    width: 44px;
+    height: 36px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #4f586b 0%, #252a36 100%);
+    box-shadow: var(--winamp-bevel-out);
+    border: 1px solid #1b1e26;
+}
+
+#play-pause-btn::before {
+    background: #00ff00;
+    filter: drop-shadow(0 0 2px #00ff00);
+}
+
+#play-pause-btn:active {
+    box-shadow: var(--winamp-bevel-in);
+    background: #15181f;
+}
+
+.control-group label {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+
+/* Горизонтальные ползунки громкости Winamp */
+.control-group input[type="range"] {
+    background: #0d0e12;
+    height: 10px;
+    border-radius: 1px;
+    border: 1px solid #444b5c;
+    box-shadow: var(--winamp-bevel-in);
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 14px;
+    height: 18px;
+    border-radius: 1px;
+    background: linear-gradient(180deg, #5c657a 0%, #2c313d 100%);
+    box-shadow: var(--winamp-bevel-out);
+    border: 1px solid #181a20;
+}
+
+.control-input, .eq-band input[type="number"] {
+    background: #000000;
+    border: 1px solid #3c4454;
+    color: #00ff00;
+    font-family: 'VT323', monospace;
+    font-size: 15px;
+}
+
+/* === ОСЦИЛЛОГРАФ / ВОЛНОВАЯ ФОРМА === */
+.waveform-container {
+    background: #000000;
+    border: 2px solid #3c4454;
+    box-shadow: var(--winamp-bevel-in);
+    border-radius: 1px;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 2px #00ff00);
+}
+
+#time-display {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    color: #00ff00;
+    letter-spacing: 1px;
+}
+
+/* === ЭКВАЛАЙЗЕР: ЛЕГЕНДАРНЫЙ WINAMP GRAPHIC EQUALIZER === */
+.eq-container-wrapper {
+    background: var(--panel-bg);
+    border: 2px solid #3c4454;
+    box-shadow: var(--winamp-bevel-out);
+    border-radius: 2px;
+}
+
+.eq-header-label {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: #00ff00;
+}
+
+.eq-header-label::before {
+    content: 'WINAMP EQUALIZER [ AUTO / PRESETS ] ';
+    color: var(--accent-amber);
+}
+
+.eq-band label {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+/* Вертикальные фейдеры Winamp */
+.eq-band input[type="range"] {
+    background: #000000;
+    border: 1px solid #3c4454;
+    box-shadow: var(--winamp-bevel-in);
+    border-radius: 1px;
+}
+
+/* === САЙДБАР: WINAMP PLAYLIST EDITOR === */
+.explorer-sidebar {
+    background: #14161d;
+    border-left: 2px solid #3c4454;
+    box-shadow: var(--winamp-bevel-out);
+}
+
+.explorer-header {
+    background: linear-gradient(180deg, #383e4d 0%, #1e2129 100%);
+    border-bottom: 2px solid #000;
+    padding: 6px 12px;
+}
+
+.explorer-title {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: var(--accent-amber);
+}
+
+.explorer-title::before {
+    content: 'WINAMP PLAYLIST ';
+    color: #00ff00;
+}
+
+.explorer-header button {
+    background: linear-gradient(180deg, #444c5c 0%, #20242e 100%);
+    box-shadow: var(--winamp-bevel-out);
+    border: 1px solid #14161d;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    color: #e2e8f0;
+    border-radius: 1px;
+}
+
+.explorer-header button:active {
+    box-shadow: var(--winamp-bevel-in);
+}
+
+.folder-group h3 {
+    background: #1c202a;
+    border: 1px solid #303746;
+    border-radius: 1px;
+    font-size: 11px;
+    color: #93c5fd;
+}
+
+.folder-group.open h3 {
+    color: var(--accent-amber);
+    background: #252a38;
+}
+
+/* Элементы плейлиста в стиле Winamp */
+.track-list-container {
+    background: #000000;
+    border: 1px solid #20242f;
+}
+
+.track-item {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: #00e600;
+    border-radius: 0;
+    padding: 3px 8px;
+    margin: 0;
+    border-bottom: 1px dotted #111e11;
+}
+
+.track-item:hover {
+    background: #002200;
+    color: #00ff00;
+}
+
+/* Активный играющий трек Winamp (классический желтый селектор) */
+.track-item.playing {
+    background: #002b4d !important;
+    color: #ffff00 !important;
+    font-weight: 700;
+    text-shadow: 0 0 4px rgba(255, 255, 0, 0.5);
+}
+
+/* === STATUS BAR === */
+.status-bar {
+    height: 24px;
+    background: linear-gradient(180deg, #383e4d 0%, #1e2129 100%);
+    border-top: 2px solid #000;
+    font-family: 'Tahoma', sans-serif;
+}
+
+.status-btn {
+    font-size: 10px;
+    font-weight: bold;
+    color: #00ff00;
+}
+
+.status-search input {
+    background: #000000;
+    border: 1px solid #3c4454;
+    color: #00ff00;
+    font-family: 'VT323', monospace;
+    font-size: 15px;
+    border-radius: 1px;
+}
+
+.status-tag {
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    color: var(--accent-amber);
+}
+
+/* === МОДАЛЬНОЕ ОКНО: ДИАЛОГ WINDOWS XP / WINAMP === */
+.modal-content {
+    background: #292d38;
+    border: 2px solid #5c657a;
+    box-shadow: var(--winamp-bevel-out), 0 10px 30px rgba(0, 0, 0, 0.9);
+    border-radius: 2px;
+}
+
+.modal-header {
+    background: linear-gradient(90deg, #0a246a 0%, #a6caf0 100%);
+    padding: 4px 8px;
+    color: #ffffff;
+}
+
+.modal-header h3 {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.modal-body input {
+    background: #000000;
+    border: 1px solid #444b5c;
+    color: #00ff00;
+    font-family: 'VT323', monospace;
+    font-size: 15px;
+    border-radius: 1px;
+}
+
+.modal-actions button {
+    background: linear-gradient(180deg, #444c5c 0%, #20242e 100%);
+    box-shadow: var(--winamp-bevel-out);
+    border: 1px solid #14161d;
+    font-weight: bold;
+    color: #ffffff;
+    border-radius: 2px;
 }
