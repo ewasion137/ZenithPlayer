@@ -739,3 +739,48 @@ body {
 .modal-actions button:hover {
     background: var(--accent);
 }
+
+/* ==========================================================================
+   KILLER LOW-GFX MODE (0% GPU USAGE)
+   ========================================================================== */
+body.low-gfx,
+body.low-gfx *,
+body.low-gfx *::before,
+body.low-gfx *::after {
+    /* 1. Вырубаем ВСЕ CSS анимации и переходы */
+    animation: none !important;
+    transition: none !important;
+    
+    /* 2. Вырубаем тяжелые шейдеры размытия и фильтры */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    
+    /* 3. Вырубаем все тени и свечения */
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* 4. Глушим тяжелые фоновые радиальные градиенты */
+body.low-gfx {
+    background-image: none !important;
+    background-color: #07080b !important;
+}
+
+/* 5. Физически скрываем холст спектрограммы и размытие обложки */
+body.low-gfx #spectrogram-canvas,
+body.low-gfx .artwork-glow {
+    display: none !important;
+}
+
+/* 6. Превращаем полупрозрачные панели в обычный плоский матовый цвет */
+body.low-gfx .now-playing-container,
+body.low-gfx #top-controls,
+body.low-gfx .eq-container-wrapper,
+body.low-gfx .explorer-sidebar,
+body.low-gfx .title-bar,
+body.low-gfx .status-bar,
+body.low-gfx .modal-content {
+    background: #0d0e14 !important;
+    border-color: #1e2230 !important;
+}

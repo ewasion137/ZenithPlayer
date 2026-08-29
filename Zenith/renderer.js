@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioContext = new AudioContext();
     const masterGain = audioContext.createGain();
     const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256; // Меньше бинов = больше FPS
+    analyser.fftSize = 256;
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
     const eqFrequencies = [60, 170, 350, 1000, 3500, 10000, 14000];
@@ -41,24 +41,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPlayingElement = null;
     let isPlaying = false;
 
-    // FL STUDIO LOGIC VARIABLES
-    let pauseTimeSec = 0;       // Где сейчас курсор (визуально)
-    let playbackStartSec = 0;   // Откуда начали играть (для возврата по пробелу)
-
-    let playbackStartedAtCtx = 0; // Системное время запуска
+    let pauseTimeSec = 0;
+    let playbackStartSec = 0;
+    let playbackStartedAtCtx = 0;
     let animationFrameId = null;
     let isDraggingSlider = false;
     let currentTrackPath = null;
     let isApplyingSettings = false;
     let visualsEnabled = true;
-    let optimizeInterval = null;
     let currentMetadata = { title: null, artist: null, album: null };
     let waveformPeaks = [];
 
+    // Кэш цветов и размеров для исключения Layout Thrashing
+    let cachedAccent = '#8b5cf6';
+    let cachedAccentSec = '#0ea5e9';
+    let waveCanvasW = 0;
+    let waveCanvasH = 0;
+    let specCanvasW = 0;
+    let specCanvasH = 0;
+
     // --- DOM Elements ---
     const playPauseBtn = document.getElementById('play-pause-btn');
-    const prevBtn = document.getElementById('prev-btn'); // New
-    const nextBtn = document.getElementById('next-btn'); // New
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
     const addUrlBtn = document.getElementById('add-url-btn');
     const urlModal = document.getElementById('url-modal');
     const closeUrlModal = document.getElementById('close-url-modal');
@@ -74,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const speedValue = document.getElementById('speed-value');
     const progressSlider = document.getElementById('progress-slider');
     const timeDisplay = document.getElementById('time-display');
-    const trackListContainer = document.getElementById('track-list');
     const searchInput = document.getElementById('search-input');
     const currentTrackNameLabel = document.getElementById('current-track-name');
     const currentTrackFolderLabel = document.getElementById('current-track-folder');
@@ -91,6 +95,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const spectrogramCanvas = document.getElementById('spectrogram-canvas');
     const spectrogramCtx = spectrogramCanvas.getContext('2d');
     const eqContainer = document.querySelector('.eq-bands');
+
+    function updateThemeCache() {
+        const style = getComputedStyle(document.documentElement);
+        cachedAccent = style.getPropertyValue('--accent').trim() || '#8b5cf6';
+        cachedAccentSec = style.getPropertyValue('--accent-secondary').trim() || '#0ea5e9';
+    }
+
+    function updateCanvasSizeCache() {
+        const dpr = window.devicePixelRatio || 1;
+        if (waveformCanvas) {
+            waveCanvasW = waveformCanvas.clientWidth;
+            waveCanvasH = waveformCanvas.clientHeight;
+            if (waveCanvasW > 0 && waveCanvasH > 0) {
+                waveformCanvas.width = waveCanvasW * dpr;
+                waveformCanvas.height = waveCanvasH * dpr;
+            }
+        }
+        if (spectrogramCanvas) {
+            specCanvasW = window.innerWidth;
+            specCanvasH = window.innerHeight;
+            spectrogramCanvas.width = specCanvasW * dpr;
+            spectrogramCanvas.height = specCanvasH * dpr;
+        }
+    }
 
     // --- EQ Generation ---
     eqFilters.forEach((filter, i) => {
@@ -118,21 +146,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Core Logic ---
-
-    // 1. SPACEBAR LISTENER (FIXED)
     window.addEventListener('keydown', (e) => {
-        // Игнорируем пробел, если пишем в поиске или цифрах
         if (e.target.tagName === 'INPUT') return;
 
         if (e.code === 'Space') {
-            e.preventDefault(); // Чтобы страница не скроллилась
+            e.preventDefault();
             if (!currentTrackBuffer) return;
-
-            if (isPlaying) {
-                stopWithReturn(); // FL Logic: Возврат на старт
-            } else {
-                play(pauseTimeSec);
-            }
+            if (isPlaying) stopWithReturn();
+            else play(pauseTimeSec);
         }
 
         if (e.ctrlKey && e.code === 'KeyT') {
@@ -140,21 +161,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 2. Play/Pause Button Click
     playPauseBtn.addEventListener('click', () => {
         if (!currentTrackBuffer) return;
-        if (isPlaying) {
-            pause(); // Обычная пауза (остаемся на месте)
-        } else {
-            play(pauseTimeSec);
-        }
+        if (isPlaying) pause();
+        else play(pauseTimeSec);
     });
 
-    // 3. Prev/Next Buttons
     prevBtn.addEventListener('click', playPrevTrack);
     nextBtn.addEventListener('click', playNextTrack);
 
-    // window controls
     const minBtn = document.getElementById('win-min');
     minBtn.addEventListener('click', () => window.electronAPI.minimize('taskbar'));
     minBtn.addEventListener('contextmenu', (e) => {
@@ -169,9 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('win-close').addEventListener('click', () => window.electronAPI.close());
 
-    // global shortcuts from main
     window.electronAPI.onGlobalCommand((cmd) => {
-        console.log('[engine] key:', cmd);
         if (cmd === 'play-pause') {
             const btn = document.getElementById('play-pause-btn');
             if (btn) btn.click();
@@ -182,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // sound engine stuff
     function play(offsetSeconds) {
         if (!currentTrackBuffer) return;
         if (currentSource) currentSource.stop();
@@ -194,9 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSource.playbackRate.value = Number(speedSlider.value) / 100;
         currentSource.connect(masterGain);
 
-        // Флаг, который по умолчанию true
         let naturalEnd = true;
-        // Переопределяем его на false, когда прерываем трек вручную
         currentSource.stop = ((stop) => function (...args) {
             naturalEnd = false;
             stop.apply(this, args);
@@ -208,21 +218,20 @@ document.addEventListener('DOMContentLoaded', () => {
         playbackStartedAtCtx = audioContext.currentTime - offsetSeconds / currentSource.playbackRate.value;
 
         currentSource.onended = () => {
-            // Если трек доиграл сам (naturalEnd) И это всё ещё тот же самый источник
             if (naturalEnd && isPlaying) {
                 isPlaying = false;
                 updateUIState();
-                // Небольшая задержка перед следующим треком для стабильности
                 setTimeout(playNextTrack, 100);
             }
         };
+
         const remainingSec = (currentTrackBuffer.duration - offsetSeconds) / (Number(speedSlider.value) / 100);
         const now = Date.now();
         window.electronAPI.updateDiscordRPC({
             title: currentMetadata.title || currentTrackNameLabel.textContent,
             artist: currentMetadata.artist || '',
             album: currentMetadata.album || '',
-            picture: currentMetadata.picture || null, // <--- Передаем картинку
+            picture: currentMetadata.picture || null,
             status: 'playing',
             startTimestamp: Math.floor(now - (offsetSeconds * 1000)),
             endTimestamp: Math.floor(now + (remainingSec * 1000))
@@ -232,37 +241,35 @@ document.addEventListener('DOMContentLoaded', () => {
         startRenderLoop();
     }
 
-    // Обычная пауза (кнопка мыши) - остаемся где были
     function pause() {
         if (!currentSource || !isPlaying) return;
-        pauseTimeSec = getCurrentTime(); // Сохраняем текущую позицию
+        pauseTimeSec = getCurrentTime();
         window.electronAPI.updateDiscordRPC({
             title: currentMetadata.title || currentTrackNameLabel.textContent,
             artist: currentMetadata.artist || '',
             album: currentMetadata.album || '',
-            picture: currentMetadata.picture || null, // <--- Передаем картинку
+            picture: currentMetadata.picture || null,
             status: 'paused'
         });
         stopSource();
         updateUIState();
-        updateSimpleUI(); // Обновить цифры
+        updateSimpleUI();
+        renderWaveform();
     }
 
-    // Стоп с возвратом (Пробел) - как в FL Studio
     function stopWithReturn() {
         if (!currentSource || !isPlaying) return;
         stopSource();
-
-        // ВОЗВРАТ НА СТАРТ
         pauseTimeSec = playbackStartSec;
 
         updateUIState();
-        updateSimpleUI(); // Обновить слайдер и цифры на позицию старта
+        updateSimpleUI();
+        renderWaveform();
     }
 
     function stopSource() {
         if (currentSource) {
-            try { currentSource.stop(); } catch (e) { } // stop() сам выставит naturalEnd = false
+            try { currentSource.stop(); } catch (e) { }
             currentSource = null;
         }
         isPlaying = false;
@@ -270,11 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadAndPlayTrack(trackPath, trackElement) {
-        if (isPlaying) {
-            fadeOutAndStop();
-        } else {
-            stopSource();
-        }
+        if (isPlaying) fadeOutAndStop();
+        else stopSource();
 
         if (currentPlayingElement) currentPlayingElement.classList.remove('playing');
 
@@ -284,15 +288,12 @@ document.addEventListener('DOMContentLoaded', () => {
         isPlaying = false;
         timeDisplay.innerHTML = '<span>Loading...</span>';
 
-        // Читаем ID3 метаданные напрямую из файла
         const meta = await window.electronAPI.getTrackMetadata(trackPath);
         currentMetadata = meta;
 
-        // Отображаем Название (если нет в тегах — берем имя файла)
         const rawFileName = trackElement.querySelector('.track-name').textContent;
         currentTrackNameLabel.textContent = meta.title || rawFileName;
 
-        // В строке папки пишем Исполнителя / Альбом или имя папки
         const folderNode = trackElement.closest('.folder-group');
         const folderName = folderNode ? folderNode.querySelector('h3').textContent : 'Unknown';
         if (meta.artist) {
@@ -301,8 +302,6 @@ document.addEventListener('DOMContentLoaded', () => {
             currentTrackFolderLabel.textContent = folderName;
         }
 
-        // Обложка из тегов
-        // Ставим четкую картинку в квадратный блок + размытие на фон
         const glowEl = document.querySelector('.artwork-glow');
         if (meta.picture) {
             if (currentTrackArtwork) currentTrackArtwork.src = meta.picture;
@@ -326,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentTrackPath !== trackPath) return;
 
             currentTrackBuffer = audioBuffer;
-            setTimeout(() => drawWaveform(audioBuffer), 50);
+            drawWaveform(audioBuffer);
 
             pauseTimeSec = 0;
             playbackStartSec = 0;
@@ -360,18 +359,6 @@ document.addEventListener('DOMContentLoaded', () => {
         stopRenderLoop();
     }
 
-    async function updateAlbumArt(trackPath) {
-        const artData = await window.electronAPI.getAlbumArt(trackPath);
-        const glowEl = document.querySelector('.artwork-glow');
-        if (artData) {
-            glowEl.style.backgroundImage = `url(${artData})`;
-            glowEl.style.opacity = '0.6';
-        } else {
-            glowEl.style.backgroundImage = '';
-            glowEl.style.opacity = '0.2';
-        }
-    }
-
     function getVisibleTracks() {
         return Array.from(document.querySelectorAll('.track-item'))
             .filter(t => t.style.display !== 'none');
@@ -379,14 +366,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function playNextTrack() {
         const tracks = getVisibleTracks();
-        // Ищем индекс по пути текущего трека
         const currentIndex = tracks.findIndex(t => t.dataset.path === currentTrackPath);
-
         if (currentIndex > -1 && currentIndex < tracks.length - 1) {
             const nextTrackElement = tracks[currentIndex + 1];
             loadAndPlayTrack(nextTrackElement.dataset.path, nextTrackElement);
-        } else {
-            console.log("Next track not found or end of list");
         }
     }
 
@@ -395,28 +378,29 @@ document.addEventListener('DOMContentLoaded', () => {
             play(0);
             return;
         }
-
         const tracks = getVisibleTracks();
         const currentIndex = tracks.findIndex(t => t.dataset.path === currentTrackPath);
-
         if (currentIndex > 0) {
             const prevTrackElement = tracks[currentIndex - 1];
             loadAndPlayTrack(prevTrackElement.dataset.path, prevTrackElement);
         }
     }
-    // --- Slider Events ---
 
+    // --- Slider Events ---
     progressSlider.addEventListener('mousedown', () => isDraggingSlider = true);
 
-    // Когда отпускаем слайдер - меняем точку старта
     window.addEventListener('mouseup', () => {
         if (isDraggingSlider) {
             isDraggingSlider = false;
             if (currentTrackBuffer) {
                 const time = (progressSlider.value / 1000) * currentTrackBuffer.duration;
                 pauseTimeSec = time;
-                playbackStartSec = time; // Если перемотали рукой - это новая точка старта
+                playbackStartSec = time;
                 if (isPlaying) play(time);
+                else {
+                    updateSimpleUI();
+                    renderWaveform();
+                }
             }
         }
     });
@@ -426,10 +410,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const time = (e.target.value / 1000) * currentTrackBuffer.duration;
         timeDisplay.innerHTML = `<span>${formatTime(time)}</span><span>${formatTime(currentTrackBuffer.duration)}</span>`;
         progressSlider.style.setProperty('--value', (e.target.value / 10) + '%');
+        renderWaveform();
     });
 
     // --- Settings & UI ---
-
     function onSettingsChange() {
         if (isApplyingSettings || !currentTrackPath) return;
         const eqValues = [];
@@ -484,6 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         setTimeout(() => { isApplyingSettings = false; }, 50);
     }
+
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             const val = searchInput.value.trim();
@@ -494,6 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
     // --- Web Stream / URL Integration ---
     let savedWebTracks = [];
 
@@ -524,7 +510,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Сохраняем в список
         const existingIndex = savedWebTracks.findIndex(t => t.url === result.url);
         const trackObj = {
             id: result.trackId,
@@ -546,11 +531,9 @@ document.addEventListener('DOMContentLoaded', () => {
         webUrlInput.value = '';
         urlStatusText.textContent = '';
 
-        // Играем трек
         playWebTrackBuffer(result, trackObj);
     });
 
-    // Отрисовка веб-треков в своей секции
     function renderWebTracksGroup() {
         if (!webTracksSection) return;
         if (savedWebTracks.length === 0) {
@@ -565,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="folder-tracks-inner" id="web-tracks-list"></div>
             </div>
         </div>
-    `;
+        `;
 
         webTracksSection.querySelector('h3').addEventListener('click', () => {
             document.getElementById('web-folder-group').classList.toggle('open');
@@ -587,7 +570,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Отрисовка локальных папок в своей секции
     function displayTracks(folders) {
         const openFolders = new Set();
         document.querySelectorAll('#local-tracks-section .folder-group.open h3').forEach(h3 => openFolders.add(h3.textContent));
@@ -638,7 +620,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchInput.value) searchInput.dispatchEvent(new Event('input'));
     }
 
-    // Воспроизведение полученного веб-потока через AudioContext
     async function playWebTrackBuffer(resolvedData, trackObj, elementNode = null) {
         if (isPlaying) fadeOutAndStop();
         else stopSource();
@@ -690,23 +671,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Optimization & Search ---
-
+    // --- Optimization (GFX ON / OFF) ---
     optimizeBtn.addEventListener('click', () => {
         visualsEnabled = !visualsEnabled;
         if (visualsEnabled) {
             document.body.classList.remove('low-gfx');
             optimizeBtn.textContent = 'GFX: ON';
             optimizeBtn.classList.remove('optimized');
-            startRenderLoop();
         } else {
             document.body.classList.add('low-gfx');
             optimizeBtn.textContent = 'GFX: OFF';
             optimizeBtn.classList.add('optimized');
-            stopRenderLoop();
-            if (optimizeInterval) clearInterval(optimizeInterval);
-            optimizeInterval = setInterval(() => { if (isPlaying) updateSimpleUI(); }, 500);
+            if (spectrogramCanvas) {
+                const dpr = window.devicePixelRatio || 1;
+                spectrogramCtx.clearRect(0, 0, specCanvasW * dpr, specCanvasH * dpr);
+            }
         }
+        if (currentTrackBuffer) renderWaveform();
     });
 
     searchInput.addEventListener('input', (e) => {
@@ -722,32 +703,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Rendering ---
-
+    // --- Rendering Loop (0% GPU Optimized) ---
     function startRenderLoop() {
-        if (!animationFrameId && visualsEnabled) animationFrameId = requestAnimationFrame(render);
+        if (!animationFrameId) {
+            animationFrameId = requestAnimationFrame(render);
+        }
     }
+
     function stopRenderLoop() {
-        if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; }
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
     }
 
-    let lastRenderTime = 0;
     function drawSpectrogram() {
-        if (!spectrogramCanvas || !visualsEnabled) return;
-
-        const w = spectrogramCanvas.clientWidth;
-        const h = spectrogramCanvas.clientHeight;
-        if (w === 0 || h === 0) return;
+        if (!spectrogramCanvas || !visualsEnabled || specCanvasW === 0 || specCanvasH === 0) return;
 
         const dpr = window.devicePixelRatio || 1;
-        if (spectrogramCanvas.width !== w * dpr || spectrogramCanvas.height !== h * dpr) {
-            spectrogramCanvas.width = w * dpr;
-            spectrogramCanvas.height = h * dpr;
-        }
-
         spectrogramCtx.save();
         spectrogramCtx.scale(dpr, dpr);
-        spectrogramCtx.clearRect(0, 0, w, h);
+        spectrogramCtx.clearRect(0, 0, specCanvasW, specCanvasH);
 
         if (!isPlaying) {
             spectrogramCtx.restore();
@@ -757,92 +733,42 @@ document.addEventListener('DOMContentLoaded', () => {
         analyser.getByteFrequencyData(dataArray);
 
         const bufferLength = analyser.frequencyBinCount;
-        const barWidth = (w / bufferLength) * 2.5;
+        const barWidth = (specCanvasW / bufferLength) * 2.5;
         let x = 0;
 
-        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8b5cf6';
-        const accentSec = getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim() || '#0ea5e9';
-
-        // Градиент для спектра
-        const grad = spectrogramCtx.createLinearGradient(0, h, 0, 0);
-        grad.addColorStop(0, accent);
-        grad.addColorStop(1, accentSec);
-
+        const grad = spectrogramCtx.createLinearGradient(0, specCanvasH, 0, 0);
+        grad.addColorStop(0, cachedAccent);
+        grad.addColorStop(1, cachedAccentSec);
         spectrogramCtx.fillStyle = grad;
 
         for (let i = 0; i < bufferLength; i++) {
-            const barHeight = (dataArray[i] / 255) * (h * 0.45); // Занимает до 45% экрана снизу
-
+            const barHeight = (dataArray[i] / 255) * (specCanvasH * 0.45);
             spectrogramCtx.globalAlpha = (dataArray[i] / 255) * 0.6;
-            spectrogramCtx.fillRect(x, h - barHeight, barWidth - 1, barHeight);
-
+            spectrogramCtx.fillRect(x, specCanvasH - barHeight, barWidth - 1, barHeight);
             x += barWidth;
-            if (x > w) break;
+            if (x > specCanvasW) break;
         }
 
         spectrogramCtx.restore();
     }
 
-    function render(timestamp) {
-        if (!currentTrackBuffer || !visualsEnabled) return;
+    function render() {
+        if (!currentTrackBuffer) return;
 
         updateSimpleUI();
-        renderWaveform();    // Отрисовка вейвформы с прогрессом
-        drawSpectrogram();   // Отрисовка спектрограммы на фоне
+        renderWaveform();
+
+        if (visualsEnabled) {
+            drawSpectrogram();
+        }
 
         if (isPlaying) {
             animationFrameId = requestAnimationFrame(render);
         }
     }
 
-    function drawDynamicTracker() {
-        if (!currentTrackBuffer) return;
-
-        // Получаем мгновенную громкость баса (первые 3 бина анализатора)
-        analyser.getByteFrequencyData(dataArray);
-        const bassLevel = (dataArray[0] + dataArray[1] + dataArray[2]) / 765; // от 0.0 до 1.0
-
-        const w = waveformCanvas.clientWidth;
-        const h = waveformCanvas.clientHeight;
-        const progressRatio = getCurrentTime() / currentTrackBuffer.duration;
-        const posX = progressRatio * w;
-
-        // Очищаем и восстанавливаем фон
-        waveformCtx.clearRect(0, 0, w, h);
-
-        // Линия трека
-        waveformCtx.beginPath();
-        waveformCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-        waveformCtx.lineWidth = 1;
-        waveformCtx.moveTo(0, h / 2);
-        waveformCtx.lineTo(w, h / 2);
-        waveformCtx.stroke();
-
-        // Заливка пройденной части
-        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#fff';
-        waveformCtx.fillStyle = accent;
-        waveformCtx.globalAlpha = 0.2;
-        waveformCtx.fillRect(0, h / 2 - 1, posX, 2);
-
-        // === ТОТ САМЫЙ РЕАКТИВНЫЙ КУБИК ===
-        waveformCtx.globalAlpha = 1.0;
-        const cubeWidth = 6;
-        // Кубик увеличивается по вертикали от баса (от 12px в покое до всей высоты контейнера на дропе)
-        const cubeHeight = 12 + (bassLevel * (h - 16));
-        const cubeY = (h - cubeHeight) / 2;
-
-        // Свечение кубика
-        waveformCtx.shadowColor = accent;
-        waveformCtx.shadowBlur = 10 + (bassLevel * 20);
-        waveformCtx.fillStyle = '#ffffff';
-        waveformCtx.fillRect(posX - cubeWidth / 2, cubeY, cubeWidth, cubeHeight);
-
-        // Сброс тени для остальных операций
-        waveformCtx.shadowBlur = 0;
-    }
-
     function updateSimpleUI() {
-        const currentTime = getCurrentTime(); // Тут уже учитывается pauseTimeSec
+        const currentTime = getCurrentTime();
         if (!isDraggingSlider && currentTrackBuffer) {
             const progress = (currentTime / currentTrackBuffer.duration) * 1000;
             progressSlider.value = progress;
@@ -850,8 +776,6 @@ document.addEventListener('DOMContentLoaded', () => {
             timeDisplay.innerHTML = `<span>${formatTime(currentTime)}</span><span>${formatTime(currentTrackBuffer.duration)}</span>`;
         }
     }
-
-    // --- Helpers ---
 
     function getCurrentTime() {
         if (!currentSource || !isPlaying) return pauseTimeSec;
@@ -871,10 +795,10 @@ document.addEventListener('DOMContentLoaded', () => {
         playPauseBtn.classList.toggle('is-playing', isPlaying);
     }
 
+    // --- Theme Switcher ---
     const themeSwitcherBtn = document.getElementById('theme-switcher');
     const themeLink = document.getElementById('theme-link');
 
-    // Список твоих тем. Просто добавляй сюда имена новых файлов.
     const themes = [
         'ultra.css',
         'cosmic.css',
@@ -886,61 +810,38 @@ document.addEventListener('DOMContentLoaded', () => {
         'kocmocunleashed.css'
     ];
 
-    // Функция, которая применяет тему
     function applyTheme(themeName) {
         if (themeName === 'main.css') {
             themeLink.href = `styles/main.css`;
         } else {
             themeLink.href = `styles/themes/${themeName}`;
         }
-        console.log(`Theme applied: ${themeName}`);
+        setTimeout(() => {
+            updateThemeCache();
+            if (currentTrackBuffer) renderWaveform();
+        }, 80);
     }
 
-    // Функция, которая сохраняет и переключает тему
     function switchTheme() {
-        // Получаем текущий индекс из памяти (или 0, если его нет)
         let currentThemeIndex = Number(localStorage.getItem('themeIndex') || 0);
-
-        // Вычисляем следующий индекс по кругу
         currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-
-        // Применяем новую тему
-        const newTheme = themes[currentThemeIndex];
-        applyTheme(newTheme);
-
-        // Перерисовываем вейвформу с новым цветом
-        setTimeout(() => {
-            if (currentTrackBuffer) drawWaveform(currentTrackBuffer);
-        }, 100);
-
-        // Сохраняем новый индекс в память
+        applyTheme(themes[currentThemeIndex]);
         localStorage.setItem('themeIndex', currentThemeIndex);
     }
 
-    // Вешаем обработчик на кнопку
     themeSwitcherBtn.addEventListener('click', switchTheme);
 
-
-    // --- Загрузка темы при старте приложения ---
     function loadInitialTheme() {
         const savedThemeIndex = Number(localStorage.getItem('themeIndex') || 0);
-        // Проверка, чтобы индекс не выходил за рамки, если ты удалишь тему
         const validIndex = savedThemeIndex < themes.length ? savedThemeIndex : 0;
-
         applyTheme(themes[validIndex]);
-        localStorage.setItem('themeIndex', validIndex); // Обновляем на случай, если был невалидный
+        localStorage.setItem('themeIndex', validIndex);
     }
-
     loadInitialTheme();
 
-    trackVolumeSlider.addEventListener('input', e => {
-        const val = e.target.value;
-        masterGain.gain.setValueAtTime(val / 100, audioContext.currentTime);
-        trackVolumeValue.textContent = `${val}%`;
-        onSettingsChange();
-    });
+    // Volume & Speed Handlers
     function updateVolume(value) {
-        const val = Math.min(200, Math.max(0, Number(value))); // Ограничиваем значение
+        const val = Math.min(200, Math.max(0, Number(value)));
         masterGain.gain.setValueAtTime(val / 100, audioContext.currentTime);
         trackVolumeValue.textContent = `${val}%`;
         trackVolumeSlider.value = val;
@@ -951,7 +852,7 @@ document.addEventListener('DOMContentLoaded', () => {
     trackVolumeInput.addEventListener('change', e => updateVolume(e.target.value));
 
     function updateSpeed(value) {
-        const val = Math.min(200, Math.max(50, Number(value))); // Ограничиваем значение
+        const val = Math.min(200, Math.max(50, Number(value)));
         speedValue.textContent = `${val}%`;
         if (currentSource) {
             currentSource.playbackRate.value = val / 100;
@@ -964,6 +865,7 @@ document.addEventListener('DOMContentLoaded', () => {
     speedSlider.addEventListener('input', e => updateSpeed(e.target.value));
     speedInput.addEventListener('change', e => updateSpeed(e.target.value));
 
+    // Discord RPC Modal
     const rpcModal = document.getElementById('rpc-modal');
     const rpcBtn = document.getElementById('discord-rpc-btn');
     const closeRpcBtn = document.getElementById('close-rpc-modal');
@@ -1003,11 +905,12 @@ document.addEventListener('DOMContentLoaded', () => {
         rpcBtn.classList.remove('saved');
     });
 
+    // Sidebar Resizer
     const resizer = document.getElementById('sidebar-resizer');
     const sidebar = document.getElementById('explorer-sidebar');
     let isResizing = false;
 
-    resizer.addEventListener('mousedown', (e) => {
+    resizer.addEventListener('mousedown', () => {
         isResizing = true;
         resizer.classList.add('resizing');
         document.body.style.cursor = 'col-resize';
@@ -1016,12 +919,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('mousemove', (e) => {
         if (!isResizing) return;
-        // Вычисляем ширину справа налево
         const newWidth = document.body.clientWidth - e.clientX;
         if (newWidth >= 200 && newWidth <= 650) {
             sidebar.style.width = `${newWidth}px`;
-            // Перерисовываем вейвформу, так как ширина левой панели изменилась
-            if (currentTrackBuffer) drawWaveform(currentTrackBuffer);
+            updateCanvasSizeCache();
+            if (currentTrackBuffer) renderWaveform();
         }
     });
 
@@ -1031,11 +933,11 @@ document.addEventListener('DOMContentLoaded', () => {
             resizer.classList.remove('resizing');
             document.body.style.cursor = 'default';
             document.body.style.userSelect = 'auto';
-            if (currentTrackBuffer) drawWaveform(currentTrackBuffer);
+            updateCanvasSizeCache();
+            if (currentTrackBuffer) renderWaveform();
         }
     });
 
-    // Рисуем сверхлегкую базовую сетку/шкалу таймлайна (вызывается 1 раз при загрузке)
     function generateWaveformPeaks(buffer) {
         if (!buffer) return [];
         const channelData = buffer.getChannelData(0);
@@ -1046,12 +948,11 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < totalBars; i++) {
             let max = 0;
             const start = i * step;
-            // Проверяем сэмплы с шагом для супер-скорости
             for (let j = 0; j < step; j += 10) {
                 const val = Math.abs(channelData[start + j] || 0);
                 if (val > max) max = val;
             }
-            peaks.push(Math.max(0.08, max)); // Минимальная высота бара 8%
+            peaks.push(Math.max(0.08, max));
         }
         return peaks;
     }
@@ -1063,19 +964,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderWaveform() {
-        const w = waveformCanvas.clientWidth;
-        const h = waveformCanvas.clientHeight;
-        if (w === 0 || h === 0) return;
+        if (waveCanvasW === 0 || waveCanvasH === 0) return;
 
         const dpr = window.devicePixelRatio || 1;
-        if (waveformCanvas.width !== w * dpr || waveformCanvas.height !== h * dpr) {
-            waveformCanvas.width = w * dpr;
-            waveformCanvas.height = h * dpr;
-        }
-
         waveformCtx.save();
         waveformCtx.scale(dpr, dpr);
-        waveformCtx.clearRect(0, 0, w, h);
+        waveformCtx.clearRect(0, 0, waveCanvasW, waveCanvasH);
 
         if (!waveformPeaks || waveformPeaks.length === 0) {
             waveformCtx.restore();
@@ -1084,44 +978,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalBars = waveformPeaks.length;
         const gap = 2;
-        const barWidth = (w - (totalBars - 1) * gap) / totalBars;
+        const barWidth = (waveCanvasW - (totalBars - 1) * gap) / totalBars;
         const progress = currentTrackBuffer ? (getCurrentTime() / currentTrackBuffer.duration) : 0;
-        const progressX = progress * w;
-
-        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8b5cf6';
+        const progressX = progress * waveCanvasW;
 
         for (let i = 0; i < totalBars; i++) {
             const x = i * (barWidth + gap);
-            const barH = waveformPeaks[i] * (h - 8);
-            const y = (h - barH) / 2;
+            const barH = waveformPeaks[i] * (waveCanvasH - 8);
+            const y = (waveCanvasH - barH) / 2;
 
             if (x + barWidth <= progressX) {
-                // Уже сыгранная часть (яркий акцент)
-                waveformCtx.fillStyle = accent;
+                waveformCtx.fillStyle = cachedAccent;
                 waveformCtx.globalAlpha = 0.9;
             } else {
-                // Несыгранная часть (приглушенная)
                 waveformCtx.fillStyle = 'rgba(255, 255, 255, 0.2)';
                 waveformCtx.globalAlpha = 0.5;
             }
 
-            // Скругленный столбик
-            waveformCtx.beginPath();
-            waveformCtx.roundRect(x, y, Math.max(1, barWidth), barH, 2);
-            waveformCtx.fill();
+            waveformCtx.fillRect(x, y, Math.max(1, barWidth), barH);
         }
 
-        // Линия курсора
-        if (currentTrackBuffer && isPlaying) {
+        // Белая линия курсора
+        if (currentTrackBuffer) {
             waveformCtx.fillStyle = '#ffffff';
             waveformCtx.globalAlpha = 1.0;
-            waveformCtx.shadowColor = accent;
-            waveformCtx.shadowBlur = 8;
-            waveformCtx.fillRect(progressX - 1, 0, 2, h);
+            if (visualsEnabled) {
+                waveformCtx.shadowColor = cachedAccent;
+                waveformCtx.shadowBlur = 8;
+            }
+            waveformCtx.fillRect(progressX - 1, 0, 2, waveCanvasH);
         }
 
         waveformCtx.restore();
     }
+
     (async () => {
         const savedId = localStorage.getItem('discord_client_id');
         if (savedId) {
@@ -1140,9 +1030,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.electronAPI.onReceiveTracks(displayTracks);
 
     window.addEventListener('resize', () => {
-        spectrogramCanvas.width = window.innerWidth;
-        spectrogramCanvas.height = window.innerHeight;
-        if (currentTrackBuffer) drawWaveform(currentTrackBuffer);
+        updateCanvasSizeCache();
+        if (currentTrackBuffer) renderWaveform();
     });
-    window.dispatchEvent(new Event('resize'));
+
+    updateThemeCache();
+    updateCanvasSizeCache();
 });
