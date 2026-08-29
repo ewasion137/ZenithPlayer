@@ -1,297 +1,367 @@
 /* ==========================================================================
-   COSMIC THEME (DEEP SPACE OBSERVATORY & NEBULA HUD)
+   THEME: COSMIC (DEEP SPACE & HOLOGRAPHIC ORBITAL HUD)
    ========================================================================== */
 
-/* === ROOT & COSMIC VARIABLES === */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Space+Grotesk:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap');
+
 :root {
-    --bg-main: #03000a;
-    --panel-bg: rgba(13, 8, 30, 0.65);
-    --surface: rgba(28, 16, 58, 0.55);
-    --accent: #d946ef;
-    --accent-secondary: #06b6d4;
+    /* Цветовая палитра: глубокий вакуум, туманность Андромеды и квантовый циан */
+    --bg-main: #02010a;
+    --panel-bg: rgba(10, 7, 24, 0.65);
+    --surface: rgba(23, 16, 48, 0.75);
+    --accent: #e879f9;
+    --accent-secondary: #22d3ee;
     --accent-gradient: linear-gradient(135deg, #d946ef 0%, #8b5cf6 50%, #06b6d4 100%);
-    --text-main: #f8fafc;
+    --text-main: #f1f5f9;
     --text-dim: #94a3b8;
     --border-light: rgba(217, 70, 239, 0.18);
-    --border-focus: rgba(6, 182, 212, 0.6);
-    --title-bg: rgba(6, 2, 18, 0.85);
-    --title-text: #e879f9;
-    
-    /* Cosmic Custom Variables */
-    --cosmic-glow-pink: 0 0 20px rgba(217, 70, 239, 0.35);
-    --cosmic-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.35);
-    --hud-glass: blur(20px) saturate(180%);
+    --border-focus: rgba(34, 211, 238, 0.6);
+    --neon-glow: 0 0 15px rgba(217, 70, 239, 0.45), 0 0 30px rgba(6, 182, 212, 0.2);
+    --hud-cyan-glow: 0 0 12px rgba(34, 211, 238, 0.5);
+    --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* === 1. GLOBAL SPACE ATMOSPHERE === */
+/* === ФОН: ГЛУБОКИЙ КОСМОС, ЗВЕЗДНАЯ ПЫЛЬ И ТУМАННОСТИ === */
 body {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
     background-color: var(--bg-main);
     background-image: 
-        radial-gradient(circle at 15% 20%, rgba(217, 70, 239, 0.14) 0%, transparent 45%),
-        radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 65%),
-        repeating-radial-gradient(circle at 50% 50%, transparent 0, rgba(255, 255, 255, 0.015) 1px, transparent 2px);
-    background-size: 100% 100%, 100% 100%, 100% 100%, 80px 80px;
-    letter-spacing: 0.3px;
+        /* Генерация звездной пыли через радиальные точки */
+        radial-gradient(1px 1px at 25px 35px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 120px 80px, rgba(34, 211, 238, 0.9), rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 280px 240px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 450px 150px, rgba(232, 121, 249, 0.9), rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 600px 380px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 750px 90px, rgba(147, 197, 253, 0.8), rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 900px 300px, rgba(244, 114, 182, 0.9), rgba(0,0,0,0)),
+        /* Космические туманности */
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.18) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(217, 70, 239, 0.08) 0%, transparent 60%);
+    background-size: 1000px 500px, 1000px 500px, 1000px 500px, 1000px 500px, 1000px 500px, 1000px 500px, 1000px 500px, 100% 100%, 100% 100%, 100% 100%;
 }
 
-/* Спектрограмма в виде туманности */
+/* === СПЕКТРОГРАММА: КВАНТОВЫЙ ШЛЕЙФ === */
 #spectrogram-canvas {
-    filter: hue-rotate(275deg) saturate(220%) contrast(120%);
     opacity: 0.22;
+    filter: hue-rotate(275deg) saturate(180%) contrast(120%);
 }
 
-/* === 2. TITLE BAR === */
+/* === TITLE BAR: ОРБИТАЛЬНЫЙ ТЕРМИНАЛ === */
 .title-bar {
-    background: var(--title-bg);
+    background: rgba(4, 2, 14, 0.8);
     border-bottom: 1px solid rgba(217, 70, 239, 0.2);
-    backdrop-filter: var(--hud-glass);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .title-text {
-    color: var(--title-text);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Orbitron', monospace;
+    font-weight: 800;
+    color: var(--accent);
     letter-spacing: 3px;
-    text-shadow: 0 0 10px rgba(217, 70, 239, 0.5);
+    text-shadow: 0 0 8px rgba(217, 70, 239, 0.6);
 }
 
 .win-btn:hover {
     background: rgba(217, 70, 239, 0.15);
-    color: #e879f9;
-    text-shadow: 0 0 8px #d946ef;
+    color: var(--accent-secondary);
+    text-shadow: var(--hud-cyan-glow);
 }
 
-/* === 3. NOW PLAYING STAGE === */
+/* === NOW PLAYING: ПЛАНЕТАРНЫЙ МОДУЛЬ === */
 .now-playing-container {
     background: var(--panel-bg);
-    backdrop-filter: var(--hud-glass);
-    border: 1px solid rgba(217, 70, 239, 0.25);
-    border-radius: 16px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--cosmic-glow-pink);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
 }
 
-/* Орбитальное сияние вокруг обложки */
-.cover-wrapper {
-    border-radius: 12px;
-    border: 1px solid rgba(6, 182, 212, 0.5);
-    box-shadow: 0 0 25px rgba(6, 182, 212, 0.35), 0 10px 30px rgba(0, 0, 0, 0.8);
-    position: relative;
-}
-
-.cover-wrapper::after {
+.now-playing-container::before {
     content: '';
     position: absolute;
-    inset: -3px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, rgba(217, 70, 239, 0.6), rgba(6, 182, 212, 0.6));
-    z-index: -1;
-    filter: blur(4px);
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent-secondary), transparent);
+}
+
+/* Обложка трека в виде планеты / космической капсулы */
+.cover-wrapper {
+    width: 90px;
+    height: 90px;
+    min-width: 90px;
+    border-radius: 50%;
+    border: 2px solid rgba(34, 211, 238, 0.4);
+    box-shadow: 0 0 20px rgba(217, 70, 239, 0.4), inset 0 0 15px rgba(6, 182, 212, 0.5);
+    position: relative;
+    padding: 3px;
+    background: rgba(10, 7, 24, 0.9);
+}
+
+#current-track-artwork {
+    border-radius: 50%;
+    filter: contrast(105%) saturate(115%);
+}
+
+.artwork-glow {
+    filter: blur(70px);
+    opacity: 0.4;
+    background-blend-mode: screen;
 }
 
 .track-info h1 {
-    font-size: 22px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 21px;
     letter-spacing: 0.5px;
-    text-shadow: 0 0 16px rgba(248, 250, 252, 0.3);
+    color: #ffffff;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.3), 0 0 25px rgba(217, 70, 239, 0.4);
 }
 
 .track-info p {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
     color: var(--accent-secondary);
-    font-family: 'JetBrains Mono', monospace;
     letter-spacing: 1px;
-    text-transform: uppercase;
-    font-size: 11px;
+    text-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
 }
 
-/* === 4. CONTROLS (PULSAR & STELLAR ENGINES) === */
+/* === ПАНЕЛЬ УПРАВЛЕНИЯ: ТЕЛЕМЕТРИЯ И ИМПУЛЬСНЫЙ ДРАЙВ === */
 #top-controls {
     background: var(--panel-bg);
-    backdrop-filter: var(--hud-glass);
-    border: 1px solid rgba(139, 92, 246, 0.25);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-light);
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
+#prev-btn, #next-btn {
+    border-radius: 12px;
+    background: rgba(23, 16, 48, 0.8);
+    border: 1px solid rgba(217, 70, 239, 0.3);
+    box-shadow: inset 0 0 8px rgba(217, 70, 239, 0.1);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: rgba(34, 211, 238, 0.15);
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
+}
+
+#prev-btn::before { border-right-color: var(--accent-secondary); }
+#next-btn::before { border-left-color: var(--accent-secondary); }
+
+/* Кнопка воспроизведения: ядро реактора */
 #play-pause-btn {
     width: 52px;
     height: 52px;
-    background: var(--accent-gradient);
-    box-shadow: 0 0 25px rgba(217, 70, 239, 0.6), inset 0 0 12px rgba(255, 255, 255, 0.4);
-    animation: pulsar-pulse 3s infinite alternate ease-in-out;
+    background: linear-gradient(135deg, #d946ef 0%, #38bdf8 100%);
+    box-shadow: 0 0 20px rgba(217, 70, 239, 0.6), 0 0 40px rgba(56, 189, 248, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 #play-pause-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 0 35px rgba(6, 182, 212, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 30px rgba(217, 70, 239, 0.9), 0 0 50px rgba(56, 189, 248, 0.6);
 }
 
-@keyframes pulsar-pulse {
-    0% { box-shadow: 0 0 18px rgba(217, 70, 239, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.3); }
-    100% { box-shadow: 0 0 30px rgba(6, 182, 212, 0.7), inset 0 0 14px rgba(255, 255, 255, 0.6); }
+.control-group label {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 1.5px;
 }
 
-#prev-btn, #next-btn {
-    background: var(--surface);
-    border: 1px solid rgba(217, 70, 239, 0.3);
-    backdrop-filter: blur(8px);
-}
-
-#prev-btn:hover, #next-btn:hover {
-    background: rgba(217, 70, 239, 0.2);
-    border-color: var(--accent-secondary);
-    box-shadow: var(--cosmic-glow-cyan);
-}
-
-/* === 5. SLIDERS & RANGE (ION BEAMS) === */
 .control-group input[type="range"] {
-    background: rgba(28, 16, 58, 0.8);
+    background: rgba(26, 20, 52, 0.9);
     border: 1px solid rgba(217, 70, 239, 0.2);
-    height: 6px;
-    border-radius: 6px;
 }
 
 .control-group input[type="range"]::-webkit-slider-thumb {
-    width: 14px;
-    height: 14px;
-    background: #06b6d4;
-    box-shadow: 0 0 10px #06b6d4, 0 0 20px #06b6d4;
-    border: 2px solid #ffffff;
-    transition: transform 0.2s ease;
-}
-
-.control-group input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.25);
-    background: #d946ef;
-    box-shadow: 0 0 15px #d946ef;
+    width: 12px;
+    height: 12px;
+    background: var(--accent-secondary);
+    box-shadow: 0 0 10px var(--accent-secondary);
+    border: 1px solid #fff;
 }
 
 .control-input, .eq-band input[type="number"] {
-    background: rgba(13, 8, 30, 0.8);
-    border: 1px solid rgba(6, 182, 212, 0.4);
-    color: #38bdf8;
-    text-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(14, 10, 32, 0.9);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    color: var(--accent-secondary);
+    text-shadow: 0 0 5px rgba(34, 211, 238, 0.5);
 }
 
-/* === 6. WAVEFORM & SENSOR DISPLAY === */
+/* === ВОЛНОВАЯ ФОРМА / ВАРП-ТРЕКИНГ === */
 .waveform-container {
-    background: rgba(6, 3, 15, 0.85);
-    border: 1px solid rgba(217, 70, 239, 0.35);
+    background: rgba(5, 3, 15, 0.85);
+    border: 1px solid rgba(217, 70, 239, 0.25);
     border-radius: 10px;
-    box-shadow: inset 0 0 20px rgba(217, 70, 239, 0.15);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 6px rgba(217, 70, 239, 0.5));
 }
 
 #time-display {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
     color: var(--accent-secondary);
     letter-spacing: 1px;
 }
 
-/* === 7. EQUALIZER (SPECTRAL EMITTER) === */
+/* === ЭКВАЛАЙЗЕР: СПЕКТРАЛЬНЫЕ КОЛОННЫ HUD === */
 .eq-container-wrapper {
     background: var(--panel-bg);
-    backdrop-filter: var(--hud-glass);
-    border: 1px solid rgba(217, 70, 239, 0.25);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-light);
     border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.eq-header-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(217, 70, 239, 0.5);
+}
+
+.eq-band label {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
 }
 
 .eq-band input[type="range"] {
-    background: rgba(10, 5, 25, 0.9);
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    border-radius: 10px;
+    background: rgba(10, 7, 24, 0.9);
+    border: 1px solid rgba(217, 70, 239, 0.3);
+    box-shadow: inset 0 0 10px rgba(139, 92, 246, 0.2);
+    border-radius: 8px;
 }
 
-.eq-band input[type="range"]::-webkit-slider-thumb {
-    width: 24px;
-    height: 8px;
-    border-radius: 4px;
-    background: var(--accent-gradient);
-    box-shadow: 0 0 12px var(--accent);
+/* === РАЗДЕЛИТЕЛЬ: ЛАЗЕРНЫЙ БАРЬЕР === */
+.resizer-bar {
+    background: rgba(217, 70, 239, 0.15);
 }
 
-/* === 8. EXPLORER SIDEBAR (STAR CHART) === */
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 15px var(--accent-secondary);
+}
+
+/* === САЙДБАР: НАВИГАЦИОННЫЙ КАТАЛОГ ЗВЁЗДНЫХ СИСТЕМ === */
 .explorer-sidebar {
-    background: rgba(8, 4, 20, 0.85);
-    backdrop-filter: var(--hud-glass);
-    border-left: 1px solid rgba(217, 70, 239, 0.25);
+    background: rgba(7, 4, 18, 0.85);
+    backdrop-filter: blur(25px);
+    border-left: 1px solid rgba(217, 70, 239, 0.2);
 }
 
 .explorer-header {
-    background: rgba(20, 10, 45, 0.6);
+    background: rgba(14, 8, 36, 0.6);
     border-bottom: 1px solid rgba(217, 70, 239, 0.2);
 }
 
 .explorer-title {
-    color: #e879f9;
-    font-family: 'JetBrains Mono', monospace;
-    text-shadow: 0 0 8px rgba(217, 70, 239, 0.4);
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(217, 70, 239, 0.5);
+}
+
+.explorer-header button {
+    font-family: 'Space Grotesk', sans-serif;
+    background: rgba(23, 16, 48, 0.8);
+    border: 1px solid rgba(217, 70, 239, 0.4);
+    color: var(--accent-secondary);
+    border-radius: 6px;
+}
+
+.explorer-header button:hover {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(217, 70, 239, 0.5);
 }
 
 .folder-group h3 {
-    background: rgba(28, 16, 58, 0.45);
+    font-family: 'Space Grotesk', sans-serif;
+    background: rgba(20, 14, 44, 0.6);
     border: 1px solid rgba(217, 70, 239, 0.15);
     border-radius: 8px;
-    transition: all 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
-}
-
-.folder-group h3:hover {
-    background: rgba(217, 70, 239, 0.2);
-    border-color: rgba(217, 70, 239, 0.5);
-    box-shadow: var(--cosmic-glow-pink);
+    color: #e2e8f0;
 }
 
 .folder-group.open h3 {
-    background: linear-gradient(90deg, rgba(217, 70, 239, 0.25), transparent);
-    border-color: var(--accent);
-    box-shadow: inset 2px 0 0 var(--accent);
+    color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+    background: rgba(34, 211, 238, 0.08);
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
 }
 
 .track-item {
+    font-family: 'Space Grotesk', sans-serif;
     border-radius: 6px;
-    margin: 3px 0;
+    border-left: 2px solid transparent;
     transition: all 0.2s ease;
 }
 
 .track-item:hover {
-    background: rgba(6, 182, 212, 0.15);
-    color: #e0f2fe;
-    transform: translateX(4px);
+    background: rgba(217, 70, 239, 0.1);
+    color: #fff;
+    padding-left: 14px;
 }
 
 .track-item.playing {
-    background: linear-gradient(90deg, rgba(217, 70, 239, 0.35) 0%, rgba(6, 182, 212, 0.15) 100%);
-    border-left: 3px solid #06b6d4;
-    box-shadow: 0 0 16px rgba(217, 70, 239, 0.3);
-    color: #fff;
-    font-weight: 700;
+    background: linear-gradient(90deg, rgba(217, 70, 239, 0.3) 0%, rgba(6, 182, 212, 0.05) 100%);
+    border-left: 3px solid var(--accent);
+    color: #ffffff;
+    box-shadow: inset 0 0 12px rgba(217, 70, 239, 0.25);
+    text-shadow: 0 0 8px rgba(217, 70, 239, 0.6);
 }
 
-/* === 9. STATUS BAR & SENSORS === */
+/* === STATUS BAR: ТЕЛЕМЕТРИЯ МИССИИ === */
 .status-bar {
-    background: var(--title-bg);
-    backdrop-filter: var(--hud-glass);
+    background: rgba(4, 2, 14, 0.85);
     border-top: 1px solid rgba(217, 70, 239, 0.2);
 }
 
+.status-btn:hover {
+    background: rgba(217, 70, 239, 0.2);
+    color: var(--accent);
+}
+
 .status-search input {
-    background: rgba(20, 10, 45, 0.8);
-    border: 1px solid rgba(217, 70, 239, 0.3);
-    border-radius: 12px;
-    padding: 3px 12px;
+    background: rgba(14, 9, 34, 0.8);
+    border: 1px solid rgba(217, 70, 239, 0.25);
+    font-family: 'Space Grotesk', sans-serif;
 }
 
 .status-search input:focus {
-    border-color: #06b6d4;
-    box-shadow: var(--cosmic-glow-cyan);
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
 }
 
-/* === 10. SCROLLBARS (STARDUST TRACKS) === */
-::-webkit-scrollbar {
-    width: 5px;
+.status-tag {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    color: var(--accent);
 }
-::-webkit-scrollbar-track {
-    background: rgba(3, 0, 10, 0.5);
+
+/* === МОДАЛЬНОЕ ОКНО: ШЛЮЗ СВЯЗИ === */
+.modal-content {
+    background: rgba(12, 8, 30, 0.95);
+    backdrop-filter: blur(30px);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    box-shadow: 0 0 40px rgba(217, 70, 239, 0.3);
 }
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--accent), var(--accent-secondary));
-    border-radius: 10px;
-    box-shadow: 0 0 8px var(--accent);
+
+.modal-header h3 {
+    font-family: 'Orbitron', monospace;
+    color: var(--accent);
+    letter-spacing: 1.5px;
 }
