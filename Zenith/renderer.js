@@ -226,6 +226,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function pause() {
         if (!currentSource || !isPlaying) return;
         pauseTimeSec = getCurrentTime(); // Сохраняем текущую позицию
+        window.electronAPI.updateDiscordRPC({
+            title: currentMetadata.title || currentTrackNameLabel.textContent,
+            artist: currentMetadata.artist || '',
+            album: currentMetadata.album || '',
+            status: 'paused'
+        });
         stopSource();
         updateUIState();
         updateSimpleUI(); // Обновить цифры
