@@ -1,486 +1,516 @@
 /* ==========================================================================
-   THEME: TERMINAL (VINTAGE CRT / UNIX TUI / GREEN PHOSPHOR MATRIX)
+   THEME: REAL TERMINAL (LINUX TTY / UNIX NCURSES / CMUS / ALSAMIXER / TMUX)
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@400;700&display=swap');
-
-@keyframes crt-flicker {
-    0% { opacity: 0.98; }
-    50% { opacity: 1; }
-    100% { opacity: 0.98; }
-}
-
-@keyframes cursor-blink {
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
-}
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fira+Code:wght@400;600;700&display=swap');
 
 :root {
-    --bg-main: #020602;
-    --panel-bg: #030c04;
-    --surface: #061408;
-    --accent: #00ff66;
-    --accent-secondary: #00aa44;
-    --accent-dim: #004d1f;
-    --accent-gradient: linear-gradient(180deg, #00ff66 0%, #008833 100%);
-    --text-main: #00ff66;
-    --text-dim: #00993d;
-    --border-light: #00ff66;
-    --border-focus: #00ff66;
-    --phosphor-glow: 0 0 6px rgba(0, 255, 102, 0.7), 0 0 16px rgba(0, 255, 102, 0.3);
-    --phosphor-box: 0 0 8px rgba(0, 255, 102, 0.3), inset 0 0 8px rgba(0, 255, 102, 0.15);
+    /* Настоящая 16-битная палитра ANSI / VGA Linux Console */
+    --bg-main: #000000;
+    --panel-bg: #050505;
+    --surface: #111111;
+    --surface-active: #222222;
+    --accent: #22c55e;          /* ANSI Green */
+    --accent-secondary: #06b6d4;/* ANSI Cyan */
+    --accent-dim: #4b5563;      /* ANSI Bright Black (Dark Gray) */
+    --accent-gradient: none;    /* Никаких градиентов в TTY */
+    --text-main: #e5e7eb;       /* ANSI White */
+    --text-dim: #9ca3af;        /* ANSI Gray */
+    --border-light: #27272a;    /* 1px рамка ncurses */
+    --border-focus: #ffffff;
+    --transition: 0s;           /* В терминале задержек нет — мгновенный отклик */
 }
 
-/* === СБРОС ВСЕХ СКРУГЛЕНИЙ: ТОЛЬКО СТРОГАЯ TUI ГЕОМЕТРИЯ === */
+/* === СБРОС ВСЕХ ЭФФЕКТОВ: ТОЛЬКО МОНОШИРИННАЯ СЕТКА === */
 *, *::before, *::after {
     border-radius: 0px !important;
-    text-shadow: 0 0 3px rgba(0, 255, 102, 0.5);
+    text-shadow: none !important;
+    box-shadow: none !important;
+    filter: none !important;
 }
 
-/* === ЭЛТ МОНИТОР: СКАНЛАЙНЫ И ВИДЕОПАМЯТЬ === */
 body {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
     background-color: var(--bg-main);
+    background-image: none; /* Никакого псевдо-шума */
     color: var(--text-main);
-    animation: crt-flicker 0.15s infinite;
-    background-image: 
-        /* Сканлайны ЭЛТ */
-        repeating-linear-gradient(
-            0deg,
-            rgba(0, 0, 0, 0.75) 0px,
-            rgba(0, 0, 0, 0.75) 1px,
-            transparent 1px,
-            transparent 2px
-        ),
-        /* Виньетка выпуклой трубки монитора */
-        radial-gradient(ellipse at center, rgba(0, 255, 102, 0.05) 0%, rgba(0, 0, 0, 0.8) 100%);
-    background-size: 100% 2px, 100% 100%;
+    font-size: 12px;
+    letter-spacing: 0px;
+    -webkit-font-smoothing: antialiased;
 }
 
 #spectrogram-canvas {
-    opacity: 0.25;
-    filter: sepia(1) hue-rotate(85deg) saturate(800%) contrast(150%);
+    opacity: 0.12;
+    filter: grayscale(100%) !important;
 }
 
-/* === TITLE BAR: TTY1 SESSION === */
+/* === TITLE BAR: TMUX / SCREEN STATUS LINE === */
 .title-bar {
-    background: #000000;
-    border-bottom: 1px solid var(--accent);
-    height: 28px;
-    min-height: 28px;
+    height: 24px;
+    min-height: 24px;
+    background: #111111;
+    border-bottom: 1px solid var(--border-light);
+    padding: 0 6px;
+}
+
+.title-bar-drag {
+    gap: 12px;
+    padding-left: 4px;
+}
+
+.title-icon {
+    display: none; /* Консоль не использует иконки */
 }
 
 .title-text {
-    font-family: 'VT323', monospace;
-    font-size: 18px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    text-shadow: var(--phosphor-glow);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: #9ca3af;
+    letter-spacing: 0px;
 }
 
 .title-text::before {
-    content: 'SYS://';
+    content: '[0:cmus*] [1:bash] [2:htop] | ';
+    color: var(--accent);
+}
+
+.window-controls {
+    height: 100%;
 }
 
 .win-btn {
-    font-family: 'VT323', monospace;
-    font-size: 18px;
-    color: var(--accent);
-    border-left: 1px solid var(--accent-dim);
+    width: 24px;
+    height: 100%;
+    background: transparent;
+    border-left: 1px solid var(--border-light);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #9ca3af;
 }
 
 .win-btn:hover {
-    background: var(--accent);
+    background: #ffffff !important;
     color: #000000 !important;
-    text-shadow: none;
 }
 
 .win-close:hover {
-    background: #ff0033 !important;
-    color: #000 !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
 }
 
-/* === NOW PLAYING: ASCII DISPLAY BUFFER === */
+/* === NOW PLAYING: ТЕКСТОВЫЙ БУФЕР МЕТАДАННЫХ === */
 .now-playing-container {
     background: var(--panel-bg);
-    border: 1px solid var(--accent);
-    box-shadow: var(--phosphor-box);
-    padding: 12px 16px;
+    border: 1px solid var(--border-light);
+    padding: 12px;
+    min-height: auto;
 }
 
-.now-playing-container::before {
-    content: '=== [ DSP_STREAM: BUFFER_ACTIVE ] =======================================';
-    position: absolute;
-    top: 2px; left: 10px; right: 10px;
-    font-size: 9px;
-    color: var(--accent-dim);
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-/* Обложка: монохромная матрица с зеленым люминофором */
+/* Обложка: строгий 1-битный прямоугольный фрейм */
 .cover-wrapper {
-    border: 1px solid var(--accent);
-    box-shadow: var(--phosphor-box);
-    background: #000;
-    position: relative;
+    width: 70px;
+    height: 70px;
+    min-width: 70px;
+    border: 1px solid var(--border-light);
+    background: #000000;
 }
 
 #current-track-artwork {
-    filter: grayscale(100%) sepia(100%) hue-rotate(80deg) saturate(800%) brightness(0.9) contrast(1.4);
+    filter: grayscale(100%) contrast(120%) !important;
 }
 
 .artwork-glow {
-    display: none; /* В терминале нет блюра */
+    display: none !important;
 }
 
 .track-info h1 {
-    font-family: 'VT323', monospace;
-    font-size: 26px;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-shadow: var(--phosphor-glow);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0px;
 }
 
 .track-info h1::before {
-    content: '> ';
+    content: 'track: "';
+    color: var(--accent-secondary);
+    font-weight: 400;
 }
 
 .track-info h1::after {
-    content: ' █';
-    animation: cursor-blink 1s infinite;
+    content: '"';
+    color: var(--accent-secondary);
+    font-weight: 400;
 }
 
 .track-info p {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    color: var(--accent-dim);
-    text-transform: uppercase;
+    color: #9ca3af;
+    margin-top: 4px;
 }
 
 .track-info p::before {
-    content: 'SRC: ';
+    content: 'artist: ';
+    color: var(--accent-dim);
 }
 
-/* === УПРАВЛЕНИЕ: КОМАНДНАЯ СТРОКА TUI === */
+/* === УПРАВЛЕНИЕ: ПАНЕЛЬ ПЕРЕКЛЮЧАТЕЛЕЙ В СТИЛЕ CLI === */
 #top-controls {
     background: var(--panel-bg);
-    border: 1px solid var(--accent);
-    box-shadow: var(--phosphor-box);
+    border: 1px solid var(--border-light);
+    padding: 10px 14px;
 }
 
-/* Кнопки как ASCII команды [ << ], [ >> ] */
+.main-controls {
+    gap: 6px;
+}
+
 #prev-btn, #next-btn {
-    background: #000;
-    border: 1px solid var(--accent);
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 28px;
+    background: #111111;
+    border: 1px solid var(--border-light);
 }
 
 #prev-btn:hover, #next-btn:hover {
-    background: var(--accent);
-    box-shadow: var(--phosphor-glow);
+    background: #ffffff;
+    transform: none;
 }
 
 #prev-btn::before {
     border: none;
-    content: '<<';
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    color: var(--accent);
+    content: '|<';
+    font-size: 11px;
+    font-weight: bold;
+    color: #ffffff;
 }
 
 #next-btn::before {
     border: none;
-    content: '>>';
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    color: var(--accent);
+    content: '>|';
+    font-size: 11px;
+    font-weight: bold;
+    color: #ffffff;
 }
 
 #prev-btn:hover::before, #next-btn:hover::before {
-    color: #000;
-    text-shadow: none;
+    color: #000000;
 }
 
-/* Play/Pause: Терминальный триггер EXEC/HALT */
+/* Кнопка воспроизведения [ PLAY / PAUSE ] */
 #play-pause-btn {
-    background: #000;
-    border: 1px solid var(--accent);
-    box-shadow: var(--phosphor-glow);
-    width: 44px;
-    height: 44px;
+    width: 68px;
+    height: 28px;
+    background: #111111;
+    border: 1px solid var(--border-light);
+    box-shadow: none;
 }
 
 #play-pause-btn::before {
     background: transparent;
     clip-path: none;
-    content: 'RUN';
-    font-family: 'VT323', monospace;
-    font-size: 18px;
+    content: '[PLAY]';
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: bold;
     color: var(--accent);
     margin: 0;
 }
 
 #play-pause-btn.is-playing::before {
     clip-path: none;
-    content: 'HLT';
-    color: var(--accent);
+    content: '[PAUSE]';
+    color: #facc15;
 }
 
 #play-pause-btn:hover {
-    background: var(--accent);
+    background: #ffffff;
     transform: none;
 }
 
 #play-pause-btn:hover::before {
-    color: #000;
-    text-shadow: none;
+    color: #000000;
 }
 
 .control-group label {
-    font-family: 'VT323', monospace;
-    font-size: 15px;
-    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent-dim);
 }
 
+/* Слайдеры в виде плоских ANSI-баров */
 .control-group input[type="range"] {
-    background: #000;
-    border: 1px solid var(--accent-dim);
+    background: #18181b;
     height: 6px;
+    border: 1px solid var(--border-light);
 }
 
 .control-group input[type="range"]::-webkit-slider-thumb {
     width: 8px;
-    height: 14px;
-    background: var(--accent);
-    box-shadow: var(--phosphor-glow);
+    height: 12px;
+    background: #e5e7eb;
     border: none;
     cursor: ew-resize;
 }
 
 .control-input, .eq-band input[type="number"] {
-    background: #000;
-    border: 1px solid var(--accent);
+    background: #000000;
+    border: 1px solid var(--border-light);
     color: var(--accent);
-    font-family: 'VT323', monospace;
-    font-size: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
 }
 
-/* === ОСЦИЛЛОГРАФ / ВОЛНОВАЯ ФОРМА === */
+/* === ПРОГРЕСС-БАР: ТЕКСТОВЫЙ РЕЙЛИНГ === */
 .waveform-container {
-    background: #000;
-    border: 1px solid var(--accent);
-    box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.2);
+    background: #000000;
+    border: 1px solid var(--border-light);
+    height: 28px;
 }
 
 #waveform-canvas {
-    filter: drop-shadow(0 0 4px var(--accent));
+    filter: contrast(200%) grayscale(100%) !important;
 }
 
 #time-display {
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    color: var(--accent);
-    letter-spacing: 1px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #9ca3af;
 }
 
-/* === ЭКВАЛАЙЗЕР: СТИЛЬ ALSAMIXER / CAVA === */
+/* === ЭКВАЛАЙЗЕР: ALSAMIXER AUDIO CHANNELS === */
 .eq-container-wrapper {
     background: var(--panel-bg);
-    border: 1px solid var(--accent);
-    box-shadow: var(--phosphor-box);
+    border: 1px solid var(--border-light);
+    padding: 12px;
 }
 
 .eq-header-label {
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    letter-spacing: 2px;
-    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0px;
+    color: #ffffff;
+    margin-bottom: 8px;
 }
 
 .eq-header-label::before {
-    content: '[ ALSAMIXER - FREQ_SPECTRUM_V1.0 ] ';
+    content: 'Card: HDA Intel PCH | Chip: Realtek ALC892 | View: ';
+    color: var(--accent-dim);
+    font-weight: 400;
 }
 
 .eq-band label {
-    font-family: 'VT323', monospace;
-    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
     color: var(--accent-dim);
 }
 
 .eq-band input[type="range"] {
-    background: #000;
-    border: 1px solid var(--accent-dim);
-    box-shadow: inset 0 0 5px rgba(0, 255, 102, 0.2);
+    background: #111111;
+    border: 1px solid var(--border-light);
 }
 
-/* === РАЗДЕЛИТЕЛЬ: TUI СЕТКА === */
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    background: var(--accent);
+    height: 6px;
+    width: 14px;
+}
+
+/* === РАЗДЕЛИТЕЛЬ: 1PX СТРОГИЙ BORDER === */
 .resizer-bar {
-    width: 2px;
-    background: var(--accent-dim);
+    width: 1px;
+    min-width: 1px;
+    background: var(--border-light);
 }
 
 .resizer-bar:hover, .resizer-bar.resizing {
-    background: var(--accent);
-    box-shadow: var(--phosphor-glow);
+    background: #ffffff;
 }
 
-/* === САЙДБАР: DIRECTORY TREE (tree / ls -la) === */
+/* === САЙДБАР: CMUS LIBRARY / FILE BROWSER === */
 .explorer-sidebar {
-    background: #000;
-    border-left: 1px solid var(--accent);
+    background: #000000;
+    border-left: 1px solid var(--border-light);
 }
 
 .explorer-header {
-    background: #000;
-    border-bottom: 1px solid var(--accent);
+    background: #0d0d0d;
+    border-bottom: 1px solid var(--border-light);
+    padding: 6px 10px;
 }
 
 .explorer-title {
-    font-family: 'VT323', monospace;
-    font-size: 18px;
-    color: var(--accent);
-    letter-spacing: 1px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0px;
 }
 
 .explorer-title::before {
-    content: 'FS: /';
+    content: 'Browser: ';
+    color: var(--accent-dim);
+    font-weight: 400;
 }
 
 .explorer-header button {
-    background: #000;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-family: 'VT323', monospace;
-    font-size: 16px;
+    background: #111111;
+    border: 1px solid var(--border-light);
+    color: #e5e7eb;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 6px;
 }
 
 .explorer-header button:hover {
-    background: var(--accent);
-    color: #000;
-    text-shadow: none;
+    background: #ffffff;
+    color: #000000;
 }
 
 .folder-group h3 {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    background: #000;
-    border: 1px dashed var(--accent-dim);
-    color: var(--accent);
+    font-weight: 500;
+    background: #0a0a0a;
+    border: 1px solid var(--border-light);
+    color: var(--accent-secondary);
+    padding: 4px 6px;
 }
 
 .folder-group h3::before {
-    content: '[+] ';
-    font-family: 'JetBrains Mono', monospace;
+    content: '+ ';
     font-size: 11px;
     margin-right: 4px;
+    color: var(--accent-dim);
 }
 
 .folder-group.open h3 {
-    border: 1px solid var(--accent);
-    color: #000;
-    background: var(--accent);
-    text-shadow: none;
+    color: #ffffff;
+    background: #18181b;
+    border-color: #3f3f46;
 }
 
 .folder-group.open h3::before {
-    content: '[-] ';
+    content: '- ';
     transform: none;
-    color: #000;
 }
 
 .track-item {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    color: var(--accent-dim);
+    color: #9ca3af;
+    padding: 3px 6px;
+    margin: 1px 0;
+    border: none;
 }
 
 .track-item::before {
-    content: '├── ';
-    color: var(--accent-dim);
+    content: '  ';
 }
 
 .track-item:hover {
-    background: #061408;
-    color: var(--accent);
-    text-shadow: var(--phosphor-glow);
+    background: #18181b;
+    color: #ffffff;
 }
 
+/* Выделение как инверсный курсор в vim/cmus */
 .track-item.playing {
-    background: var(--accent);
-    color: #000 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
     font-weight: 700;
-    text-shadow: none !important;
 }
 
 .track-item.playing::before {
-    content: '►── ';
-    color: #000;
+    content: '► ';
 }
 
-/* === STATUS BAR: TTY STATUS LINE === */
+/* === STATUS BAR: BASH PROMPT / TMUX FOOTER === */
 .status-bar {
-    background: #000;
-    border-top: 1px solid var(--accent);
-    height: 24px;
-    min-height: 24px;
-    font-family: 'VT323', monospace;
-    font-size: 16px;
+    height: 22px;
+    min-height: 22px;
+    background: #111111;
+    border-top: 1px solid var(--border-light);
+    padding: 0 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
 }
 
 .status-btn {
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    color: var(--accent);
+    font-size: 11px;
+    color: #9ca3af;
+    padding: 1px 4px;
 }
 
 .status-btn:hover {
-    background: var(--accent);
-    color: #000;
-    text-shadow: none;
+    background: #ffffff;
+    color: #000000;
 }
 
 .status-search input {
-    background: #000;
-    border: 1px solid var(--accent-dim);
-    color: var(--accent);
-    font-family: 'VT323', monospace;
-    font-size: 16px;
+    background: #000000;
+    border: 1px solid var(--border-light);
+    color: #ffffff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 1px 4px;
 }
 
 .status-search input:focus {
-    border-color: var(--accent);
-    box-shadow: var(--phosphor-glow);
+    border-color: #ffffff;
 }
 
 .status-tag {
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    color: var(--accent-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
 }
 
-/* === МОДАЛЬНОЕ ОКНО: TUI DIALOG BOX === */
+/* === МОДАЛЬНОЕ ОКНО: NCURSES DIALOG BOX === */
 .modal-content {
-    background: #000;
-    border: 2px solid var(--accent);
-    box-shadow: var(--phosphor-box), 0 0 30px rgba(0, 255, 102, 0.4);
+    background: #050505;
+    border: 1px solid #ffffff;
+    padding: 12px;
 }
 
 .modal-header h3 {
-    font-family: 'VT323', monospace;
-    font-size: 20px;
-    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #ffffff;
+    font-weight: 700;
 }
 
 .modal-header h3::before {
-    content: '[ DIALOG_PROMPT ] ';
+    content: '[ ';
+    color: var(--accent-dim);
+}
+
+.modal-header h3::after {
+    content: ' ]';
+    color: var(--accent-dim);
 }
 
 .modal-body input {
-    background: #000;
-    border: 1px solid var(--accent);
-    color: var(--accent);
+    background: #000000;
+    border: 1px solid var(--border-light);
+    color: #ffffff;
     font-family: 'JetBrains Mono', monospace;
+}
+
+.modal-body input:focus {
+    border-color: #ffffff;
+}
+
+.modal-actions button {
+    background: #111111;
+    border: 1px solid var(--border-light);
+    color: #ffffff;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.modal-actions button:hover {
+    background: #ffffff;
+    color: #000000;
 }
