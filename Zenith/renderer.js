@@ -516,16 +516,56 @@ document.addEventListener('DOMContentLoaded', () => {
     function render(timestamp) {
         if (!currentTrackBuffer || !visualsEnabled) return;
 
-        // Ограничиваем до ~45 FPS для экономии GPU
-        if (timestamp - lastRenderTime < 22) {
-            animationFrameId = requestAnimationFrame(render);
-            return;
-        }
-        lastRenderTime = timestamp;
-
-        updateSimpleUI(); // Двигаем ползунок
-        drawSpectrogram();
+        // Ограничение кадров не нужно, теперь рендер весит 0.01ms
+        updateSimpleUI();
+        drawDynamicTracker(); // Тот самый кубик
         if (isPlaying) animationFrameId = requestAnimationFrame(render);
+    }
+
+    function drawDynamicTracker() {
+        if (!currentTrackBuffer) return;
+
+        // Получаем мгновенную громкость баса (первые 3 бина анализатора)
+        analyser.getByteFrequencyData(dataArray);
+        const bassLevel = (dataArray[0] + dataArray[1] + dataArray[2]) / 765; // от 0.0 до 1.0
+
+        const w = waveformCanvas.clientWidth;
+        const h = waveformCanvas.clientHeight;
+        const progressRatio = getCurrentTime() / currentTrackBuffer.duration;
+        const posX = progressRatio * w;
+
+        // Очищаем и восстанавливаем фон
+        waveformCtx.clearRect(0, 0, w, h);
+
+        // Линия трека
+        waveformCtx.beginPath();
+        waveformCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        waveformCtx.lineWidth = 1;
+        waveformCtx.moveTo(0, h / 2);
+        waveformCtx.lineTo(w, h / 2);
+        waveformCtx.stroke();
+
+        // Заливка пройденной части
+        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#fff';
+        waveformCtx.fillStyle = accent;
+        waveformCtx.globalAlpha = 0.2;
+        waveformCtx.fillRect(0, h / 2 - 1, posX, 2);
+
+        // === ТОТ САМЫЙ РЕАКТИВНЫЙ КУБИК ===
+        waveformCtx.globalAlpha = 1.0;
+        const cubeWidth = 6;
+        // Кубик увеличивается по вертикали от баса (от 12px в покое до всей высоты контейнера на дропе)
+        const cubeHeight = 12 + (bassLevel * (h - 16));
+        const cubeY = (h - cubeHeight) / 2;
+
+        // Свечение кубика
+        waveformCtx.shadowColor = accent;
+        waveformCtx.shadowBlur = 10 + (bassLevel * 20);
+        waveformCtx.fillStyle = '#ffffff';
+        waveformCtx.fillRect(posX - cubeWidth / 2, cubeY, cubeWidth, cubeHeight);
+
+        // Сброс тени для остальных операций
+        waveformCtx.shadowBlur = 0;
     }
 
     function updateSimpleUI() {
@@ -535,42 +575,6 @@ document.addEventListener('DOMContentLoaded', () => {
             progressSlider.value = progress;
             progressSlider.style.setProperty('--value', (progress / 10) + '%');
             timeDisplay.innerHTML = `<span>${formatTime(currentTime)}</span><span>${formatTime(currentTrackBuffer.duration)}</span>`;
-        }
-    }
-
-    function drawSpectrogram() {
-        analyser.getByteFrequencyData(dataArray);
-        const bufferLength = dataArray.length;
-
-        spectrogramCtx.clearRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height);
-
-        const barWidth = (spectrogramCanvas.width / bufferLength) * 1.8;
-        const centerX = spectrogramCanvas.width / 2;
-        const timeFactor = (Date.now() / 50) % 360;
-
-        // Рисуем один раз общим цветом или градиентом, если возможно, 
-        // но для "WOW" эффекта оставим цикл, просто оптимизируем его.
-
-        spectrogramCtx.lineCap = 'round';
-
-        for (let i = 0; i < bufferLength; i++) {
-            const barHeight = (dataArray[i] / 255) * spectrogramCanvas.height * 0.7;
-            if (barHeight < 2) continue; // Пропускаем тихие бины
-
-            const hue = (i / bufferLength * 360) + timeFactor;
-            spectrogramCtx.fillStyle = `hsla(${hue}, 80%, 60%, 0.6)`;
-
-            // Вместо тяжелых градиентов используем простые Rect
-            spectrogramCtx.fillRect(centerX + (i * (barWidth + 2)), spectrogramCanvas.height - barHeight, barWidth, barHeight);
-            spectrogramCtx.fillRect(centerX - (i * (barWidth + 2)) - barWidth, spectrogramCanvas.height - barHeight, barWidth, barHeight);
-        }
-
-        // Оптимизируем пульсацию: меняем только прозрачность спец-слоя
-        const bass = dataArray[0] + dataArray[1] + dataArray[2]; // Быстрый замер баса
-        const glowEl = document.querySelector('.artwork-glow');
-        if (glowEl) {
-            glowEl.style.opacity = (bass / 765) * 0.6;
-            glowEl.style.transform = `scale(${1 + (bass / 1500)}) rotate(${timeFactor / 10}deg)`;
         }
     }
 
@@ -821,31 +825,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Рисуем сверхлегкую базовую сетку/шкалу таймлайна (вызывается 1 раз при загрузке)
-function drawWaveform() {
-    const dpr = window.devicePixelRatio || 1;
-    waveformCanvas.width = waveformCanvas.clientWidth * dpr;
-    waveformCanvas.height = waveformCanvas.clientHeight * dpr;
-    waveformCtx.scale(dpr, dpr);
+    function drawWaveform() {
+        const dpr = window.devicePixelRatio || 1;
+        waveformCanvas.width = waveformCanvas.clientWidth * dpr;
+        waveformCanvas.height = waveformCanvas.clientHeight * dpr;
+        waveformCtx.scale(dpr, dpr);
 
-    const w = waveformCanvas.clientWidth;
-    const h = waveformCanvas.clientHeight;
+        const w = waveformCanvas.clientWidth;
+        const h = waveformCanvas.clientHeight;
 
-    waveformCtx.clearRect(0, 0, w, h);
+        waveformCtx.clearRect(0, 0, w, h);
 
-    // Центральная направляющая линия
-    waveformCtx.beginPath();
-    waveformCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-    waveformCtx.lineWidth = 1;
-    waveformCtx.moveTo(0, h / 2);
-    waveformCtx.lineTo(w, h / 2);
-    waveformCtx.stroke();
+        // Центральная направляющая линия
+        waveformCtx.beginPath();
+        waveformCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        waveformCtx.lineWidth = 1;
+        waveformCtx.moveTo(0, h / 2);
+        waveformCtx.lineTo(w, h / 2);
+        waveformCtx.stroke();
 
-    // Засечки делений (каждые 5% ширины)
-    waveformCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-    for (let x = 0; x < w; x += w / 20) {
-        waveformCtx.fillRect(x, h / 2 - 4, 1, 8);
+        // Засечки делений (каждые 5% ширины)
+        waveformCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        for (let x = 0; x < w; x += w / 20) {
+            waveformCtx.fillRect(x, h / 2 - 4, 1, 8);
+        }
     }
-}
     selectFolderBtn.addEventListener('click', () => window.electronAPI.selectFolder(true));
     window.electronAPI.onReceiveTracks(displayTracks);
 
