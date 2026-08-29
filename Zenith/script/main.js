@@ -3,11 +3,17 @@
 
 /* i dont give a f man */
 
+
 // --- MAIN RUNNING SCRIPT OF ZENITHPLAYER --- //
 
 const { app, BrowserWindow, ipcMain, dialog, globalShortcut, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const musicMetadata = require('music-metadata');
+const DiscordRPC = require('discord-rpc');
+
+let rpcClient = null;
+let isRpcConnected = false;
 
 const settingsPath = path.join(app.getPath('userData'), 'zenith-settings.json');
 let appSettings = {};
@@ -221,35 +227,41 @@ ipcMain.handle('get-audio-data', async (event, filePath) => {
 
 ipcMain.handle('get-track-settings', (event, trackPath) => appSettings[trackPath] || {});
 
-ipcMain.handle('get-album-art', async (event, trackPath) => {
+ipcMain.handle('get-track-metadata', async (event, trackPath) => {
     try {
-        const dir = path.dirname(trackPath);
-        const files = await fs.promises.readdir(dir);
+        const metadata = await musicMetadata.parseFile(trackPath, { skipCovers: false });
+        const common = metadata.common || {};
 
-        // album
-        const artFile = files.find(f => {
-            const name = f.toLowerCase();
-            const isImg = /\.(jpg|jpeg|png|webp|gif)$/i.test(name);
-            if (!isImg) return false;
-
-            // Сначала ищем явные обложки
-            return name.includes('cover') ||
-                name.includes('folder') ||
-                name.includes('album') ||
-                name.includes('front') ||
-                name.includes('artwork') ||
-                files.length < 20;
-        });
-
-        if (artFile) {
-            const artPath = path.join(dir, artFile);
-            const buffer = await fs.promises.readFile(artPath);
-            return `data:image/${path.extname(artFile).slice(1)};base64,${buffer.toString('base64')}`;
+        let coverBase64 = null;
+        if (common.picture && common.picture.length > 0) {
+            const pic = common.picture[0];
+            coverBase64 = `data:${pic.format};base64,${pic.data.toString('base64')}`;
+        } else {
+            // Фолбэк: если внутри тегов нет обложки, ищем файл в папке
+            const dir = path.dirname(trackPath);
+            const files = await fs.promises.readdir(dir);
+            const artFile = files.find(f => {
+                const name = f.toLowerCase();
+                const isImg = /\.(jpg|jpeg|png|webp)$/i.test(name);
+                return isImg && (name.includes('cover') || name.includes('folder') || name.includes('album') || name.includes('front') || files.length < 10);
+            });
+            if (artFile) {
+                const buf = await fs.promises.readFile(path.join(dir, artFile));
+                coverBase64 = `data:image/${path.extname(artFile).slice(1)};base64,${buf.toString('base64')}`;
+            }
         }
-    } catch (e) {
-        console.error('Art search error:', e);
+
+        return {
+            title: common.title || null,
+            artist: common.artist || null,
+            album: common.album || null,
+            year: common.year || null,
+            picture: coverBase64
+        };
+    } catch (err) {
+        console.error('Metadata parse error:', err);
+        return { title: null, artist: null, album: null, picture: null };
     }
-    return null;
 });
 
 ipcMain.on('window-minimize', (event, type) => {
@@ -268,6 +280,57 @@ ipcMain.on('window-maximize', () => {
 ipcMain.on('window-close', () => {
     app.isQuitting = true;
     app.quit();
+});
+
+ipcMain.handle('discord-rpc:init', async (event, clientId) => {
+    try {
+        if (rpcClient) {
+            await rpcClient.destroy();
+            rpcClient = null;
+        }
+
+        DiscordRPC.register(clientId);
+        rpcClient = new DiscordRPC.Client({ transport: 'ipc' });
+
+        return new Promise((resolve) => {
+            rpcClient.on('ready', () => {
+                isRpcConnected = true;
+                resolve({ success: true });
+            });
+
+            rpcClient.login({ clientId }).catch(err => {
+                isRpcConnected = false;
+                resolve({ success: false, error: err.message });
+            });
+        });
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.on('discord-rpc:update', (event, data) => {
+    if (!rpcClient || !isRpcConnected) return;
+
+    const activity = {
+        details: data.title ? (data.artist ? `${data.artist} - ${data.title}` : data.title) : 'Listening to Music',
+        state: data.status === 'playing' ? (data.album || 'Playing') : 'Paused',
+        largeImageKey: 'zenith_logo', // Задай имя ассета в Discord Dev Portal или оставь
+        largeImageText: 'Zenith Player',
+        instance: false
+    };
+
+    if (data.status === 'playing' && data.startTimestamp && data.endTimestamp) {
+        activity.startTimestamp = data.startTimestamp;
+        activity.endTimestamp = data.endTimestamp;
+    }
+
+    rpcClient.setActivity(activity).catch(console.error);
+});
+
+ipcMain.on('discord-rpc:clear', () => {
+    if (rpcClient && isRpcConnected) {
+        rpcClient.clearActivity().catch(console.error);
+    }
 });
 
 app.on('will-quit', () => {
