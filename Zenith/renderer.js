@@ -820,59 +820,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function drawWaveform(buffer) {
-        // 1. Фикс разрешения (HD качество)
-        const dpr = window.devicePixelRatio || 1;
-        waveformCanvas.width = waveformCanvas.clientWidth * dpr;
-        waveformCanvas.height = waveformCanvas.clientHeight * dpr;
-        waveformCtx.scale(dpr, dpr);
+    // Рисуем сверхлегкую базовую сетку/шкалу таймлайна (вызывается 1 раз при загрузке)
+function drawWaveform() {
+    const dpr = window.devicePixelRatio || 1;
+    waveformCanvas.width = waveformCanvas.clientWidth * dpr;
+    waveformCanvas.height = waveformCanvas.clientHeight * dpr;
+    waveformCtx.scale(dpr, dpr);
 
-        const width = waveformCanvas.clientWidth;
-        const height = waveformCanvas.clientHeight;
-        const data = buffer.getChannelData(0);
+    const w = waveformCanvas.clientWidth;
+    const h = waveformCanvas.clientHeight;
 
-        // 2. Настройка стиля (берем актуальный акцентный цвет темы)
-        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8b5cf6';
+    waveformCtx.clearRect(0, 0, w, h);
 
-        waveformCtx.clearRect(0, 0, width, height);
+    // Центральная направляющая линия
+    waveformCtx.beginPath();
+    waveformCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    waveformCtx.lineWidth = 1;
+    waveformCtx.moveTo(0, h / 2);
+    waveformCtx.lineTo(w, h / 2);
+    waveformCtx.stroke();
 
-        // Рисуем центральную линию (ось)
-        waveformCtx.beginPath();
-        waveformCtx.strokeStyle = 'rgba(255,255,255,0.1)';
-        waveformCtx.moveTo(0, height / 2);
-        waveformCtx.lineTo(width, height / 2);
-        waveformCtx.stroke();
-
-        // 3. Рисуем столбики
-        const barWidth = 2; // Ширина одного столбика
-        const gap = 1;      // Просвет между ними
-        const step = Math.ceil(data.length / (width / (barWidth + gap)));
-        const amp = height / 2;
-
-        for (let i = 0; i < width; i += (barWidth + gap)) {
-            let min = 1.0;
-            let max = -1.0;
-
-            for (let j = 0; j < step; j++) {
-                const datum = data[Math.floor((i / (barWidth + gap)) * step) + j];
-                if (datum < min) min = datum;
-                if (datum > max) max = datum;
-            }
-
-            // Делаем цвет чуть прозрачным, чтобы выглядело мягче
-            waveformCtx.fillStyle = accentColor;
-
-            // Рисуем верхнюю и нижнюю части столбика
-            // Ограничиваем минимальную высоту в 1px, чтобы не было пустых мест
-            const x = i;
-            const y = (1 + min) * amp;
-            const w = barWidth;
-            const h = Math.max(1, (max - min) * amp);
-
-            // Скругленные столбики (опционально)
-            waveformCtx.fillRect(x, y, w, h);
-        }
+    // Засечки делений (каждые 5% ширины)
+    waveformCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    for (let x = 0; x < w; x += w / 20) {
+        waveformCtx.fillRect(x, h / 2 - 4, 1, 8);
     }
+}
     selectFolderBtn.addEventListener('click', () => window.electronAPI.selectFolder(true));
     window.electronAPI.onReceiveTracks(displayTracks);
 
