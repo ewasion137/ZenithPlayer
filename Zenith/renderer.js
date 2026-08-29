@@ -207,6 +207,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(playNextTrack, 100);
             }
         };
+        const remainingSec = (currentTrackBuffer.duration - offsetSeconds) / (Number(speedSlider.value) / 100);
+        const now = Date.now();
+        window.electronAPI.updateDiscordRPC({
+            title: currentMetadata.title || currentTrackNameLabel.textContent,
+            artist: currentMetadata.artist || '',
+            album: currentMetadata.album || '',
+            status: 'playing',
+            startTimestamp: Math.floor(now - (offsetSeconds * 1000)),
+            endTimestamp: Math.floor(now + (remainingSec * 1000))
+        });
 
         updateUIState();
         startRenderLoop();
