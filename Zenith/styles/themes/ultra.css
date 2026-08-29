@@ -1,25 +1,422 @@
-/* === ULTRA (CYBERPUNK NEON) === */
-:root {
-    --bg-main: #040207;
-    --panel-bg: rgba(18, 10, 28, 0.75);
-    --surface: rgba(35, 20, 55, 0.85);
-    --accent: #ff007a;
-    --accent-secondary: #00f2ff;
-    --accent-gradient: linear-gradient(135deg, #ff007a 0%, #7a00ff 50%, #00f2ff 100%);
-    --text-main: #ffffff;
-    --text-dim: #9d8ba9;
-    --border-light: rgba(255, 0, 122, 0.15);
-    --border-focus: #ff007a;
-    --title-bg: rgba(8, 3, 14, 0.9);
-    --title-text: #ff007a;
+/* ==========================================================================
+   THEME: ULTRA (BATTLESTATION RGB OVERDRIVE / EPOMAKER MECHANICAL CHROMA)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap');
+
+@keyframes chroma-flow {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
 }
 
+@keyframes rgb-border-sweep {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+:root {
+    --bg-main: #050508;
+    --panel-bg: #0b0c10;
+    --surface: #14161f;
+    --accent: #ff0055;
+    --accent-secondary: #00f0ff;
+    --accent-tertiary: #ffee00;
+    --rgb-gradient: linear-gradient(90deg, #ff0055, #ff7700, #ffee00, #00ff66, #00f0ff, #7000ff, #ff0055);
+    --text-main: #ffffff;
+    --text-dim: #798299;
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-focus: #00f0ff;
+    --keycap-bevel: 0 4px 0 #07080b, 0 5px 10px rgba(0, 0, 0, 0.8);
+    --chroma-shadow: 0 0 15px rgba(255, 0, 85, 0.5), 0 0 25px rgba(0, 240, 255, 0.3);
+}
+
+/* === ФОН: КАРБОНОВЫЙ ПЛЕЙТ + АМБИЕНТНАЯ ПОДСВЕТКА СТОЛА === */
 body {
+    font-family: 'Chakra Petch', -apple-system, sans-serif;
+    background-color: var(--bg-main);
     background-image: 
-        radial-gradient(circle at 10% 10%, rgba(255, 0, 122, 0.12) 0%, transparent 45%),
-        radial-gradient(circle at 90% 90%, rgba(0, 242, 255, 0.12) 0%, transparent 45%);
+        /* Карбоновое плетение */
+        radial-gradient(black 15%, transparent 16%),
+        radial-gradient(black 15%, transparent 16%),
+        /* Агрессивный фоновый RGB-засвет */
+        radial-gradient(circle at 0% 0%, rgba(255, 0, 85, 0.22) 0%, transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(0, 240, 255, 0.22) 0%, transparent 40%),
+        linear-gradient(45deg, #111218 25%, #08090d 25%, #08090d 50%, #111218 50%, #111218 75%, #08090d 75%, #08090d 100%);
+    background-size: 8px 8px, 8px 8px, 100% 100%, 100% 100%, 8px 8px;
+    background-position: 0 0, 4px 4px, 0 0, 0 0, 0 0;
 }
 
 #spectrogram-canvas {
-    filter: hue-rotate(300deg) saturate(180%);
+    opacity: 0.35;
+    filter: saturate(250%) contrast(140%);
+    animation: chroma-flow 12s linear infinite;
+}
+
+/* === TITLE BAR: КОРПУС ШАССИ C RGB-ЛЕНТОЙ === */
+.title-bar {
+    background: #08090d;
+    border-bottom: 2px solid transparent;
+    border-image: var(--rgb-gradient) 1;
+    height: 34px;
+}
+
+.title-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: #ffffff;
+    text-shadow: 2px 0 var(--accent), -2px 0 var(--accent-secondary);
+}
+
+.win-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+}
+
+.win-btn:hover {
+    background: #181b26;
+    color: var(--accent-secondary);
+    box-shadow: inset 0 -2px 0 var(--accent-secondary);
+}
+
+.win-close:hover {
+    background: #ff0055 !important;
+    color: #fff;
+    box-shadow: 0 0 15px #ff0055;
+}
+
+/* === NOW PLAYING: РУБЛЕНЫЙ МОДУЛЬ С БЕГУЩИМ RGB-КОНТУРОМ === */
+.now-playing-container {
+    background: #0d0e15;
+    border: 1px solid #1f2333;
+    border-radius: 4px;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9), 0 8px 25px rgba(0, 0, 0, 0.7);
+}
+
+/* Анимированная RGB-рамка */
+.now-playing-container::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: var(--rgb-gradient);
+    background-size: 300% 300%;
+    animation: rgb-border-sweep 4s ease infinite;
+}
+
+/* Обложка: квадратный PBT дисплей с RGB-подсветкой */
+.cover-wrapper {
+    width: 86px;
+    height: 86px;
+    border-radius: 4px;
+    border: 2px solid #00f0ff;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4), inset 0 0 10px rgba(255, 0, 85, 0.4);
+    background: #000;
+}
+
+#current-track-artwork {
+    filter: contrast(115%) brightness(105%);
+}
+
+.artwork-glow {
+    filter: blur(50px);
+    opacity: 0.45;
+}
+
+.track-info h1 {
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-shadow: 2px 0 var(--accent), -2px 0 var(--accent-secondary);
+}
+
+.track-info p {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-secondary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* === ПАНЕЛЬ УПРАВЛЕНИЯ: МЕХАНИЧЕСКИЕ КЕЙКАПЫ И МАКРОСЫ === */
+#top-controls {
+    background: #0d0e15;
+    border: 1px solid #1f2333;
+    border-radius: 4px;
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Кнопки как механические свитчи / клавиши клавиатуры */
+#prev-btn, #next-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #1e2233 0%, #12141f 100%);
+    border: 1px solid #2d334d;
+    box-shadow: var(--keycap-bevel);
+    transform: translateY(0);
+    transition: all 0.08s ease;
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: linear-gradient(180deg, #252b42 0%, #161926 100%);
+    border-color: var(--accent-secondary);
+    box-shadow: var(--keycap-bevel), 0 0 12px var(--accent-secondary);
+}
+
+#prev-btn:active, #next-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #07080b, 0 0 15px var(--accent-secondary);
+}
+
+#prev-btn::before { border-right-color: #fff; }
+#next-btn::before { border-left-color: #fff; }
+
+/* PLAY BUTTON: RGB TURBO CORE */
+#play-pause-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    background: #12141f;
+    border: 2px solid transparent;
+    background-image: linear-gradient(#12141f, #12141f), var(--rgb-gradient);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    box-shadow: var(--keycap-bevel), var(--chroma-shadow);
+    animation: chroma-flow 6s linear infinite;
+    transform: translateY(0);
+    transition: all 0.08s ease;
+}
+
+#play-pause-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: var(--keycap-bevel), 0 0 25px #ff0055, 0 0 35px #00f0ff;
+}
+
+#play-pause-btn:active {
+    transform: translateY(3px) scale(0.98);
+}
+
+.control-group label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-secondary);
+    letter-spacing: 1px;
+}
+
+.control-group input[type="range"] {
+    background: #141724;
+    height: 6px;
+    border: 1px solid #282e45;
+    border-radius: 0;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    background: #ff0055;
+    box-shadow: 0 0 10px #ff0055;
+    border: 1px solid #fff;
+    cursor: ew-resize;
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'Share Tech Mono', monospace;
+    background: #07080c;
+    border: 1px solid #282e45;
+    color: #ffee00;
+    border-radius: 2px;
+}
+
+/* === ВОЛНОВАЯ ФОРМА: КИБЕРПАНК СТАТУС-ТРЕК === */
+.waveform-container {
+    background: #06070a;
+    border: 1px solid #202436;
+    border-radius: 2px;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9);
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 5px #00f0ff);
+}
+
+#time-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-secondary);
+}
+
+/* === ЭКВАЛАЙЗЕР: OVERCLOCKING VOLTAGE BARS === */
+.eq-container-wrapper {
+    background: #0d0e15;
+    border: 1px solid #1f2333;
+    border-radius: 4px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+.eq-header-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    text-shadow: 2px 0 var(--accent), -2px 0 var(--accent-secondary);
+}
+
+.eq-band label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+}
+
+.eq-band input[type="range"] {
+    background: #08090d;
+    border: 1px solid #282e45;
+    border-radius: 2px;
+}
+
+/* === RESIZER: НЕОНОВАЯ ЛАЗЕРНАЯ НАПРАВЛЯЮЩАЯ === */
+.resizer-bar {
+    width: 4px;
+    background: #181b26;
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--accent);
+    box-shadow: 0 0 15px var(--accent);
+}
+
+/* === САЙДБАР: ТЕМНЫЙ КОРПУС С МАКРО-СПИСКОМ ТРЕКОВ === */
+.explorer-sidebar {
+    background: #08090d;
+    border-left: 2px solid #1a1e2b;
+}
+
+.explorer-header {
+    background: #0e1017;
+    border-bottom: 2px solid #1a1e2b;
+}
+
+.explorer-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--accent-secondary);
+}
+
+.explorer-header button {
+    font-family: 'Chakra Petch', sans-serif;
+    background: #161924;
+    border: 1px solid #2b324a;
+    border-radius: 2px;
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.explorer-header button:hover {
+    background: #ff0055;
+    border-color: #ff0055;
+    box-shadow: 0 0 15px #ff0055;
+}
+
+.folder-group h3 {
+    font-family: 'Chakra Petch', sans-serif;
+    background: #10121a;
+    border: 1px solid #1f2436;
+    border-radius: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.folder-group.open h3 {
+    color: #00f0ff;
+    border-color: #00f0ff;
+    background: rgba(0, 240, 255, 0.08);
+    box-shadow: inset 3px 0 0 #00f0ff;
+}
+
+.track-item {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 2px;
+    border-left: 2px solid transparent;
+}
+
+.track-item:hover {
+    background: #151824;
+    color: #00f0ff;
+    padding-left: 14px;
+}
+
+.track-item.playing {
+    background: linear-gradient(90deg, rgba(255, 0, 85, 0.25) 0%, transparent 100%);
+    border-left: 3px solid #ff0055;
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 0 8px #ff0055;
+}
+
+/* === STATUS BAR: ТЕЛЕМЕТРИЯ СИСТЕМЫ === */
+.status-bar {
+    background: #08090d;
+    border-top: 1px solid #1a1e2b;
+}
+
+.status-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.status-btn:hover {
+    background: #181b26;
+    color: #00f0ff;
+}
+
+.status-search input {
+    background: #050508;
+    border: 1px solid #23283b;
+    border-radius: 2px;
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.status-search input:focus {
+    border-color: #ff0055;
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
+}
+
+.status-tag {
+    font-family: 'Share Tech Mono', monospace;
+    color: #ffee00;
+}
+
+/* === МОДАЛЬНОЕ ОКНО === */
+.modal-content {
+    background: #0b0c12;
+    border: 2px solid #ff0055;
+    border-radius: 4px;
+    box-shadow: 0 0 30px rgba(255, 0, 85, 0.4);
+}
+
+.modal-header h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #ff0055;
 }
