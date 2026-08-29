@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let visualsEnabled = true;
     let optimizeInterval = null;
     let currentMetadata = { title: null, artist: null, album: null };
+    let waveformPeaks = [];
 
     // --- DOM Elements ---
     const playPauseBtn = document.getElementById('play-pause-btn');
@@ -513,13 +514,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let lastRenderTime = 0;
+    function drawSpectrogram() {
+        if (!spectrogramCanvas || !visualsEnabled) return;
+
+        const w = spectrogramCanvas.clientWidth;
+        const h = spectrogramCanvas.clientHeight;
+        if (w === 0 || h === 0) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        if (spectrogramCanvas.width !== w * dpr || spectrogramCanvas.height !== h * dpr) {
+            spectrogramCanvas.width = w * dpr;
+            spectrogramCanvas.height = h * dpr;
+        }
+
+        spectrogramCtx.save();
+        spectrogramCtx.scale(dpr, dpr);
+        spectrogramCtx.clearRect(0, 0, w, h);
+
+        if (!isPlaying) {
+            spectrogramCtx.restore();
+            return;
+        }
+
+        analyser.getByteFrequencyData(dataArray);
+
+        const bufferLength = analyser.frequencyBinCount;
+        const barWidth = (w / bufferLength) * 2.5;
+        let x = 0;
+
+        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8b5cf6';
+        const accentSec = getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim() || '#0ea5e9';
+
+        // Градиент для спектра
+        const grad = spectrogramCtx.createLinearGradient(0, h, 0, 0);
+        grad.addColorStop(0, accent);
+        grad.addColorStop(1, accentSec);
+
+        spectrogramCtx.fillStyle = grad;
+
+        for (let i = 0; i < bufferLength; i++) {
+            const barHeight = (dataArray[i] / 255) * (h * 0.45); // Занимает до 45% экрана снизу
+
+            spectrogramCtx.globalAlpha = (dataArray[i] / 255) * 0.6;
+            spectrogramCtx.fillRect(x, h - barHeight, barWidth - 1, barHeight);
+
+            x += barWidth;
+            if (x > w) break;
+        }
+
+        spectrogramCtx.restore();
+    }
+
     function render(timestamp) {
         if (!currentTrackBuffer || !visualsEnabled) return;
 
-        // Ограничение кадров не нужно, теперь рендер весит 0.01ms
         updateSimpleUI();
-        drawDynamicTracker(); // Тот самый кубик
-        if (isPlaying) animationFrameId = requestAnimationFrame(render);
+        renderWaveform();    // Отрисовка вейвформы с прогрессом
+        drawSpectrogram();   // Отрисовка спектрограммы на фоне
+
+        if (isPlaying) {
+            animationFrameId = requestAnimationFrame(render);
+        }
     }
 
     function drawDynamicTracker() {
@@ -825,35 +880,100 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Рисуем сверхлегкую базовую сетку/шкалу таймлайна (вызывается 1 раз при загрузке)
-    function drawWaveform() {
-        const dpr = window.devicePixelRatio || 1;
-        waveformCanvas.width = waveformCanvas.clientWidth * dpr;
-        waveformCanvas.height = waveformCanvas.clientHeight * dpr;
-        waveformCtx.scale(dpr, dpr);
+    function generateWaveformPeaks(buffer) {
+        if (!buffer) return [];
+        const channelData = buffer.getChannelData(0);
+        const totalBars = 140;
+        const step = Math.floor(channelData.length / totalBars);
+        const peaks = [];
 
+        for (let i = 0; i < totalBars; i++) {
+            let max = 0;
+            const start = i * step;
+            // Проверяем сэмплы с шагом для супер-скорости
+            for (let j = 0; j < step; j += 10) {
+                const val = Math.abs(channelData[start + j] || 0);
+                if (val > max) max = val;
+            }
+            peaks.push(Math.max(0.08, max)); // Минимальная высота бара 8%
+        }
+        return peaks;
+    }
+
+    function drawWaveform(buffer) {
+        if (!buffer) return;
+        waveformPeaks = generateWaveformPeaks(buffer);
+        renderWaveform();
+    }
+
+    function renderWaveform() {
         const w = waveformCanvas.clientWidth;
         const h = waveformCanvas.clientHeight;
+        if (w === 0 || h === 0) return;
 
+        const dpr = window.devicePixelRatio || 1;
+        if (waveformCanvas.width !== w * dpr || waveformCanvas.height !== h * dpr) {
+            waveformCanvas.width = w * dpr;
+            waveformCanvas.height = h * dpr;
+        }
+
+        waveformCtx.save();
+        waveformCtx.scale(dpr, dpr);
         waveformCtx.clearRect(0, 0, w, h);
 
-        // Центральная направляющая линия
-        waveformCtx.beginPath();
-        waveformCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-        waveformCtx.lineWidth = 1;
-        waveformCtx.moveTo(0, h / 2);
-        waveformCtx.lineTo(w, h / 2);
-        waveformCtx.stroke();
-
-        // Засечки делений (каждые 5% ширины)
-        waveformCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-        for (let x = 0; x < w; x += w / 20) {
-            waveformCtx.fillRect(x, h / 2 - 4, 1, 8);
+        if (!waveformPeaks || waveformPeaks.length === 0) {
+            waveformCtx.restore();
+            return;
         }
+
+        const totalBars = waveformPeaks.length;
+        const gap = 2;
+        const barWidth = (w - (totalBars - 1) * gap) / totalBars;
+        const progress = currentTrackBuffer ? (getCurrentTime() / currentTrackBuffer.duration) : 0;
+        const progressX = progress * w;
+
+        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8b5cf6';
+
+        for (let i = 0; i < totalBars; i++) {
+            const x = i * (barWidth + gap);
+            const barH = waveformPeaks[i] * (h - 8);
+            const y = (h - barH) / 2;
+
+            if (x + barWidth <= progressX) {
+                // Уже сыгранная часть (яркий акцент)
+                waveformCtx.fillStyle = accent;
+                waveformCtx.globalAlpha = 0.9;
+            } else {
+                // Несыгранная часть (приглушенная)
+                waveformCtx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                waveformCtx.globalAlpha = 0.5;
+            }
+
+            // Скругленный столбик
+            waveformCtx.beginPath();
+            waveformCtx.roundRect(x, y, Math.max(1, barWidth), barH, 2);
+            waveformCtx.fill();
+        }
+
+        // Линия курсора
+        if (currentTrackBuffer && isPlaying) {
+            waveformCtx.fillStyle = '#ffffff';
+            waveformCtx.globalAlpha = 1.0;
+            waveformCtx.shadowColor = accent;
+            waveformCtx.shadowBlur = 8;
+            waveformCtx.fillRect(progressX - 1, 0, 2, h);
+        }
+
+        waveformCtx.restore();
     }
+
+
     selectFolderBtn.addEventListener('click', () => window.electronAPI.selectFolder(true));
     window.electronAPI.onReceiveTracks(displayTracks);
 
     window.addEventListener('resize', () => {
+        spectrogramCanvas.width = window.innerWidth;
+        spectrogramCanvas.height = window.innerHeight;
         if (currentTrackBuffer) drawWaveform(currentTrackBuffer);
     });
     window.dispatchEvent(new Event('resize'));

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Zenith</title>
+    <title>Zenith Player</title>
     <link rel="stylesheet" href="styles/main.css">
     <link id="theme-link" rel="stylesheet" href="">
 </head>
@@ -12,32 +12,32 @@
     <!-- 1. TITLE BAR -->
     <div class="title-bar">
         <div class="title-bar-drag">
-            <img src="icon.png" class="title-icon">
+            <img src="icon.png" class="title-icon" alt="">
             <span class="title-text">ZENITH PLAYER</span>
         </div>
         <div class="window-controls">
-            <button id="win-min" class="win-btn">&minus;</button>
-            <button id="win-max" class="win-btn">&#9634;</button>
-            <button id="win-close" class="win-btn win-close">&times;</button>
+            <button id="win-min" class="win-btn" title="Minimize">&minus;</button>
+            <button id="win-max" class="win-btn" title="Maximize">&#9634;</button>
+            <button id="win-close" class="win-btn win-close" title="Close">&times;</button>
         </div>
     </div>
 
-    <!-- 2. MAIN WORKSPACE (VS CODE STYLE SPLIT) -->
+    <!-- 2. MAIN WORKSPACE -->
     <div class="app-workspace">
         <canvas id="spectrogram-canvas"></canvas>
 
         <!-- LEFT: MAIN PLAYER STAGE -->
         <div class="player-stage">
-            <!-- NOW PLAYING -->
+            <!-- NOW PLAYING HERO -->
             <div class="now-playing-container">
                 <div class="artwork-glow"></div>
                 <div class="track-info">
                     <h1 id="current-track-name">Zenith Player</h1>
-                    <p id="current-track-folder">Select a folder or track</p>
+                    <p id="current-track-folder">Select a track from explorer</p>
                 </div>
             </div>
 
-            <!-- CONTROLS & WAVEFORM -->
+            <!-- CONTROLS & TIMELINE -->
             <div id="top-controls">
                 <div class="main-controls">
                     <button id="prev-btn" title="Previous Track"></button>
@@ -48,13 +48,13 @@
                 <div class="controls-column">
                     <div class="sliders-row">
                         <div class="control-group">
-                            <label>Vol</label>
+                            <label>VOL</label>
                             <input type="range" id="track-volume-slider" min="0" max="200" value="100" step="1">
                             <input type="number" id="track-volume-input" min="0" max="200" value="100" class="control-input">
                             <span id="track-volume-value">100%</span>
                         </div>
                         <div class="control-group">
-                            <label>Speed</label>
+                            <label>SPEED</label>
                             <input type="range" id="speed-slider" min="50" max="200" value="100" step="1">
                             <input type="number" id="speed-input" min="50" max="200" value="100" class="control-input">
                             <span id="speed-value">100%</span>
@@ -76,19 +76,19 @@
 
             <!-- EQUALIZER -->
             <div class="eq-container-wrapper">
-                <div class="eq-header-label">EQUALIZER</div>
+                <div class="eq-header-label">EQUALIZER (DSP)</div>
                 <div class="eq-bands"></div>
             </div>
         </div>
 
-        <!-- RESIZER DIVIDER -->
-        <div id="sidebar-resizer" class="resizer-bar" title="Drag to resize explorer"></div>
+        <!-- RESIZER -->
+        <div id="sidebar-resizer" class="resizer-bar" title="Drag to resize"></div>
 
-        <!-- RIGHT: EXPLORER SIDEBAR -->
+        <!-- RIGHT: EXPLORER -->
         <div class="explorer-sidebar" id="explorer-sidebar">
             <div class="explorer-header">
-                <span>EXPLORER</span>
-                <button id="select-folder-btn" title="Open Folder">📂 Open</button>
+                <span class="explorer-title">EXPLORER</span>
+                <button id="select-folder-btn" title="Open Folder">📂 Open Folder</button>
             </div>
             <div class="track-list-container">
                 <div id="track-list"></div>
@@ -96,10 +96,10 @@
         </div>
     </div>
 
-    <!-- 3. BOTTOM STATUS BAR (VS CODE STYLE) -->
+    <!-- 3. BOTTOM STATUS BAR -->
     <div class="status-bar">
         <div class="status-left">
-            <button id="discord-rpc-btn" class="status-btn" title="Discord Rich Presence">🎮 <span id="rpc-quick-status">RPC</span></button>
+            <button id="discord-rpc-btn" class="status-btn" title="Discord RPC">🎮 <span id="rpc-quick-status">RPC</span></button>
             <button id="optimize-btn" class="status-btn" title="Toggle Visuals">GFX: ON</button>
             <button id="save-settings-btn" class="status-btn" title="Save Settings">💾 Save</button>
             <button id="reset-settings-btn" class="status-btn" title="Reset Settings">Reset</button>
@@ -107,12 +107,12 @@
 
         <div class="status-center">
             <div class="status-search">
-                <input type="text" id="search-input" placeholder="🔍 Search tracks...">
+                <input type="text" id="search-input" placeholder="🔍 Search in playlist...">
             </div>
         </div>
 
         <div class="status-right">
-            <span id="audio-format-tag" class="status-tag">44.1kHz • DSP</span>
+            <span id="audio-format-tag" class="status-tag">44.1kHz • 24bit</span>
             <button id="theme-switcher" class="status-btn" title="Change Theme">🎨 Theme</button>
         </div>
     </div>
