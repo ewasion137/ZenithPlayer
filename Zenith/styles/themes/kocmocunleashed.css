@@ -1,107 +1,128 @@
 /* ==========================================================================
-   THEME: KOCMOC UNLEASHED (CHERRYTEAM MONOCHROME / EVENT HORIZON SINGULARITY)
+   THEME: KOCMOC UNLEASHED (CHERRY TEAM / MONOCHROME SINGULARITY)
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Syne:wght@700;800&family=JetBrains+Mono:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Syne:wght@700;800&family=Space+Mono:wght@400;700&display=swap');
 
-@keyframes blackhole-swirl {
-    0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(180deg) scale(1.03); }
-    100% { transform: rotate(360deg) scale(1); }
+/* === СЕЙСМИЧЕСКОЕ ДРОЖАНИЕ И ИСКРИВЛЕНИЕ ЧЕРНОЙ ДЫРЫ === */
+@keyframes blackhole-tremble {
+    0% { transform: translate(-50%, -50%) translate(0px, 0px) scale(1); }
+    15% { transform: translate(-50%, -50%) translate(-2px, 1.5px) scale(1.012); }
+    30% { transform: translate(-50%, -50%) translate(2px, -1px) scale(0.992); }
+    45% { transform: translate(-50%, -50%) translate(-1.5px, -2px) scale(1.018); }
+    60% { transform: translate(-50%, -50%) translate(2.5px, 1px) scale(0.996); }
+    75% { transform: translate(-50%, -50%) translate(-1px, 2px) scale(1.008); }
+    90% { transform: translate(-50%, -50%) translate(1.5px, -1.5px) scale(1.002); }
+    100% { transform: translate(-50%, -50%) translate(0px, 0px) scale(1); }
 }
 
-@keyframes event-horizon-pulse {
-    0%, 100% {
-        box-shadow: 
-            0 0 20px #ffffff,
-            0 0 50px rgba(255, 255, 255, 0.6),
-            inset 0 0 20px #ffffff;
-    }
-    50% {
-        box-shadow: 
-            0 0 40px #ffffff,
-            0 0 90px rgba(255, 255, 255, 0.9),
-            inset 0 0 35px #ffffff;
-    }
+@keyframes accretion-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-@keyframes laser-sweep {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+@keyframes photon-strobe {
+    0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 35px #ffffff) blur(2px); }
+    50% { opacity: 1; filter: drop-shadow(0 0 70px #ffffff) drop-shadow(0 0 120px rgba(255,255,255,0.8)) blur(1px); }
 }
 
 :root {
     --bg-main: #000000;
-    --panel-bg: #050505;
-    --surface: #0f0f12;
-    --surface-bright: #222226;
+    --panel-bg: rgba(5, 5, 6, 0.82);
+    --surface: rgba(18, 18, 22, 0.9);
     --accent: #ffffff;
-    --accent-secondary: #a1a1aa;
-    --accent-dim: #52525b;
+    --accent-secondary: #888894;
+    --accent-dim: #33333d;
     --accent-gradient: linear-gradient(180deg, #ffffff 0%, #71717a 100%);
     --text-main: #ffffff;
-    --text-dim: #71717a;
-    --border-light: rgba(255, 255, 255, 0.2);
+    --text-dim: #737380;
+    --border-light: rgba(255, 255, 255, 0.22);
     --border-focus: #ffffff;
-    --singularity-glow: 0 0 25px rgba(255, 255, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.4);
-    --sharp-cut: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-    --transition: 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
+    --kocmoc-glow: 0 0 20px rgba(255, 255, 255, 0.75), 0 0 40px rgba(255, 255, 255, 0.35);
+    --transition: 0.1s cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* === ФОН: ЧЕРНАЯ ДЫРА И АККРЕЦИОННЫЙ ДИСК KOCMOC === */
+/* === ФОН: ГИГАНТСКАЯ ЧЕРНАЯ ДЫРА И ГРАВИТАЦИОННОЕ ЛИНЗИРОВАНИЕ === */
 body {
-    font-family: 'Unbounded', 'Syne', sans-serif;
-    background-color: var(--bg-main);
-    background-image: 
-        /* Фотонное кольцо Черной Дыры */
-        radial-gradient(circle at 50% 50%, transparent 0%, transparent 160px, rgba(255, 255, 255, 0.25) 162px, transparent 166px),
-        /* Сингулярность горизонта событий */
-        radial-gradient(circle at 50% 50%, #000000 0%, #000000 130px, #ffffff 138px, rgba(255, 255, 255, 0.4) 150px, transparent 350px),
-        /* Лазерные горизонтальные струны уровня */
-        repeating-linear-gradient(
-            0deg,
-            rgba(255, 255, 255, 0.03) 0px,
-            rgba(255, 255, 255, 0.03) 1px,
-            transparent 1px,
-            transparent 32px
-        );
-    background-size: 100% 100%, 100% 100%, 100% 32px;
-    background-attachment: fixed;
-    color: var(--text-main);
+    font-family: 'Syne', -apple-system, sans-serif;
+    background-color: #000000;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
 }
 
-/* === СПЕКТРОГРАММА: СВЕРХСВЕТОВАЯ ИНВЕРСИЯ === */
+/* 1. Гравитационное искажение и аккреционный диск */
+body::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 42%;
+    width: 680px;
+    height: 680px;
+    border-radius: 50%;
+    /* Фотонное кольцо и световая воронка */
+    background: radial-gradient(circle, #000000 52%, rgba(255, 255, 255, 0.9) 53%, rgba(255, 255, 255, 0.15) 62%, transparent 72%);
+    box-shadow: 
+        0 0 100px 30px rgba(255, 255, 255, 0.4),
+        inset 0 0 80px 20px #000000;
+    pointer-events: none;
+    z-index: 0;
+    animation: blackhole-tremble 0.22s infinite linear, photon-strobe 4s infinite ease-in-out;
+}
+
+/* 2. Вращающееся кольцо горизонта событий */
+body::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 42%;
+    width: 820px;
+    height: 380px;
+    margin-top: -190px;
+    margin-left: -410px;
+    border-radius: 50%;
+    border-top: 4px solid rgba(255, 255, 255, 0.95);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+    filter: blur(4px) drop-shadow(0 0 30px #ffffff);
+    pointer-events: none;
+    z-index: 0;
+    transform-origin: center center;
+    animation: accretion-spin 16s linear infinite, blackhole-tremble 0.22s infinite linear;
+}
+
+/* === СПЕКТРОГРАММА: МОНОХРОМНЫЙ УЛЬТРА-КОНТРАСТ === */
 #spectrogram-canvas {
-    opacity: 0.25;
+    opacity: 0.35;
     filter: grayscale(100%) contrast(300%) brightness(1.5);
 }
 
-/* === TITLE BAR: МОНОХРОМНЫЙ ШАССИС === */
+/* === TITLE BAR: СКОШЕННЫЙ ХЕДЕР ДЕМОН-УРОВНЯ === */
 .title-bar {
-    background: #000000;
+    background: rgba(0, 0, 0, 0.92);
     border-bottom: 2px solid #ffffff;
-    height: 32px;
-    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+    height: 34px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 .title-text {
-    font-family: 'Unbounded', sans-serif;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
     font-weight: 900;
-    font-size: 11px;
-    letter-spacing: 3px;
+    letter-spacing: 4px;
     color: #ffffff;
-    text-shadow: 0 0 10px #ffffff;
+    text-shadow: var(--kocmoc-glow);
 }
 
-.title-text::before {
-    content: '/// KOCMOC: ';
+.title-text::after {
+    content: ' [UNLEASHED]';
     color: #71717a;
 }
 
 .win-btn {
-    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
     color: #ffffff;
-    font-weight: 900;
+    border-left: 1px solid #222;
 }
 
 .win-btn:hover {
@@ -113,79 +134,76 @@ body {
 .win-close:hover {
     background: #ffffff !important;
     color: #000000 !important;
-    box-shadow: 0 0 25px #ffffff;
 }
 
-/* === NOW PLAYING: МОДУЛЬ СИНГУЛЯРНОСТИ (ЧЕРНАЯ ДЫРА) === */
+/* === NOW PLAYING: ТЕХНИЧЕСКИЙ БОКС С ШИПАМИ (CHERRY TEAM STYLE) === */
 .now-playing-container {
-    background: #050507;
+    background: var(--panel-bg);
+    backdrop-filter: blur(20px);
     border: 2px solid #ffffff;
-    clip-path: var(--sharp-cut);
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.15), inset 0 0 30px rgba(0, 0, 0, 0.9);
+    border-radius: 0;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+    box-shadow: 0 0 35px rgba(255, 255, 255, 0.25), inset 0 0 25px rgba(0, 0, 0, 0.9);
     position: relative;
-    padding: 18px 24px;
 }
 
-/* Верхняя лазерная линия */
 .now-playing-container::before {
-    content: '';
+    content: '/// TOP 1 EXTREME DEMON // VERIFIED BY ARSHADOW';
     position: absolute;
-    top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, #ffffff, transparent);
+    top: 4px; right: 28px;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    color: #71717a;
+    letter-spacing: 2px;
 }
 
-/* Обложка трека: черная дыра с белым фотонным ореолом */
+/* Обложка: монохромная сингулярность в титановой рамке */
 .cover-wrapper {
     width: 86px;
     height: 86px;
-    border-radius: 50%;
+    border-radius: 0;
     border: 2px solid #ffffff;
+    box-shadow: var(--kocmoc-glow);
     background: #000000;
-    animation: event-horizon-pulse 4s ease-in-out infinite;
-    position: relative;
-    padding: 3px;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
 #current-track-artwork {
-    border-radius: 50%;
-    filter: grayscale(100%) contrast(180%) brightness(0.9);
+    filter: grayscale(100%) contrast(160%) brightness(1.1);
 }
 
 .artwork-glow {
-    filter: blur(50px) grayscale(100%) contrast(200%);
+    filter: blur(50px) grayscale(100%);
     opacity: 0.5;
+    background-color: #ffffff;
 }
 
 .track-info h1 {
-    font-family: 'Unbounded', sans-serif;
+    font-family: 'Orbitron', sans-serif;
     font-weight: 900;
+    font-size: 24px;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    font-size: 20px;
-    letter-spacing: -0.5px;
     color: #ffffff;
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    text-shadow: var(--kocmoc-glow);
 }
 
 .track-info p {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Space Mono', monospace;
     font-size: 11px;
-    font-weight: 700;
     color: #a1a1aa;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
 
-.track-info p::before {
-    content: 'VERIFIED // ';
-    color: #ffffff;
-}
-
-/* === УПРАВЛЕНИЕ: ПИЛООБРАЗНЫЙ БЛОК ДЕМОНА === */
+/* === УПРАВЛЕНИЕ: МЕХАНИЧЕСКИЕ КЛАВИШИ УРОВНЯ === */
 #top-controls {
-    background: #050507;
+    background: var(--panel-bg);
+    backdrop-filter: blur(20px);
     border: 2px solid #ffffff;
-    clip-path: var(--sharp-cut);
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
 }
 
 #prev-btn, #next-btn {
@@ -193,15 +211,15 @@ body {
     height: 42px;
     border-radius: 0;
     background: #000000;
-    border: 1.5px solid #ffffff;
-    clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
-    transition: all 0.15s ease;
+    border: 2px solid #ffffff;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    transition: all 0.08s ease;
 }
 
 #prev-btn:hover, #next-btn:hover {
     background: #ffffff;
-    box-shadow: 0 0 20px #ffffff;
-    transform: scale(1.08);
+    box-shadow: var(--kocmoc-glow);
+    transform: scale(1.05);
 }
 
 #prev-btn::before { border-right-color: #ffffff; }
@@ -210,15 +228,16 @@ body {
 #prev-btn:hover::before { border-right-color: #000000; }
 #next-btn:hover::before { border-left-color: #000000; }
 
-/* Кнопка Play: Ядро Коллапса */
+/* Кнопка Play: Орб сингулярности */
 #play-pause-btn {
     width: 52px;
     height: 52px;
-    border-radius: 50%;
+    border-radius: 0;
     background: #000000;
     border: 2px solid #ffffff;
-    box-shadow: var(--singularity-glow);
-    transition: all 0.15s ease;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    box-shadow: 0 0 25px #ffffff, inset 0 0 10px #ffffff;
+    transition: all 0.08s ease;
 }
 
 #play-pause-btn::before {
@@ -227,8 +246,8 @@ body {
 
 #play-pause-btn:hover {
     background: #ffffff;
-    transform: scale(1.1);
-    box-shadow: 0 0 35px #ffffff, 0 0 70px rgba(255, 255, 255, 0.8);
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 0 45px #ffffff, 0 0 80px rgba(255, 255, 255, 0.8);
 }
 
 #play-pause-btn:hover::before {
@@ -236,18 +255,18 @@ body {
 }
 
 .control-group label {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 9px;
-    font-weight: 900;
-    color: #a1a1aa;
-    letter-spacing: 1.5px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 2px;
 }
 
 .control-group input[type="range"] {
     background: #18181b;
     height: 4px;
+    border: 1px solid #ffffff;
     border-radius: 0;
-    border: 1px solid #3f3f46;
 }
 
 .control-group input[type="range"]::-webkit-slider-thumb {
@@ -256,7 +275,8 @@ body {
     border-radius: 0;
     background: #ffffff;
     box-shadow: 0 0 10px #ffffff;
-    transform: rotate(45deg); /* Квадрат-ромб шипа GD */
+    border: none;
+    transform: rotate(45deg);
     cursor: pointer;
 }
 
@@ -264,65 +284,61 @@ body {
     background: #000000;
     border: 1px solid #ffffff;
     color: #ffffff;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
+    font-family: 'Space Mono', monospace;
     border-radius: 0;
+    font-weight: 700;
 }
 
 /* === ВОЛНОВАЯ ФОРМА: ЛАЗЕРНЫЙ СЕЙСМОГРАФ === */
 .waveform-container {
     background: #000000;
-    border: 1.5px solid #ffffff;
+    border: 2px solid #ffffff;
     border-radius: 0;
-    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 #waveform-canvas {
-    filter: drop-shadow(0 0 6px #ffffff);
+    filter: drop-shadow(0 0 6px #ffffff) contrast(200%);
 }
 
 #time-display {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
+    font-family: 'Space Mono', monospace;
     font-size: 11px;
+    font-weight: 700;
     color: #ffffff;
 }
 
-/* === ЭКВАЛАЙЗЕР: СТРУКТУРА ШИПОВ И БЛОКОВ === */
+/* === ЭКВАЛАЙЗЕР: АМПЛИТУДНЫЕ ПИКИ СИНГУЛЯРНОСТИ === */
 .eq-container-wrapper {
-    background: #050507;
+    background: var(--panel-bg);
+    backdrop-filter: blur(20px);
     border: 2px solid #ffffff;
-    clip-path: var(--sharp-cut);
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
 }
 
 .eq-header-label {
-    font-family: 'Unbounded', sans-serif;
+    font-family: 'Orbitron', monospace;
     font-size: 11px;
     font-weight: 900;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     color: #ffffff;
-    text-shadow: 0 0 10px #ffffff;
-}
-
-.eq-header-label::before {
-    content: '▲ ';
+    text-shadow: var(--kocmoc-glow);
 }
 
 .eq-band label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Space Mono', monospace;
     font-size: 9px;
-    font-weight: 700;
-    color: #71717a;
+    color: #a1a1aa;
 }
 
 .eq-band input[type="range"] {
     background: #000000;
-    border: 1px solid #3f3f46;
+    border: 1px solid #ffffff;
     border-radius: 0;
 }
 
-/* === RESIZER: БЕЛЫЙ ЛАЗЕРНЫЙ ЛУЧ === */
+/* === РАЗДЕЛИТЕЛЬ: ЧИСТЫЙ ЛАЗЕРНЫЙ ЛУЧ === */
 .resizer-bar {
     width: 3px;
     background: #27272a;
@@ -330,37 +346,38 @@ body {
 
 .resizer-bar:hover, .resizer-bar.resizing {
     background: #ffffff;
-    box-shadow: 0 0 20px #ffffff;
+    box-shadow: 0 0 20px #ffffff, 0 0 40px #ffffff;
 }
 
-/* === САЙДБАР: СПИСОК УРОВНЕЙ И СЕКЦИЙ === */
+/* === САЙДБАР: НАВИГАЦИЯ ПО ДЕМОН-ЛИСТУ === */
 .explorer-sidebar {
-    background: #030304;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(25px);
     border-left: 2px solid #ffffff;
 }
 
 .explorer-header {
-    background: #000000;
+    background: #09090b;
     border-bottom: 2px solid #ffffff;
 }
 
 .explorer-title {
-    font-family: 'Unbounded', sans-serif;
+    font-family: 'Orbitron', monospace;
     font-weight: 900;
     font-size: 11px;
     letter-spacing: 2px;
     color: #ffffff;
+    text-shadow: var(--kocmoc-glow);
 }
 
 .explorer-header button {
     background: #000000;
     border: 1px solid #ffffff;
     border-radius: 0;
-    font-family: 'Unbounded', sans-serif;
-    font-size: 10px;
-    font-weight: 900;
     color: #ffffff;
-    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .explorer-header button:hover {
@@ -370,33 +387,29 @@ body {
 }
 
 .folder-group h3 {
-    font-family: 'Unbounded', sans-serif;
-    background: #0a0a0d;
+    font-family: 'Space Mono', monospace;
+    background: #09090b;
     border: 1px solid #27272a;
     border-radius: 0;
-    font-size: 10px;
-    font-weight: 700;
+    color: #d4d4d8;
+    font-size: 11px;
     text-transform: uppercase;
 }
 
 .folder-group.open h3 {
+    color: #000000;
     background: #ffffff;
-    color: #000000;
     border-color: #ffffff;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
-}
-
-.folder-group.open h3::before {
-    color: #000000;
+    font-weight: 700;
+    box-shadow: 0 0 15px #ffffff;
 }
 
 .track-item {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
     border-radius: 0;
-    border-left: 2px solid transparent;
     color: #71717a;
+    border-left: 2px solid transparent;
 }
 
 .track-item:hover {
@@ -405,27 +418,25 @@ body {
     padding-left: 14px;
 }
 
-/* Активный играющий трек: 100% ATTITUDE */
 .track-item.playing {
     background: #ffffff;
     color: #000000 !important;
-    border-left: none;
-    font-weight: 900;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    font-weight: 700;
+    border-left: 4px solid #000000;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
 }
 
-/* === STATUS BAR === */
+/* === STATUS BAR: ТЕЛЕМЕТРИЯ ГОРИЗОНТА СОБЫТИЙ === */
 .status-bar {
+    height: 30px;
     background: #000000;
     border-top: 2px solid #ffffff;
-    height: 28px;
 }
 
 .status-btn {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 9px;
-    font-weight: 900;
-    color: #a1a1aa;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    color: #71717a;
 }
 
 .status-btn:hover {
@@ -434,22 +445,21 @@ body {
 }
 
 .status-search input {
-    background: #0a0a0d;
-    border: 1px solid #3f3f46;
+    background: #09090b;
+    border: 1px solid #ffffff;
     border-radius: 0;
     color: #ffffff;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Space Mono', monospace;
 }
 
 .status-search input:focus {
-    border-color: #ffffff;
-    box-shadow: 0 0 10px #ffffff;
+    box-shadow: 0 0 15px #ffffff;
 }
 
 .status-tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
+    font-family: 'Space Mono', monospace;
     color: #ffffff;
+    text-shadow: var(--kocmoc-glow);
 }
 
 /* === МОДАЛЬНОЕ ОКНО === */
@@ -457,27 +467,32 @@ body {
     background: #000000;
     border: 2px solid #ffffff;
     border-radius: 0;
-    clip-path: var(--sharp-cut);
-    box-shadow: 0 0 60px rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 50px rgba(255, 255, 255, 0.4);
 }
 
 .modal-header h3 {
-    font-family: 'Unbounded', sans-serif;
+    font-family: 'Orbitron', monospace;
     font-weight: 900;
     color: #ffffff;
+    letter-spacing: 2px;
 }
 
 .modal-body input {
-    background: #0a0a0d;
+    background: #09090b;
     border: 1px solid #ffffff;
     border-radius: 0;
-    color: #ffffff;
 }
 
 .modal-actions button {
+    background: #000000;
+    border: 1px solid #ffffff;
     border-radius: 0;
-    font-family: 'Unbounded', sans-serif;
-    font-weight: 900;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+}
+
+.modal-actions button:hover {
     background: #ffffff;
     color: #000000;
+    box-shadow: 0 0 15px #ffffff;
 }
