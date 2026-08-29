@@ -749,6 +749,45 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchInput.value) searchInput.dispatchEvent(new Event('input'));
     }
 
+    const rpcModal = document.getElementById('rpc-modal');
+    const rpcBtn = document.getElementById('discord-rpc-btn');
+    const closeRpcBtn = document.getElementById('close-rpc-modal');
+    const rpcClientIdInput = document.getElementById('rpc-client-id');
+    const rpcConnectBtn = document.getElementById('rpc-connect-btn');
+    const rpcDisconnectBtn = document.getElementById('rpc-disconnect-btn');
+    const rpcStatusText = document.getElementById('rpc-status-text');
+
+    rpcClientIdInput.value = localStorage.getItem('discord_client_id') || '';
+
+    rpcBtn.addEventListener('click', () => rpcModal.classList.remove('hidden'));
+    closeRpcBtn.addEventListener('click', () => rpcModal.classList.add('hidden'));
+
+    rpcConnectBtn.addEventListener('click', async () => {
+        const clientId = rpcClientIdInput.value.trim();
+        if (!clientId) return;
+        localStorage.setItem('discord_client_id', clientId);
+
+        rpcStatusText.textContent = 'Connecting...';
+        rpcStatusText.className = 'status-connecting';
+
+        const res = await window.electronAPI.initDiscordRPC(clientId);
+        if (res.success) {
+            rpcStatusText.textContent = 'Connected';
+            rpcStatusText.className = 'status-connected';
+            rpcBtn.classList.add('saved');
+        } else {
+            rpcStatusText.textContent = 'Error: ' + (res.error || 'Failed');
+            rpcStatusText.className = 'status-disconnected';
+        }
+    });
+
+    rpcDisconnectBtn.addEventListener('click', () => {
+        window.electronAPI.clearDiscordRPC();
+        rpcStatusText.textContent = 'Disconnected';
+        rpcStatusText.className = 'status-disconnected';
+        rpcBtn.classList.remove('saved');
+    });
+
     function drawWaveform(buffer) {
         // 1. Фикс разрешения (HD качество)
         const dpr = window.devicePixelRatio || 1;
