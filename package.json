@@ -8,7 +8,7 @@
     "build": "electron-builder"
   },
   "keywords": [],
-  "author": "",
+  "author": "ewasion137 <addntim@gmail.com>",
   "license": "MIT",
   "build": {
     "appId": "com.ewasion137.zenith",
