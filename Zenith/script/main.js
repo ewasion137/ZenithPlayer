@@ -438,23 +438,43 @@ ipcMain.on('window-close', () => {
 
 ipcMain.handle('discord-rpc:init', async (event, clientId) => {
     try {
+        // Безопасно убиваем старый клиент (глушим баг библиотеки discord-rpc)
         if (rpcClient) {
-            await rpcClient.destroy();
+            try {
+                rpcClient.removeAllListeners();
+                await rpcClient.destroy();
+            } catch (_) {
+                // Игнорируем ошибку библиотеки 'reading write' на закрытом сокете
+            }
             rpcClient = null;
         }
 
+        isRpcConnected = false;
         DiscordRPC.register(clientId);
         rpcClient = new DiscordRPC.Client({ transport: 'ipc' });
 
+        // Обязательно глушим системные ошибки сокета, чтобы Electron не плевался
+        rpcClient.on('error', (err) => {
+            console.warn('[Discord RPC Error]:', err.message);
+        });
+
         return new Promise((resolve) => {
-            rpcClient.on('ready', () => {
+            // Таймаут 5 секунд на случай, если Discord завис или закрыт
+            const timeout = setTimeout(() => {
+                isRpcConnected = false;
+                resolve({ success: false, error: 'Timeout. Is Discord app running?' });
+            }, 5000);
+
+            rpcClient.once('ready', () => {
+                clearTimeout(timeout);
                 isRpcConnected = true;
                 resolve({ success: true });
             });
 
             rpcClient.login({ clientId }).catch(err => {
+                clearTimeout(timeout);
                 isRpcConnected = false;
-                resolve({ success: false, error: err.message });
+                resolve({ success: false, error: 'Could not connect (open Discord app)' });
             });
         });
     } catch (e) {
