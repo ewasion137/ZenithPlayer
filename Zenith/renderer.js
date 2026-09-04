@@ -544,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
         webTracksSection.innerHTML = `
         <div class="folder-group open" id="web-folder-group">
             <h3>🌐 Online Streams (${savedWebTracks.length})</h3>
-            <div class="folder-tracks" style="display: block;">
+            <div class="folder-tracks">
                 <div class="folder-tracks-inner" id="web-tracks-list"></div>
             </div>
         </div>
