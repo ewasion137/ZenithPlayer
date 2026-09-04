@@ -1,68 +1,79 @@
-# Zenith Player 🌌
+# ZENITH PLAYER
 
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-blueviolet)
-![License](https://img.shields.io/badge/license-MIT-orange)
-![Version](https://img.shields.io/badge/version-2.1.0-green)
+Desktop audio player built with Electron and the Web Audio API. Built for local libraries, raw audio streams, heavy EQ tweaking. Runs on Windows and GNU/Linux.
 
-**Zenith** is a high-end, indie audio player built for those who value both sound quality and aesthetic "ricing". It combines modern glassmorphism with retro-futuristic themes and springy animations inspired by the Hyprland compositor.
+## What It Actually Does
+
+### Real Audio Engine & DSP
+- 7-band EQ with frequencies: 60Hz, 170Hz, 350Hz, 1kHz, 3.5kHz, 10kHz and 14kHz.
+- Automatic per-track state memory. Volume, speed and custom EQ curves are stored individually for every single file.
+- FL Studio style playback logic. Spacebar stops playback and returns cursor back to your last start marker.
+
+### YouTube & Spotify Stream Resolution
+- Paste raw YouTube links, Spotify track URLs or plain search queries directly into the search bar.
+- Uses an automated yt-dlp binary. Extracts audio streams, thumbnails and track metadata without running a headless browser.
+
+### Hardware & Performance Control
+- Low-GFX mode switch. Shuts down background shaders, glass blurs, drop shadows and real-time spectrum canvas loops to drop GPU usage to 0% (NEARLY).
+
+### System
+- Global keyboard hooks (`Alt + P`, `Alt + Left` and `Alt + Right`) alongside hardware media keys.
+- Discord Rich Presence integration with track name, artist, cover art and live timestamps.
+- Left-click on minimize - minimizes to the OS taskbar. Right-click makes the player into the tray.
+- Add tracks to your local folder and the library updates automatically.
+
+### Theme Engine
+Cycle interface presets with `Ctrl + T`:
+- Ultra
+- Cosmic
+- Frutiger Aero
+- Terminal
+- Winamp
+- MacGlass
+- Kocmoc Unleashed (Reference...)
 
 ---
 
-## Key Features
+## Keybinds
 
-- **Premium Themes**: Switch between **Zenith Ultra**, **Cosmic**, **Frutiger Aero**, **Terminal**, **Winamp**, and **MacGlass** with `Ctrl + T`.
-- **FL Studio Playback Logic**: Features a smart marker system—when you stop, the playback position reverts to your last set marker.
-- **Seamless Crossfade**: Smooth 1.5s transitions between tracks for a gapless listening experience.
-- **Hyprland Animations**: Springy, elastic UI transitions using custom bezier curves for that "premium rice" feel.
-- **Smart Album Art**: Automatic recursive searching for covers, folders, and front-art in your music directories.
-- **Per-Track Memory**: Zenith remembers your Equalizer, Volume, and Speed settings for **every single track** individually.
-- **Global Control**: Manage your music from anywhere with Global Media Keys (`Play`, `Next`, `Prev`) or `Alt + P`.
-- **Dual-Mode Minimize**: 
-    - **Left Click**: Minimize to taskbar.
-    - **Right Click**: Hide to system tray.
+| Shortcut | Scope | Action |
+|---|---|---|
+| `Alt + P` | Global | Play / Pause |
+| `Alt + Right` | Global | Next track |
+| `Alt + Left` | Global | Previous track |
+| `Ctrl + T` | Local | Cycle theme |
 
 ---
 
-## 🛠 Installation & Development
+## Installation & Build
 
-### 1. Requirements
-- [Node.js](https://nodejs.org/) installed on your system.
+### Requirements
+- Node.js (v18+ recommended)
+- npm
 
-### 2. Setup
+### Run
 ```bash
-# Clone the repository
-git clone https://github.com/ewasion137/ZenithPlayer.git
-
-# Install dependencies
+# Install packages
 npm install
 
-# Run the app
+# Start player
 npm start
 ```
 
-### 3. Build (Release)
-To create a production-ready installer for your current OS:
+### Build
 ```bash
 npm run build
 ```
 
 ---
 
-## 🎮 Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `Space` | Play / Pause |
-| `Alt + P` | Global Play / Pause |
-| `Alt + Right` | Next Track |
-| `Alt + Left` | Previous Track |
-| `Ctrl + T` | Switch Theme |
-| `Ctrl + F` | Focus Search |
+## Stack
+- Electron
+- Web Audio API (AudioBufferSourceNode, BiquadFilterNode and AnalyserNode)
+- yt-dlp via `yt-dlp-wrap`
+- music-metadata
+- discord-rpc
 
 ---
 
-## 🐧 Linux Support
-Zenith is fully compatible with **GNU/Linux**. It features cross-platform path handling and optimized file watching for non-recursive file systems. 
-
-
-<img width="1920" height="1034" alt="image" src="https://github.com/user-attachments/assets/7c495769-59f3-4855-a7f9-16f3c22830a2" />
+### License - MIT
