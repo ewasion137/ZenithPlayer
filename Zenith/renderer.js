@@ -814,7 +814,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'paper-dark.css',
         'zen.css',
         'aqua-osx.css',
-        'amoled-pure.css'
+        'amoled-pure.css',
+        'y2k-futurism.css'
     ];
 
     function applyTheme(themeName) {
