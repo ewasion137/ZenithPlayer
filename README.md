@@ -32,6 +32,19 @@ Cycle interface presets with `Ctrl + T`:
 - MacGlass
 - Kocmoc Unleashed (Reference...)
 
+--
+
+## Preview
+### Track selecting and mixering
+<img width="692" height="388" alt="0904 (1)" src="https://github.com/user-attachments/assets/83d220a1-f705-4bcb-ac11-17809260efd2" />
+
+### Discord RPC connection and Youtube music link download
+<img width="692" height="388" alt="0904 (1)-копия-копия" src="https://github.com/user-attachments/assets/d79c9489-6066-4622-8bca-abf5cc00577d" />
+
+### All themes (Including with GFX: OFF)
+<img width="692" height="388" alt="0904 (1)-копия" src="https://github.com/user-attachments/assets/c31c7ac4-322e-4849-bc4b-a0cbb26ffbdc" />
+
+
 ---
 
 ## Keybinds
@@ -77,3 +90,4 @@ npm run build
 ---
 
 ### License - MIT
+
