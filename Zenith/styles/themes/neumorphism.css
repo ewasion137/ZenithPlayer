@@ -1,0 +1,617 @@
+/* ==========================================================================
+   THEME: NEUMORPHISM (TACTILE SOFT-TOUCH MATTE AUDIO INTERFACE)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@600;800&display=swap');
+
+/* === СИСТЕМНЫЕ ПЕРЕМЕННЫЕ МЯГКОГО МАТОВОГО ПЛАСТИКА И СВЕТОТЕНЕЙ === */
+:root {
+    /* Базовый оттенок графитового софт-тач пластика */
+    --bg-main: #1c2026;
+    --panel-bg: #1c2026;
+    --surface: #1c2026;
+    
+    /* Neumorphic Lighting (Угол падения света ~135deg) */
+    --neu-light: rgba(43, 50, 60, 0.95);      /* Верхний левый блик */
+    --neu-dark: rgba(16, 18, 22, 0.98);       /* Нижняя правая глубокая тень */
+    --neu-light-subtle: rgba(48, 56, 68, 0.5);
+    
+    /* Световые профили выпуклостей и углублений */
+    --extruded-flat: 7px 7px 15px var(--neu-dark), -7px -7px 15px var(--neu-light);
+    --extruded-sm: 4px 4px 9px var(--neu-dark), -4px -4px 9px var(--neu-light);
+    --extruded-floating: 12px 12px 28px var(--neu-dark), -12px -12px 28px var(--neu-light);
+    
+    /* Выдавленные внутрь пазы (Concave / Debossed Wells) */
+    --debossed-well: inset 5px 5px 10px var(--neu-dark), inset -5px -5px 10px var(--neu-light);
+    --debossed-deep: inset 7px 7px 14px var(--neu-dark), inset -7px -7px 14px var(--neu-light);
+    --debossed-sm: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+
+    /* Неоновые светодиодные маркеры активности (LED Diode System) */
+    --accent: #3b82f6;               /* Luminous Cobalt LED */
+    --accent-secondary: #06b6d4;     /* Cyan Specular */
+    --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+    --led-glow: 0 0 12px rgba(59, 130, 246, 0.85), 0 0 24px rgba(6, 182, 212, 0.4);
+    
+    --text-main: #e2e8f0;
+    --text-dim: #79869b;
+    --border-light: transparent;     /* В нейморфизме отсутствуют жесткие линии */
+    --border-focus: transparent;
+    --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === ОБЩАЯ КОРПУСНАЯ СТРУКТУРА === */
+* {
+    border-color: transparent !important;
+    outline: none !important;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    background-image: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.04) 0%, transparent 40%),
+                      radial-gradient(circle at 90% 90%, rgba(6, 182, 212, 0.03) 0%, transparent 40%);
+    color: var(--text-main);
+}
+
+#spectrogram-canvas {
+    opacity: 0.2;
+    filter: drop-shadow(0 0 8px #3b82f6);
+}
+
+/* === 1. TITLE BAR: МОНОЛИТНАЯ ВЕРХНЯЯ КРОМКА === */
+.title-bar {
+    height: 42px;
+    min-height: 42px;
+    background: var(--bg-main);
+    border-bottom: none;
+    box-shadow: 0 6px 14px var(--neu-dark);
+    padding: 0 16px;
+}
+
+.title-icon {
+    filter: drop-shadow(2px 2px 4px var(--neu-dark));
+}
+
+.title-text {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+}
+
+.window-controls {
+    gap: 10px;
+    align-items: center;
+}
+
+/* Тактильные софт-кнопки управления окном */
+.win-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #1e2329, #1a1d22);
+    box-shadow: var(--extruded-sm);
+    color: var(--text-dim);
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.win-btn:hover {
+    box-shadow: var(--debossed-sm);
+    color: var(--text-main);
+}
+
+.win-close:hover {
+    background: linear-gradient(145deg, #ef4444, #dc2626);
+    color: #ffffff !important;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.7);
+}
+
+/* === 2. PLAYER STAGE: ТАКТИЛЬНАЯ АУДИОПАНЕЛЬ === */
+.player-stage {
+    gap: 22px;
+    padding: 24px 28px;
+}
+
+/* КАРТОЧКА ТЕКУЩЕГО ТРЕКА: МАССИВНЫЙ ВЫПУКЛЫЙ ОСТРОВ */
+.now-playing-container {
+    background: linear-gradient(145deg, #1e2229, #1a1d23);
+    border-radius: 22px;
+    box-shadow: var(--extruded-flat);
+    border: none;
+    padding: 22px 26px;
+    position: relative;
+}
+
+/* Утопленное софт-гнездо под обложку альбома */
+.cover-wrapper {
+    width: 90px;
+    height: 90px;
+    min-width: 90px;
+    border-radius: 18px;
+    background: var(--bg-main);
+    box-shadow: var(--debossed-deep);
+    border: none;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#current-track-artwork {
+    border-radius: 14px;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5);
+}
+
+.artwork-glow {
+    filter: blur(40px);
+    opacity: 0.15;
+}
+
+.track-info h1 {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.track-info p {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-secondary);
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.track-info p::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: var(--led-glow);
+}
+
+/* ОСНОВНОЙ ПРИБОРНЫЙ БЛОК УПРАВЛЕНИЯ */
+#top-controls {
+    background: linear-gradient(145deg, #1e2229, #1a1d23);
+    border-radius: 22px;
+    box-shadow: var(--extruded-flat);
+    border: none;
+    padding: 22px 28px;
+    gap: 26px;
+}
+
+.main-controls {
+    gap: 16px;
+}
+
+/* Выпуклые круглые кнопки переключения треков */
+#prev-btn, #next-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #1e2329, #191c21);
+    box-shadow: var(--extruded-sm);
+    border: none;
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    box-shadow: var(--debossed-sm);
+    transform: none;
+}
+
+#prev-btn:active, #next-btn:active {
+    box-shadow: var(--debossed-deep);
+}
+
+#prev-btn::before { border-right-color: var(--text-main); }
+#next-btn::before { border-left-color: var(--text-main); }
+
+/* ЦЕНТРАЛЬНЫЙ ПРИВОД PLAY/PAUSE: КРУГЛАЯ ШАЙБА СО СВЕТОДИОДНЫМ КОЛЬЦОМ */
+#play-pause-btn {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #20252c, #181b20);
+    box-shadow: 8px 8px 18px var(--neu-dark), -8px -8px 18px var(--neu-light);
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    position: relative;
+    transition: var(--transition);
+}
+
+#play-pause-btn:hover {
+    box-shadow: 10px 10px 22px var(--neu-dark), -10px -10px 22px var(--neu-light);
+    border-color: var(--accent);
+    transform: scale(1.03);
+}
+
+#play-pause-btn:active, #play-pause-btn.is-playing {
+    background: linear-gradient(145deg, #181b20, #20252c);
+    box-shadow: inset 5px 5px 12px var(--neu-dark), inset -5px -5px 12px var(--neu-light);
+    border-color: var(--accent);
+}
+
+#play-pause-btn::before {
+    background: var(--accent);
+    box-shadow: var(--led-glow);
+}
+
+/* РЕГУЛЯТОРЫ (ГРОМКОСТЬ И СКОРОСТЬ) */
+.control-group label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+}
+
+/* Утопленная канавка под ползунок */
+.control-group input[type="range"] {
+    height: 10px;
+    background: var(--bg-main);
+    box-shadow: var(--debossed-sm);
+    border-radius: 20px;
+}
+
+/* Выдавленная круглая ручка ползунка */
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #22272f, #191c21);
+    box-shadow: 3px 3px 7px var(--neu-dark), -3px -3px 7px var(--neu-light);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: var(--transition);
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--accent);
+    box-shadow: var(--led-glow);
+}
+
+/* Вдавленные дисплеи значений параметров */
+.control-input, .eq-band input[type="number"] {
+    background: var(--bg-main);
+    box-shadow: var(--debossed-sm);
+    border-radius: 8px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 11px;
+    padding: 4px;
+}
+
+#track-volume-value, #speed-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+/* === ВОЛНОВАЯ ФОРМА: ГЛУБОКИЙ АКУСТИЧЕСКИЙ ЖЁЛОБ === */
+.waveform-container {
+    height: 48px;
+    background: var(--bg-main);
+    border-radius: 14px;
+    box-shadow: var(--debossed-deep);
+    border: none;
+    padding: 4px;
+}
+
+#waveform-canvas {
+    border-radius: 10px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+#time-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+/* === ЭКВАЛАЙЗЕР: ФИЗИЧЕСКИЙ МИКШЕРНЫЙ ПУЛЬТ === */
+.eq-container-wrapper {
+    background: linear-gradient(145deg, #1e2229, #1a1d23);
+    border-radius: 22px;
+    box-shadow: var(--extruded-flat);
+    border: none;
+    padding: 22px 26px;
+}
+
+.eq-header-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.eq-header-label::after {
+    content: '';
+    flex: 1;
+    height: 4px;
+    background: var(--bg-main);
+    box-shadow: var(--debossed-sm);
+    border-radius: 10px;
+}
+
+.eq-bands {
+    margin-top: 8px;
+}
+
+.eq-band label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+/* Вертикальный вдавленный паз под фейдер */
+.eq-band input[type="range"] {
+    width: 14px;
+    height: 74px;
+    background: var(--bg-main);
+    border-radius: 12px;
+    box-shadow: var(--debossed-sm);
+}
+
+/* Фейдер эквалайзера со светодиодом */
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 24px;
+    height: 14px;
+    border-radius: 6px;
+    background: linear-gradient(145deg, #22272f, #191c21);
+    box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* === РАЗДЕЛИТЕЛЬ КОРПУСА: УТОПЛЕННЫЙ ТЕХНОЛОГИЧЕСКИЙ ШОВ === */
+.resizer-bar {
+    width: 8px;
+    background: var(--bg-main);
+    box-shadow: var(--debossed-sm);
+    cursor: col-resize;
+    margin: 0 4px;
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--accent);
+    box-shadow: var(--led-glow);
+}
+
+/* === 3. EXPLORER SIDEBAR: БОКОВАЯ КАССЕТНИЦА === */
+.explorer-sidebar {
+    background: var(--bg-main);
+    box-shadow: inset 8px 0 16px var(--neu-dark);
+    border-left: none;
+}
+
+.explorer-header {
+    background: var(--bg-main);
+    border-bottom: none;
+    box-shadow: 0 4px 10px var(--neu-dark);
+    padding: 16px 20px;
+}
+
+.explorer-title {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+}
+
+.explorer-header button {
+    background: linear-gradient(145deg, #1e2329, #1a1d22);
+    box-shadow: var(--extruded-sm);
+    border-radius: 10px;
+    color: var(--text-main);
+    font-weight: 700;
+    padding: 6px 14px;
+    transition: var(--transition);
+}
+
+.explorer-header button:hover {
+    box-shadow: var(--debossed-sm);
+    color: var(--accent);
+}
+
+/* Утопленная ванночка под список треков */
+.track-list-container {
+    padding: 16px;
+    margin: 10px;
+    background: var(--bg-main);
+    border-radius: 16px;
+    box-shadow: var(--debossed-sm);
+}
+
+/* Группа папок */
+.folder-group h3 {
+    background: linear-gradient(145deg, #1e2329, #191c21);
+    box-shadow: var(--extruded-sm);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-weight: 700;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    transition: var(--transition);
+}
+
+.folder-group.open h3 {
+    box-shadow: var(--debossed-sm);
+    color: var(--accent);
+}
+
+/* Элемент трека */
+.track-item {
+    border-radius: 10px;
+    padding: 9px 14px;
+    margin: 5px 0;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: var(--transition);
+}
+
+.track-item:hover {
+    background: linear-gradient(145deg, #1f242b, #191c21);
+    box-shadow: var(--extruded-sm);
+    color: var(--text-main);
+    transform: translateY(-1px);
+}
+
+/* Активный воспроизводимый трек: вдавливается внутрь с диодной подсветкой */
+.track-item.playing {
+    background: var(--bg-main) !important;
+    box-shadow: var(--debossed-sm) !important;
+    color: var(--accent) !important;
+    font-weight: 800;
+    position: relative;
+    border-left: none;
+}
+
+.track-item.playing::after {
+    content: '';
+    position: absolute;
+    right: 14px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: var(--led-glow);
+}
+
+/* === 4. BOTTOM STATUS BAR: ПРИБОРНЫЙ ПОДВАЛ === */
+.status-bar {
+    height: 38px;
+    min-height: 38px;
+    background: var(--bg-main);
+    box-shadow: 0 -6px 14px var(--neu-dark);
+    border-top: none;
+    padding: 0 16px;
+}
+
+.status-btn {
+    background: linear-gradient(145deg, #1e2329, #1a1d22);
+    box-shadow: var(--extruded-sm);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-weight: 700;
+    padding: 4px 12px;
+    transition: var(--transition);
+}
+
+.status-btn:hover {
+    box-shadow: var(--debossed-sm);
+    color: var(--text-main);
+}
+
+.status-btn.saved {
+    color: #10b981;
+    box-shadow: var(--debossed-sm);
+}
+
+/* Вдавленный поисковый инпут */
+.status-search input {
+    background: var(--bg-main);
+    box-shadow: var(--debossed-sm);
+    border-radius: 10px;
+    color: var(--text-main);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 14px;
+    width: 220px;
+}
+
+.status-search input:focus {
+    box-shadow: var(--debossed-deep);
+    color: var(--accent);
+}
+
+.status-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-dim);
+    background: var(--bg-main);
+    box-shadow: var(--debossed-sm);
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+/* === 5. МОДАЛЬНЫЕ ОКНА: ВЫПУКЛЫЙ МОНОЛИТ === */
+.modal-overlay {
+    background: rgba(14, 16, 20, 0.75);
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    background: linear-gradient(145deg, #1e2229, #191c21);
+    box-shadow: var(--extruded-floating);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 24px;
+}
+
+.modal-header {
+    border-bottom: none;
+    padding-bottom: 14px;
+}
+
+.modal-header h3 {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+#close-rpc-modal, #close-url-modal {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #1e2329, #191c22);
+    box-shadow: var(--extruded-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+#close-rpc-modal:hover, #close-url-modal:hover {
+    box-shadow: var(--debossed-sm);
+    color: #ef4444;
+}
+
+.modal-body input {
+    background: var(--bg-main);
+    box-shadow: var(--debossed-sm);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text-main);
+    font-size: 12px;
+}
+
+.modal-body input:focus {
+    box-shadow: var(--debossed-deep);
+}
+
+.modal-actions button {
+    background: linear-gradient(145deg, #1e2329, #1a1d22);
+    box-shadow: var(--extruded-sm);
+    border-radius: 10px;
+    color: var(--text-main);
+    font-weight: 700;
+    padding: 8px 16px;
+    transition: var(--transition);
+}
+
+.modal-actions button:hover {
+    box-shadow: var(--debossed-sm);
+    color: var(--accent);
+}

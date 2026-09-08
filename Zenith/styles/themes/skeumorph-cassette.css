@@ -1,0 +1,638 @@
+/* ==========================================================================
+   THEME: SKEUOMORPH CASSETTE // VINTAGE TAPE DECK (1984 HI-FI STEREO)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,700&family=Oswald:wght@500;700&family=Share+Tech+Mono&display=swap');
+
+/* === ВРАЩЕНИЕ БОБИН И КАТУШЕК КАССЕТЫ ПРИ ВОСПРОИЗВЕДЕНИИ === */
+@keyframes cassette-spin-left {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes cassette-spin-right {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes vu-bulb-flicker {
+    0%, 100% { opacity: 0.92; }
+    48% { opacity: 0.95; }
+    50% { opacity: 0.88; }
+    52% { opacity: 0.97; }
+    85% { opacity: 0.90; }
+}
+
+/* === СИСТЕМНЫЕ ПЕРЕМЕННЫЕ АНАЛОГОВОЙ АУДИОАППАРАТУРЫ === */
+:root {
+    /* Текстура шлифованного титаново-алюминиевого шасси */
+    --bg-main: #141416;
+    --panel-bg: #222327;
+    --surface: #191a1d;
+    --chassis-bevel: inset 1px 1px 0px rgba(255, 255, 255, 0.18), inset -1px -1px 0px rgba(0, 0, 0, 0.8);
+    --metal-plate: linear-gradient(180deg, #2e3036 0%, #202125 45%, #18191c 100%);
+    
+    /* Теплые лампы подсветки шкалы и индикаторов (Incandescent Backlight) */
+    --accent: #ff9e24;               /* Теплый янтарный свет ламп накаливания */
+    --accent-secondary: #ff3e14;     /* Светодиод записи REC / Пиковый уровень */
+    --accent-green: #26d07c;         /* Аналоговый индикатор нормы */
+    --accent-gradient: linear-gradient(180deg, #ffaf40 0%, #ff8500 100%);
+    --tape-brown: #24140b;           /* Магнитная лента Fe2O3 / CrO2 */
+    
+    --text-main: #ede8dc;            /* Шелкография краской на металле */
+    --text-dim: #8e8a82;             /* Выгравированные вторичные надписи */
+    --border-light: rgba(0, 0, 0, 0.7);
+    --border-focus: #ff9e24;
+    
+    /* Физические тени тумблеров и механических клавиш */
+    --piano-key-shadow: 0 4px 0px #0c0c0e, 0 6px 10px rgba(0, 0, 0, 0.75);
+    --screw-head: radial-gradient(circle at 40% 40%, #555 10%, #111 80%);
+    --transition: 0.14s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+/* === КОРПУС АППАРАТА: БРАШИРОВАННЫЙ МЕТАЛЛ И ВИНТЫ КРЕПЛЕНИЯ === */
+body {
+    font-family: 'Share Tech Mono', monospace;
+    background-color: var(--bg-main);
+    background-image: 
+        /* Тонкие горизонтальные полосы шлифованного алюминия */
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 3px),
+        linear-gradient(180deg, #18191c 0%, #101012 100%);
+    color: var(--text-main);
+}
+
+/* Заводские крепежные винты по краям рабочей панели */
+.app-workspace::before, .app-workspace::after {
+    content: '+';
+    position: absolute;
+    font-family: 'Courier Prime', monospace;
+    font-size: 14px;
+    font-weight: 900;
+    width: 14px;
+    height: 14px;
+    line-height: 12px;
+    text-align: center;
+    border-radius: 50%;
+    background: #33363d;
+    color: #111;
+    box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.3), inset -1px -1px 2px #000, 0 1px 3px #000;
+    z-index: 50;
+    pointer-events: none;
+}
+.app-workspace::before { top: 8px; left: 8px; }
+.app-workspace::after { bottom: 8px; left: 8px; }
+
+#spectrogram-canvas {
+    opacity: 0.16;
+    filter: sepia(100%) hue-rotate(345deg) saturate(250%);
+}
+
+/* === 1. TITLE BAR: ШЕЛЬФ АППАРАТУРНОЙ СТОЙКИ === */
+.title-bar {
+    height: 38px;
+    background: linear-gradient(180deg, #2b2d33 0%, #1a1b1e 100%);
+    border-bottom: 2px solid #0a0a0c;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    padding: 0 12px;
+}
+
+.title-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #d1cbc0;
+}
+
+.title-text::before {
+    content: '● SOLID STATE STEREO CASSETTE DECK // ';
+    color: var(--accent);
+}
+
+.win-btn {
+    width: 32px;
+    height: 22px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #383a42 0%, #202125 100%);
+    border: 1px solid #111;
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.2), 0 2px 3px rgba(0,0,0,0.5);
+    color: #cfcac0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    margin: 0 3px;
+    transition: var(--transition);
+}
+
+.win-btn:hover {
+    background: #474a54;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.win-btn:active {
+    transform: translateY(1px);
+    box-shadow: inset 1px 1px 3px #000;
+}
+
+.win-close:hover {
+    background: #a92020 !important;
+    color: #fff !important;
+}
+
+/* === 2. PLAYER STAGE & КАССЕТНЫЙ КАРМАН === */
+.player-stage {
+    gap: 18px;
+    padding: 22px 26px;
+}
+
+/* КАССЕТНЫЙ КАРМАН СО СМОТРОВЫМ ТОНИРОВАННЫМ СТЕКЛОМ */
+.now-playing-container {
+    background: #0f1012;
+    border: 3px solid #33363e;
+    border-radius: 6px;
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.95), 0 5px 15px rgba(0, 0, 0, 0.6), var(--chassis-bevel);
+    position: relative;
+    padding: 20px 24px;
+    overflow: hidden;
+}
+
+/* Янтарная подсветка кассетного кармана (Лампа накаливания за стеклом) */
+.now-playing-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 50% 10%, rgba(255, 158, 36, 0.18) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 2;
+    animation: vu-bulb-flicker 8s infinite;
+}
+
+/* Маркировка кассетного отсека */
+.now-playing-container::after {
+    content: 'AUTO REVERSE / 4-TRACK 2-CHANNEL / CrO2 TAPE';
+    position: absolute;
+    bottom: 4px;
+    left: 18px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: rgba(237, 232, 220, 0.4);
+}
+
+/* ОБЛОЖКА ТРЕКА: КОМПАКТ-КАССЕТА C-90 С ВРАЩАЮЩИМИСЯ БОБИНАМИ */
+.cover-wrapper {
+    width: 140px;
+    height: 90px;
+    min-width: 140px;
+    border-radius: 6px;
+    background: #1c1815;
+    border: 2px solid #3e3831;
+    position: relative;
+    box-shadow: inset 0 0 10px #000, 0 4px 8px rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+/* Настоящее бумажное окно стикера кассеты */
+#current-track-artwork {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+    filter: sepia(35%) contrast(110%);
+    opacity: 0.82;
+}
+
+/* ЛЕВАЯ КАТУШКА СО ЗУБЦАМИ КАССЕТЫ */
+.cover-wrapper::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    margin-top: -16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: 
+        radial-gradient(circle at center, #111 6px, transparent 7px),
+        repeating-conic-gradient(#f7f4ed 0deg 30deg, #111 30deg 60deg);
+    border: 2px solid #554e44;
+    box-shadow: inset 0 0 4px #000, 0 0 6px rgba(0,0,0,0.8);
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* ПРАВАЯ КАТУШКА СО ЗУБЦАМИ КАССЕТЫ */
+.cover-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    margin-top: -16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: 
+        radial-gradient(circle at center, #111 6px, transparent 7px),
+        repeating-conic-gradient(#f7f4ed 0deg 30deg, #111 30deg 60deg);
+    border: 2px solid #554e44;
+    box-shadow: inset 0 0 4px #000, 0 0 6px rgba(0,0,0,0.8);
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Запуск вращения катушек кассеты, когда играет аудио */
+body:has(#play-pause-btn.is-playing) .cover-wrapper::before {
+    animation: cassette-spin-left 3.5s linear infinite;
+}
+body:has(#play-pause-btn.is-playing) .cover-wrapper::after {
+    animation: cassette-spin-right 3.5s linear infinite;
+}
+
+.artwork-glow {
+    filter: blur(50px);
+    opacity: 0.15;
+    background-color: var(--accent);
+}
+
+/* Печатные этикетки трека */
+.track-info h1 {
+    font-family: 'Courier Prime', monospace;
+    font-size: 19px;
+    font-weight: 700;
+    color: #fffbf0;
+    text-shadow: 1px 1px 0px #000;
+}
+
+.track-info p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    margin-top: 4px;
+    letter-spacing: 1px;
+}
+
+/* === МЕХАНИЧЕСКИЕ КЛАВИШИ УПРАВЛЕНИЯ ТРАНСПОРТОМ (PIANO KEYS) === */
+#top-controls {
+    background: var(--metal-plate);
+    border: 2px solid #0f1012;
+    border-radius: 6px;
+    box-shadow: var(--chassis-bevel), 0 6px 14px rgba(0, 0, 0, 0.7);
+    padding: 20px 24px;
+}
+
+.main-controls {
+    gap: 10px;
+    background: #111215;
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: inset 0 2px 6px #000, 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Тяжелые механические клавиши с ходом вниз */
+#prev-btn, #next-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #444852 0%, #2b2c31 70%, #1c1d20 100%);
+    border: 1px solid #141517;
+    box-shadow: var(--piano-key-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: linear-gradient(180deg, #535763 0%, #35373d 70%, #222327 100%);
+}
+
+#prev-btn:active, #next-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0px #0c0c0e, inset 0 2px 4px #000;
+}
+
+#prev-btn::before { border-right-color: #d1cbc0; }
+#next-btn::before { border-left-color: #d1cbc0; }
+
+/* КЛАВИША ВОСПРОИЗВЕДЕНИЯ: ХРОМИРОВАННЫЙ ТАКТИЛЬНЫЙ ВЫКЛЮЧАТЕЛЬ */
+#play-pause-btn {
+    width: 58px;
+    height: 52px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #ffaf40 0%, #e07b00 70%, #994e00 100%);
+    border: 1px solid #542b00;
+    box-shadow: 0 5px 0px #381a00, 0 8px 14px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transition: var(--transition);
+}
+
+#play-pause-btn:hover {
+    filter: brightness(1.1);
+}
+
+#play-pause-btn:active, #play-pause-btn.is-playing {
+    transform: translateY(5px);
+    box-shadow: 0 1px 0px #381a00, inset 0 3px 6px rgba(0, 0, 0, 0.8);
+    background: linear-gradient(180deg, #d47000 0%, #a85200 100%);
+}
+
+#play-pause-btn::before {
+    background: #190e03;
+}
+
+/* АНАЛОГОВЫЕ СЛАЙДЕРЫ ГРОМКОСТИ С РАЗМЕТКОЙ ДЕЦИБЕЛОВ */
+.control-group label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #b0aaa0;
+    letter-spacing: 1px;
+}
+
+.control-group input[type="range"] {
+    background: #0d0d0f;
+    height: 6px;
+    border: 1px solid #333;
+    border-radius: 1px;
+    box-shadow: inset 0 1px 3px #000;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 16px;
+    height: 24px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #999 0%, #444 50%, #222 100%);
+    border: 1px solid #111;
+    box-shadow: 0 2px 4px #000, inset 0 1px 0 #fff;
+    cursor: ew-resize;
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'Share Tech Mono', monospace;
+    background: #0c0d0e;
+    border: 1px solid #3d4048;
+    color: var(--accent);
+    border-radius: 2px;
+    box-shadow: inset 0 1px 4px #000;
+}
+
+#track-volume-value, #speed-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+}
+
+/* === ВОЛНОВАЯ ФОРМА: ПОДСВЕЧЕННАЯ ШКАЛА VU-METER === */
+.waveform-container {
+    background: #0a0b0d;
+    border: 2px solid #282a30;
+    border-radius: 3px;
+    box-shadow: inset 0 0 12px #000, 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+/* Градуировочная сетка аналогового индикатора уровня dB */
+.waveform-container::after {
+    content: '-20   -10    -7    -5    -3    -1    0   +1   +3   +5 dB';
+    position: absolute;
+    top: 2px;
+    left: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: rgba(255, 158, 36, 0.7);
+    pointer-events: none;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 6px rgba(255, 158, 36, 0.6));
+}
+
+#time-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 2px;
+}
+
+/* === ЭКВАЛАЙЗЕР: ФИЗИЧЕСКИЙ БЛОК ГРАФИЧЕСКОГО ЭКВАЛАЙЗЕРА С РИФЛЕНЫМИ РУЧКАМИ === */
+.eq-container-wrapper {
+    background: var(--metal-plate);
+    border: 2px solid #0f1012;
+    border-radius: 6px;
+    box-shadow: var(--chassis-bevel), 0 5px 15px rgba(0, 0, 0, 0.6);
+}
+
+.eq-header-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #c9c3b6;
+}
+
+.eq-header-label::after {
+    content: ' // 7-BAND ANALOG STEREO EQUALIZER';
+    color: var(--accent);
+}
+
+.eq-band label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: #8c8880;
+}
+
+/* Вертикальные фейдеры пульта */
+.eq-band input[type="range"] {
+    background: #090a0c;
+    border: 1px solid #2a2c33;
+    box-shadow: inset 0 0 5px #000;
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 22px;
+    height: 12px;
+    border-radius: 1px;
+    background: linear-gradient(180deg, #d9d9d9 0%, #6e7075 50%, #3b3d42 100%);
+    border: 1px solid #111;
+    box-shadow: 0 2px 4px #000;
+}
+
+/* === МЕТАЛЛИЧЕСКИЙ ШОВ РАЗДЕЛИТЕЛЯ === */
+.resizer-bar {
+    width: 6px;
+    background: #1a1b1e;
+    border-left: 1px solid #2f3238;
+    border-right: 1px solid #0a0a0c;
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+}
+
+/* === БОКОВАЯ КАССЕТНИЦА (EXPLORER: TAPE ARCHIVE SHELF) === */
+.explorer-sidebar {
+    background: #18191c;
+    border-left: 2px solid #0d0d0f;
+    box-shadow: inset 4px 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.explorer-header {
+    background: linear-gradient(180deg, #27282d 0%, #1c1d21 100%);
+    border-bottom: 2px solid #0c0c0e;
+}
+
+.explorer-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #dbd6cb;
+}
+
+.explorer-header button {
+    font-family: 'Share Tech Mono', monospace;
+    background: linear-gradient(180deg, #383a42 0%, #202125 100%);
+    border: 1px solid #111;
+    border-radius: 2px;
+    color: #ede8dc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.explorer-header button:hover {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 0 10px rgba(255, 158, 36, 0.5);
+}
+
+/* Подкассетники и коробки магнитоальбомов */
+.folder-group h3 {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    background: #25272c;
+    border: 1px solid #3d4047;
+    border-left: 4px solid var(--accent);
+    border-radius: 2px;
+    color: #ede8dc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.folder-group.open h3 {
+    background: #32353c;
+    color: #fff;
+    border-color: #555a64;
+    border-left-color: #ff3e14;
+}
+
+.track-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: #9c978f;
+    border-radius: 2px;
+    border-left: 2px solid transparent;
+}
+
+.track-item:hover {
+    background: rgba(255, 158, 36, 0.1);
+    color: #ede8dc;
+    border-left-color: var(--accent);
+}
+
+.track-item.playing {
+    background: #26190a !important;
+    border-left: 3px solid var(--accent) !important;
+    color: var(--accent) !important;
+    font-weight: bold;
+    box-shadow: inset 0 0 6px rgba(255, 158, 36, 0.2);
+}
+
+/* === 3. BOTTOM STATUS BAR: ПРИБОРНАЯ ПАНЕЛЬ ТЕЛЕМЕТРИИ === */
+.status-bar {
+    height: 34px;
+    background: linear-gradient(180deg, #24252a 0%, #151618 100%);
+    border-top: 2px solid #0d0d0f;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.status-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: #a39e93;
+    background: #1f2024;
+    border: 1px solid #111;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px #000;
+}
+
+.status-btn:hover {
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.status-btn.saved {
+    background: #113620;
+    color: #26d07c;
+    border-color: #26d07c;
+}
+
+.status-search input {
+    background: #0a0b0d;
+    border: 1px solid #33363e;
+    border-radius: 2px;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    box-shadow: inset 0 1px 4px #000;
+}
+
+.status-search input:focus {
+    border-color: var(--accent);
+}
+
+.status-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: #0a0b0d;
+    padding: 2px 6px;
+    border: 1px solid #2a2c33;
+    border-radius: 2px;
+}
+
+/* === 4. МОДАЛЬНЫЕ ОКНА: СЕРВИСНЫЙ ЛЮК ТЕХНИЧЕСКОГО ОБСЛУЖИВАНИЯ === */
+.modal-content {
+    background: #202126;
+    border: 3px solid #3d414a;
+    border-radius: 4px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9), var(--chassis-bevel);
+}
+
+.modal-header {
+    border-bottom: 2px solid #111;
+}
+
+.modal-header h3 {
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 1px;
+    color: #ede8dc;
+}
+
+.modal-body input {
+    background: #0d0e10;
+    border: 1px solid #383b44;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    border-radius: 2px;
+}
+
+.modal-actions button {
+    font-family: 'Share Tech Mono', monospace;
+    background: linear-gradient(180deg, #3d404a 0%, #202126 100%);
+    border: 1px solid #111;
+    color: #ede8dc;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px #000;
+}
+
+.modal-actions button:hover {
+    background: var(--accent);
+    color: #000;
+}

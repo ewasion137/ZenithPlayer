@@ -808,7 +808,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'macglass.css',
         'main.css',
         'kocmocunleashed.css',
-        'vaporwave.css'
+        'vaporwave.css',
+        'neumorphism.css'
     ];
 
     function applyTheme(themeName) {
