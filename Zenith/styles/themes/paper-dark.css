@@ -1,0 +1,562 @@
+/* ==========================================================================
+   THEME: PAPER DARK // NOIR DRAFTSMAN NOTEBOOK (ARCHITECT SKETCHBOOK)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
+
+/* === ТЕКСТУРНЫЕ ПЕРЕМЕННЫЕ КРАФТОВОЙ БУМАГИ, ТУШИ И ПЕЧАТЕЙ === */
+:root {
+    /* Фоновая текстура выдержанной графитовой бумаги */
+    --bg-main: #181715;
+    --panel-bg: #22201c;
+    --surface: #2b2823;
+    
+    /* Чернила, штемпельная краска и сургуч */
+    --accent: #d4a373;               /* Сепия / выцветшие чернила */
+    --accent-secondary: #e07a5f;     /* Терракотовый карандаш / сургучная печать */
+    --accent-highlighter: #ffd166;   /* Желтый маркер пометок */
+    --accent-gradient: linear-gradient(135deg, #d4a373 0%, #b88655 50%, #8c5d33 100%);
+    
+    --text-main: #ede4d3;            /* Костяной белый / мел на грифеле */
+    --text-dim: #9c9485;             /* Графитовый карандаш */
+    --border-light: rgba(212, 163, 115, 0.25);
+    --border-focus: #e07a5f;
+    
+    /* Органические тени бумажных листов и папок */
+    --paper-shadow: 2px 5px 15px rgba(0, 0, 0, 0.65), inset 0 0 50px rgba(0, 0, 0, 0.25);
+    --card-shadow: 1px 3px 8px rgba(0, 0, 0, 0.55);
+    --stitch-border: 1.5px dashed rgba(212, 163, 115, 0.35);
+    --transition: 0.2s ease-out;
+}
+
+/* === ФОН: МИЛЛИМЕТРОВКА, ВОЛОКНА БУМАГИ И ПОЛЯ ТЕТРАДИ === */
+body {
+    font-family: 'Courier Prime', monospace;
+    background-color: var(--bg-main);
+    background-image: 
+        /* Красная вертикальная линия полей чертежа слева */
+        linear-gradient(90deg, transparent 460px, rgba(224, 122, 95, 0.15) 460px, transparent 462px),
+        /* Сетка миллиметровой бумаги архитектора */
+        repeating-linear-gradient(0deg, rgba(212, 163, 115, 0.035) 0px, rgba(212, 163, 115, 0.035) 1px, transparent 1px, transparent 20px),
+        repeating-linear-gradient(90deg, rgba(212, 163, 115, 0.035) 0px, rgba(212, 163, 115, 0.035) 1px, transparent 1px, transparent 20px),
+        /* Текстура зернистости волокон */
+        radial-gradient(circle at 50% 50%, #201e1a 0%, #151412 100%);
+    color: var(--text-main);
+}
+
+#spectrogram-canvas {
+    opacity: 0.18;
+    filter: sepia(80%) hue-rotate(330deg) contrast(150%);
+}
+
+/* === 1. TITLE BAR: КОЖАНЫЙ КОРЕШОК БЛОКНОТА === */
+.title-bar {
+    height: 38px;
+    background: #1c1b18;
+    border-bottom: 2px solid #2e2b24;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    padding: 0 14px;
+}
+
+.title-text {
+    font-family: 'Special Elite', cursive;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--text-main);
+}
+
+.title-text::before {
+    content: '№. ';
+    color: var(--accent-secondary);
+    font-family: 'Courier Prime', monospace;
+}
+
+.window-controls {
+    gap: 6px;
+    align-items: center;
+}
+
+/* Кнопки в виде вырезанных картонных бирок */
+.win-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    background: #2b2823;
+    border: 1px solid rgba(212, 163, 115, 0.3);
+    color: var(--text-dim);
+    font-family: 'Special Elite', cursive;
+    font-size: 13px;
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+    transition: var(--transition);
+}
+
+.win-btn:hover {
+    background: var(--surface);
+    color: var(--accent);
+    transform: rotate(3deg) scale(1.05);
+}
+
+.win-close:hover {
+    background: var(--accent-secondary) !important;
+    color: #fff !important;
+    border-color: var(--accent-secondary);
+    transform: rotate(-3deg) scale(1.05);
+}
+
+/* === 2. PLAYER STAGE & БУМАЖНЫЕ СТРАНИЦЫ === */
+.player-stage {
+    gap: 20px;
+    padding: 24px 30px;
+}
+
+/* NOW PLAYING: КАРТОЧКА ДЕЛА, ПРИКРЕПЛЕННАЯ СКОТЧЕМ (WASHI TAPE) */
+.now-playing-container {
+    background: var(--panel-bg);
+    border: var(--stitch-border);
+    border-radius: 3px;
+    box-shadow: var(--paper-shadow);
+    padding: 22px 28px;
+    position: relative;
+}
+
+/* Полупрозрачная полоска малярной ленты сверху карточки */
+.now-playing-container::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg);
+    width: 110px;
+    height: 24px;
+    background: rgba(220, 200, 170, 0.16);
+    backdrop-filter: blur(2px);
+    border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    border-right: 2px dashed rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+}
+
+/* Канцелярская рукописная пометка в углу */
+.now-playing-container::after {
+    content: 'Fig. 01 — Master Tape';
+    position: absolute;
+    top: 6px;
+    right: 14px;
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    color: var(--accent-secondary);
+    transform: rotate(2deg);
+}
+
+/* ОБЛОЖКА ТРЕКА В СТИЛЕ СНИМКА POLAROID */
+.cover-wrapper {
+    width: 96px;
+    height: 110px;
+    min-width: 96px;
+    background: #ede6d6;
+    border-radius: 2px;
+    padding: 5px 5px 22px 5px;
+    box-shadow: 2px 6px 16px rgba(0, 0, 0, 0.7);
+    border: none;
+    position: relative;
+    transform: rotate(-3deg);
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.cover-wrapper:hover {
+    transform: rotate(0deg) scale(1.05);
+}
+
+/* Скрепка на снимке */
+.cover-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    width: 10px;
+    height: 24px;
+    border: 2px solid #a39988;
+    border-radius: 8px;
+    background: transparent;
+    z-index: 5;
+}
+
+#current-track-artwork {
+    width: 100%;
+    height: 100%;
+    border-radius: 1px;
+    filter: sepia(30%) contrast(110%);
+}
+
+.artwork-glow {
+    filter: blur(60px);
+    opacity: 0.15;
+    background-color: var(--accent);
+}
+
+/* Заголовки, напечатанные на печатной машинке */
+.track-info h1 {
+    font-family: 'Special Elite', cursive;
+    font-size: 21px;
+    color: var(--text-main);
+    letter-spacing: 0.5px;
+}
+
+.track-info p {
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-top: 2px;
+}
+
+/* === ПАНЕЛЬ УПРАВЛЕНИЯ: ДЕРЕВЯННЫЕ И РЕЗИНОВЫЕ ШТАМПЫ === */
+#top-controls {
+    background: var(--panel-bg);
+    border: var(--stitch-border);
+    border-radius: 3px;
+    box-shadow: var(--paper-shadow);
+    padding: 20px 24px;
+    position: relative;
+}
+
+.main-controls {
+    gap: 14px;
+}
+
+/* Кнопки переключения: круглые бумажные бирки с заклепками */
+#prev-btn, #next-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #2a2722;
+    border: 2px solid rgba(212, 163, 115, 0.4);
+    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.5);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: #38342e;
+    border-color: var(--accent);
+    transform: scale(1.08);
+}
+
+#prev-btn::before { border-right-color: var(--accent); }
+#next-btn::before { border-left-color: var(--accent); }
+
+/* КНОПКА PLAY/PAUSE: КРАСНЫЙ СУРГУЧНЫЙ ОТТИСК ПЕЧАТИ */
+#play-pause-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #e07a5f 0%, #a84832 70%, #662517 100%);
+    border: 3px double #f4a261;
+    box-shadow: 2px 5px 12px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0, 0, 0, 0.5);
+    transition: var(--transition);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.08) rotate(5deg);
+    box-shadow: 3px 7px 18px rgba(224, 122, 95, 0.45);
+}
+
+#play-pause-btn:active, #play-pause-btn.is-playing {
+    transform: scale(0.96);
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8);
+}
+
+#play-pause-btn::before {
+    background: #181715;
+}
+
+/* РУЧНЫЕ ЧЕРТЕЖНЫЕ СЛАЙДЕРЫ */
+.control-group label {
+    font-family: 'Special Elite', cursive;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1px;
+}
+
+.control-group input[type="range"] {
+    background: #151412;
+    height: 4px;
+    border: 1px dashed rgba(212, 163, 115, 0.35);
+    border-radius: 0;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    background: var(--accent);
+    border: 1px solid #111;
+    box-shadow: 1px 2px 4px #000;
+    transform: rotate(45deg);
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'Courier Prime', monospace;
+    background: #181714;
+    border: 1px solid rgba(212, 163, 115, 0.4);
+    color: var(--accent);
+    border-radius: 2px;
+    font-weight: 700;
+}
+
+#track-volume-value, #speed-value {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    color: var(--accent);
+}
+
+/* === ВОЛНОВАЯ ФОРМА: САМОПИСЕЦ И КАРДИОГРАММА ТУШЬЮ === */
+.waveform-container {
+    background: #161513;
+    border: 1.5px solid rgba(212, 163, 115, 0.3);
+    border-radius: 2px;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+    position: relative;
+}
+
+/* Линейка миллиметровых отметок */
+.waveform-container::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--accent) 0px, var(--accent) 1px, transparent 1px, transparent 10px);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 1px 2px rgba(212, 163, 115, 0.4));
+}
+
+#time-display {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    color: var(--accent);
+}
+
+/* === ЭКВАЛАЙЗЕР: ЛИСТ ТЕХНИЧЕСКОЙ КАЛИБРОВКИ === */
+.eq-container-wrapper {
+    background: var(--panel-bg);
+    border: var(--stitch-border);
+    border-radius: 3px;
+    box-shadow: var(--paper-shadow);
+    position: relative;
+}
+
+.eq-header-label {
+    font-family: 'Special Elite', cursive;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--text-main);
+}
+
+.eq-header-label::after {
+    content: ' — [Calibrated in Sepia]';
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    color: var(--accent-secondary);
+}
+
+.eq-band label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+}
+
+.eq-band input[type="range"] {
+    background: #171614;
+    border: 1px dashed rgba(212, 163, 115, 0.25);
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 18px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    box-shadow: 1px 2px 4px #000;
+}
+
+/* === РАЗДЕЛИТЕЛЬ: ШОВ ПЕРЕПЛЁТА === */
+.resizer-bar {
+    width: 6px;
+    background: #141311;
+    border-left: 1px dashed rgba(212, 163, 115, 0.3);
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--accent);
+}
+
+/* === САЙДБАР: КАРТОТЕКА ДЕЛ (MANILA ARCHIVE FOLDER) === */
+.explorer-sidebar {
+    background: #1c1b18;
+    border-left: 2px solid #292621;
+    box-shadow: inset 5px 0 15px rgba(0, 0, 0, 0.6);
+}
+
+.explorer-header {
+    background: #24221d;
+    border-bottom: 2px solid #2f2c25;
+}
+
+.explorer-title {
+    font-family: 'Special Elite', cursive;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--text-main);
+}
+
+.explorer-header button {
+    font-family: 'Special Elite', cursive;
+    font-size: 11px;
+    background: #2d2923;
+    border: 1px solid rgba(212, 163, 115, 0.4);
+    border-radius: 2px;
+    color: var(--text-main);
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.explorer-header button:hover {
+    background: var(--accent);
+    color: #181715;
+}
+
+/* Папки картотеки со скошенными ярлыками */
+.folder-group h3 {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    background: #26241e;
+    border: 1px solid #3d3830;
+    border-radius: 2px;
+    color: var(--text-main);
+    box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+.folder-group.open h3 {
+    background: #332f27;
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.track-item {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-radius: 2px;
+    padding: 6px 10px;
+}
+
+.track-item:hover {
+    background: rgba(212, 163, 115, 0.12);
+    color: var(--text-main);
+}
+
+/* Воспроизводимый трек: помечен желтым маркером текстовыделителя */
+.track-item.playing {
+    background: rgba(255, 209, 102, 0.18) !important;
+    border-left: 3px solid var(--accent-highlighter) !important;
+    color: #fff !important;
+    font-weight: 700;
+}
+
+/* === 3. BOTTOM STATUS BAR: ДЕРЕВЯННАЯ ЛИНЕЙКА ЧЕРТЁЖНИКА === */
+.status-bar {
+    height: 36px;
+    background: #1b1a17;
+    border-top: 2px solid #2b2822;
+    box-shadow: inset 0 1px 0 rgba(212, 163, 115, 0.15);
+    padding: 0 14px;
+}
+
+.status-btn {
+    font-family: 'Special Elite', cursive;
+    font-size: 12px;
+    color: var(--text-dim);
+    background: #24221d;
+    border: 1px solid rgba(212, 163, 115, 0.25);
+    border-radius: 2px;
+    padding: 3px 8px;
+}
+
+.status-btn:hover {
+    color: var(--text-main);
+    border-color: var(--accent);
+}
+
+.status-btn.saved {
+    background: #243324;
+    color: #81c784;
+    border-color: #81c784;
+}
+
+.status-search input {
+    background: #141311;
+    border: 1px dashed rgba(212, 163, 115, 0.4);
+    border-radius: 2px;
+    color: var(--accent);
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+}
+
+.status-search input:focus {
+    border-style: solid;
+    border-color: var(--accent);
+}
+
+.status-tag {
+    font-family: 'Special Elite', cursive;
+    font-size: 11px;
+    color: var(--accent);
+}
+
+/* === 4. МОДАЛЬНЫЕ ОКНА: БЛАНК ПРИКАЗА НА ПЕРГАМЕНТЕ === */
+.modal-content {
+    background: #22201c;
+    border: 2px dashed var(--accent);
+    border-radius: 3px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.85);
+    padding: 22px;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(212, 163, 115, 0.3);
+}
+
+.modal-header h3 {
+    font-family: 'Special Elite', cursive;
+    letter-spacing: 1px;
+    color: var(--text-main);
+}
+
+.modal-body input {
+    background: #171614;
+    border: 1px solid rgba(212, 163, 115, 0.4);
+    border-radius: 2px;
+    color: var(--accent);
+    font-family: 'Courier Prime', monospace;
+}
+
+.modal-actions button {
+    background: #2c2822;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    color: var(--text-main);
+    font-family: 'Special Elite', cursive;
+    font-size: 12px;
+    box-shadow: 1px 2px 4px #000;
+}
+
+.modal-actions button:hover {
+    background: var(--accent);
+    color: #181715;
+}
