@@ -1,0 +1,641 @@
+/* ==========================================================================
+   THEME: VAPORWAVE // 蒸気波 (1995 NEON HORIZON & VIRTUAL PLAZA)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=VT323&family=Rajdhani:wght@600;700&family=Zen+Maru+Gothic:wght@700&display=swap');
+
+/* === KEYFRAMES: СИНТ-СЕТКА, ГЛИТЧ И ХРОМАТИЧЕСКИЙ БЛИК === */
+@keyframes vapor-grid-scroll {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 50px; }
+}
+
+@keyframes neon-sun-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 25px #ff71ce) drop-shadow(0 0 60px rgba(255, 113, 206, 0.6));
+    }
+    50% {
+        filter: drop-shadow(0 0 40px #ff71ce) drop-shadow(0 0 90px rgba(1, 205, 254, 0.8));
+    }
+}
+
+@keyframes holographic-shine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes vhs-glitch-flicker {
+    0% { opacity: 0.98; }
+    50% { opacity: 1; }
+    52% { opacity: 0.9; }
+    54% { opacity: 1; }
+    80% { opacity: 0.96; }
+    100% { opacity: 1; }
+}
+
+/* === СИСТЕМНЫЕ ПЕРЕМЕННЫЕ ЭСТЕТИКИ 80s/90s === */
+:root {
+    --bg-main: #0c0517;
+    --panel-bg: rgba(22, 11, 41, 0.85);
+    --surface: #1e0f38;
+    --accent: #ff71ce;             /* Hot Neon Pink */
+    --accent-secondary: #01cdfe;   /* Cyberpunk Aqua Blue */
+    --accent-mint: #05ffa1;        /* FM-Towns Mint */
+    --accent-gold: #fffb96;        /* Sunset Gold */
+    --accent-gradient: linear-gradient(135deg, #ff71ce 0%, #b967ff 45%, #01cdfe 100%);
+    --holo-gradient: linear-gradient(90deg, #ff71ce, #01cdfe, #05ffa1, #fffb96, #ff71ce);
+    --text-main: #ffffff;
+    --text-dim: #a692c8;
+    --border-light: rgba(255, 113, 206, 0.35);
+    --border-focus: #01cdfe;
+    
+    --vapor-shadow: 4px 4px 0px #01cdfe, -2px -2px 0px #ff71ce;
+    --vapor-glow: 0 0 15px rgba(255, 113, 206, 0.75), 0 0 30px rgba(1, 205, 254, 0.5);
+    --bevel-outset: inset 1px 1px 0px #ffb3e6, inset -1px -1px 0px #700049;
+    --bevel-box: 2px 2px 0px #000, 3px 3px 0px #01cdfe;
+    --transition: 0.18s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+/* === ЭКРАННЫЕ CRT-ЛИНИИ ПОВЕРХ ВСЕГО ПРИЛОЖЕНИЯ === */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.22) 0px,
+        rgba(0, 0, 0, 0.22) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events: none;
+    z-index: 99999;
+    animation: vhs-glitch-flicker 0.12s infinite;
+}
+
+/* === ФОН: РЕТРО-ФУТУРИСТИЧЕСКИЙ ЗАКАТ И 3D ПЕРСПЕКТИВНАЯ СЕТКА === */
+body {
+    font-family: 'Rajdhani', -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    background-image:
+        /* Горизонтальный неоновый горизонт */
+        linear-gradient(180deg, 
+            transparent 0%, 
+            rgba(255, 113, 206, 0.08) 55%, 
+            rgba(1, 205, 254, 0.25) 60%, 
+            rgba(12, 5, 23, 0.95) 75%, 
+            #0c0517 100%
+        ),
+        /* Неоновое восходящее/заходящее солнце */
+        radial-gradient(circle 320px at 50% 55%, rgba(255, 113, 206, 0.45) 0%, rgba(185, 103, 255, 0.25) 45%, transparent 70%),
+        /* Векторная перспектива сетки пола */
+        repeating-linear-gradient(0deg, rgba(1, 205, 254, 0.15) 0px, rgba(1, 205, 254, 0.15) 1px, transparent 1px, transparent 32px),
+        repeating-linear-gradient(90deg, rgba(255, 113, 206, 0.12) 0px, rgba(255, 113, 206, 0.12) 1px, transparent 1px, transparent 32px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+}
+
+#spectrogram-canvas {
+    opacity: 0.4;
+    filter: drop-shadow(0 0 12px #ff71ce) drop-shadow(0 0 25px #01cdfe) hue-rotate(15deg);
+}
+
+/* === 1. TITLE BAR: ВИНТАЖНЫЙ ОКРАС WINDOWS 95 + ЯПОНСКИЕ ТИТРЫ === */
+.title-bar {
+    height: 36px;
+    background: linear-gradient(90deg, #ff71ce 0%, #b967ff 35%, #01cdfe 75%, #05ffa1 100%);
+    border-bottom: 2px solid #000;
+    box-shadow: 0 4px 15px rgba(255, 113, 206, 0.5);
+    padding: 0 6px;
+}
+
+.title-bar-drag {
+    gap: 12px;
+}
+
+.title-icon {
+    filter: drop-shadow(2px 2px 0px #000);
+}
+
+.title-text {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #000000, 0 0 10px #ff71ce;
+}
+
+.title-text::before {
+    content: '【 蒸気波 // ＡＥＳＴＨＥＴＩＣ 】';
+    font-family: 'Zen Maru Gothic', sans-serif;
+    color: #fffb96;
+    margin-right: 8px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0px #000;
+}
+
+.window-controls {
+    gap: 4px;
+    align-items: center;
+}
+
+.win-btn {
+    width: 26px;
+    height: 24px;
+    background: #c3c7cb;
+    color: #000000;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    font-weight: 900;
+    border: 2px outset #ffffff;
+    box-shadow: 1px 1px 0px #000;
+    border-radius: 0px;
+}
+
+.win-btn:hover {
+    background: #ffffff;
+    color: #000;
+    box-shadow: 0 0 10px #ffffff;
+}
+
+.win-close:hover {
+    background: #ff0055 !important;
+    color: #ffffff !important;
+    border-color: #ff99bb;
+    box-shadow: 0 0 12px #ff0055;
+}
+
+/* === 2. PLAYER STAGE & PANELS === */
+.player-stage {
+    gap: 20px;
+    padding: 24px 28px;
+}
+
+/* NOW PLAYING КАССЕТНЫЙ ДЕК */
+.now-playing-container {
+    background: linear-gradient(135deg, rgba(30, 15, 56, 0.95) 0%, rgba(15, 6, 28, 0.98) 100%);
+    border: 2px solid #ff71ce;
+    border-radius: 4px;
+    box-shadow: var(--vapor-shadow), 0 0 25px rgba(255, 113, 206, 0.35);
+    position: relative;
+    padding: 20px 24px;
+}
+
+.now-playing-container::before {
+    content: 'HI-FI STEREO SOUND SYSTEM / AUTO REVERSE  cassette deck 1995';
+    position: absolute;
+    top: 3px;
+    left: 12px;
+    font-family: 'VT323', monospace;
+    font-size: 11px;
+    color: #05ffa1;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Обложка альбома (Винтажная рамка с неоновой подсветкой) */
+.cover-wrapper {
+    width: 90px;
+    height: 90px;
+    min-width: 90px;
+    border-radius: 2px;
+    border: 2px solid #01cdfe;
+    box-shadow: 4px 4px 0px #ff71ce, inset 0 0 15px rgba(1, 205, 254, 0.5);
+    position: relative;
+    background: #000;
+}
+
+.cover-wrapper::after {
+    content: 'SIDE A';
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-family: 'VT323', monospace;
+    font-size: 12px;
+    color: #fffb96;
+    text-shadow: 1px 1px 0 #000;
+    pointer-events: none;
+}
+
+#current-track-artwork {
+    filter: saturate(140%) contrast(115%);
+}
+
+.artwork-glow {
+    filter: blur(65px);
+    opacity: 0.6;
+    background-size: cover;
+    mix-blend-mode: screen;
+}
+
+/* Заголовки трека */
+.track-info h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #ff71ce, -2px -2px 0px #01cdfe;
+    text-transform: uppercase;
+}
+
+.track-info p {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    color: #05ffa1;
+    letter-spacing: 2px;
+    margin-top: 2px;
+    text-shadow: 1px 1px 5px rgba(5, 255, 161, 0.7);
+}
+
+/* === ПАНЕЛЬ УПРАВЛЕНИЯ: ТАКТИЛЬНЫЕ КНОПКИ КАССЕТНИКА === */
+#top-controls {
+    background: linear-gradient(180deg, #241142 0%, #160a2c 100%);
+    border: 2px solid #01cdfe;
+    border-radius: 4px;
+    box-shadow: 4px 4px 0px #ff71ce;
+    padding: 18px 24px;
+}
+
+.main-controls {
+    gap: 14px;
+}
+
+#prev-btn, #next-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    background: #c3c7cb;
+    border: 2px outset #ffffff;
+    box-shadow: 2px 2px 0px #000;
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: #e8e8e8;
+    box-shadow: 0 0 15px #01cdfe;
+    transform: translate(-1px, -1px);
+}
+
+#prev-btn:active, #next-btn:active {
+    border-style: inset;
+    transform: translate(1px, 1px);
+}
+
+#prev-btn::before { border-right-color: #241142; }
+#next-btn::before { border-left-color: #241142; }
+
+/* КНОПКА PLAY: ГОЛОГРАФИЧЕСКИЙ КРИСТАЛЛ */
+#play-pause-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--holo-gradient);
+    background-size: 300% 300%;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 20px #ff71ce, 0 0 40px #01cdfe;
+    animation: holographic-shine 6s ease infinite;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 0 30px #ff71ce, 0 0 60px #01cdfe;
+}
+
+#play-pause-btn::before {
+    background: #120526;
+}
+
+#play-pause-btn.is-playing::before {
+    background: #120526;
+}
+
+/* ПОЛЗУНКИ СКОРОСТИ И ГРОМКОСТИ */
+.control-group label {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fffb96;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 0px #000;
+}
+
+.control-group input[type="range"] {
+    background: #0d041c;
+    height: 8px;
+    border: 1px solid #ff71ce;
+    border-radius: 0px;
+    box-shadow: inset 2px 2px 4px #000;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 14px;
+    height: 18px;
+    border-radius: 1px;
+    background: linear-gradient(180deg, #ffffff 0%, #c3c7cb 100%);
+    border: 1px solid #000;
+    box-shadow: 1px 1px 0px #01cdfe, -1px -1px 0px #ff71ce;
+    cursor: pointer;
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    background: #0c0517;
+    border: 1px solid #01cdfe;
+    color: #05ffa1;
+    border-radius: 0px;
+    box-shadow: inset 1px 1px 3px #000;
+}
+
+#track-volume-value, #speed-value {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: #ff71ce;
+}
+
+/* === ВОЛНОВАЯ ФОРМА (СИНТЕЗАТОРНЫЙ ДИСПЛЕЙ ЭЛТ) === */
+.waveform-container {
+    background: #06020c;
+    border: 2px solid #05ffa1;
+    border-radius: 0px;
+    box-shadow: inset 0 0 15px rgba(5, 255, 161, 0.3), 3px 3px 0px #000;
+    position: relative;
+}
+
+.waveform-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg, rgba(5, 255, 161, 0.06) 0px, rgba(5, 255, 161, 0.06) 1px, transparent 1px, transparent 16px);
+    pointer-events: none;
+    z-index: 1;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 6px #ff71ce) hue-rotate(-20deg);
+}
+
+#time-display {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    color: #05ffa1;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(5, 255, 161, 0.8);
+}
+
+/* === ГРАФИЧЕСКИЙ ЭКВАЛАЙЗЕР: СЕКЦИЯ СТУДИЙНОГО МИКШЕРА === */
+.eq-container-wrapper {
+    background: linear-gradient(135deg, rgba(28, 12, 53, 0.95) 0%, rgba(15, 6, 28, 0.95) 100%);
+    border: 2px solid #ff71ce;
+    border-radius: 4px;
+    box-shadow: var(--vapor-shadow);
+}
+
+.eq-header-label {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #fffb96;
+    text-shadow: 2px 2px 0px #000;
+}
+
+.eq-header-label::after {
+    content: ' // SPECTRUM DSP DECK 1995';
+    color: #01cdfe;
+}
+
+.eq-band label {
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    color: #05ffa1;
+}
+
+.eq-band input[type="range"] {
+    background: #080312;
+    border: 1px solid #01cdfe;
+    border-radius: 0;
+    box-shadow: inset 0 0 8px #000;
+}
+
+/* === РАЗДЕЛИТЕЛЬ САЙДБАРА: СВЕТОВОЙ ЛУЧ === */
+.resizer-bar {
+    width: 4px;
+    background: #ff71ce;
+    box-shadow: 0 0 10px #ff71ce;
+    transition: var(--transition);
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: #01cdfe;
+    box-shadow: 0 0 20px #01cdfe, 0 0 35px #05ffa1;
+}
+
+/* === САЙДБАР БИБЛИОТЕКИ (VIRTUAL PLAZA DIRECTORY) === */
+.explorer-sidebar {
+    background: rgba(16, 8, 32, 0.96);
+    border-left: 2px solid #01cdfe;
+    box-shadow: -4px 0px 20px rgba(1, 205, 254, 0.25);
+}
+
+.explorer-header {
+    background: linear-gradient(90deg, #1c0b38 0%, #291252 100%);
+    border-bottom: 2px solid #ff71ce;
+}
+
+.explorer-title {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #ff71ce;
+}
+
+.explorer-header button {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    background: #c3c7cb;
+    color: #000000;
+    border: 2px outset #ffffff;
+    box-shadow: 2px 2px 0px #000;
+    border-radius: 0px;
+    padding: 2px 8px;
+}
+
+.explorer-header button:hover {
+    background: #ffffff;
+    box-shadow: 0 0 12px #05ffa1;
+}
+
+.folder-group h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    background: #1a0a33;
+    border: 1px solid #ff71ce;
+    border-radius: 2px;
+    color: #ffffff;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
+}
+
+.folder-group.open h3 {
+    background: linear-gradient(90deg, #ff71ce 0%, #b967ff 100%);
+    color: #ffffff;
+    text-shadow: 1px 1px 2px #000;
+    border-color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 113, 206, 0.5);
+}
+
+.track-item {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #c7b5e6;
+    border-radius: 2px;
+    border-left: 3px solid transparent;
+}
+
+.track-item:hover {
+    background: rgba(255, 113, 206, 0.18);
+    color: #ffffff;
+    border-left-color: #01cdfe;
+    transform: translateX(4px);
+}
+
+.track-item.playing {
+    background: linear-gradient(90deg, rgba(255, 113, 206, 0.35) 0%, rgba(1, 205, 254, 0.1) 100%) !important;
+    border-left-color: #05ffa1 !important;
+    color: #fffb96 !important;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(255, 251, 150, 0.8);
+}
+
+/* === 3. BOTTOM STATUS BAR: ТАСКБАР RETRO-OS === */
+.status-bar {
+    height: 34px;
+    background: #c3c7cb;
+    border-top: 2px solid #ffffff;
+    box-shadow: inset 0 1px 0px #dfdfdf, 0 -2px 10px rgba(0, 0, 0, 0.5);
+    padding: 0 8px;
+}
+
+.status-btn {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000000;
+    background: #c3c7cb;
+    border: 2px outset #ffffff;
+    box-shadow: 1px 1px 0px #000;
+    border-radius: 0px;
+    padding: 2px 8px;
+}
+
+.status-btn:hover {
+    background: #e1e4e8;
+    color: #000;
+}
+
+.status-btn:active, .status-btn.saved {
+    border-style: inset;
+    background: #a2a6aa;
+}
+
+.status-search input {
+    background: #ffffff;
+    border: 2px inset #7c7c7c;
+    border-radius: 0px;
+    color: #000000;
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    padding: 2px 8px;
+}
+
+.status-search input:focus {
+    outline: none;
+    border-color: #01cdfe;
+    box-shadow: 0 0 10px #ff71ce;
+}
+
+.status-tag {
+    font-family: 'VT323', monospace;
+    font-size: 15px;
+    color: #241142;
+    font-weight: 700;
+}
+
+/* === 4. МОДАЛЬНЫЕ ОКНА: ДИАЛОГОВЫЕ ОКНА WINDOWS 95 === */
+.modal-content {
+    background: #c3c7cb;
+    border: 3px outset #ffffff;
+    border-radius: 0px;
+    box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.75), 0 0 40px rgba(255, 113, 206, 0.5);
+    color: #000000;
+    padding: 4px;
+}
+
+.modal-header {
+    background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+    padding: 4px 8px;
+    border-bottom: none;
+}
+
+.modal-header h3 {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    color: #ffffff;
+    letter-spacing: 2px;
+}
+
+#close-rpc-modal, #close-url-modal {
+    background: #c3c7cb;
+    border: 2px outset #ffffff;
+    color: #000000;
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    font-weight: bold;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-body {
+    padding: 14px;
+}
+
+.modal-body label {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: #000000;
+}
+
+.modal-body input {
+    background: #ffffff;
+    border: 2px inset #7c7c7c;
+    border-radius: 0px;
+    color: #000000;
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+}
+
+.modal-actions button {
+    background: #c3c7cb;
+    border: 2px outset #ffffff;
+    border-radius: 0px;
+    color: #000000;
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 1px 1px 0px #000;
+}
+
+.modal-actions button:hover {
+    background: #ffffff;
+    border-color: #01cdfe;
+}

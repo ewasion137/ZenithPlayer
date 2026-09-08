@@ -807,7 +807,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'winamp.css',
         'macglass.css',
         'main.css',
-        'kocmocunleashed.css'
+        'kocmocunleashed.css',
+        'vaporwave.css'
     ];
 
     function applyTheme(themeName) {
