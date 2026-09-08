@@ -1,0 +1,571 @@
+/* ==========================================================================
+   THEME: AQUA OS X // 2004 MAC OS X TIGER & QUICKTIME 7 PRO
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
+
+/* === АНИМАЦИЯ ПУЛЬСАЦИИ СИНЕГО АКВА-ГЕЛЯ И БЛИКОВ === */
+@keyframes aqua-gel-pulse {
+    0%, 100% {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 1px #fff, inset 0 -2px 4px rgba(0, 50, 150, 0.6), 0 0 12px rgba(45, 125, 246, 0.4);
+    }
+    50% {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 1px #fff, inset 0 -2px 4px rgba(0, 50, 150, 0.6), 0 0 22px rgba(45, 125, 246, 0.85);
+    }
+}
+
+@keyframes aqua-candy-stripes {
+    0% { background-position: 0 0; }
+    100% { background-position: 30px 0; }
+}
+
+/* === ПАЛИТРА И ГЛЯНЦЕВЫЕ МАТЕРИАЛЫ MAC OS X AQUA === */
+:root {
+    /* Фирменный шлифованный алюминий (Brushed Metal) */
+    --bg-main: #c6c9cf;
+    --panel-bg: #d2d5dc;
+    --surface: #e1e4eb;
+    
+    /* Сочный синий леденцовый гель (Aqua Gel) */
+    --accent: #2779f5;
+    --accent-secondary: #51a5ff;
+    --accent-dark: #1254bf;
+    --accent-gradient: linear-gradient(180deg, #74b3ff 0%, #3a8df8 49%, #1d6fe9 50%, #1255be 100%);
+    
+    /* Текст классической Mac OS */
+    --text-main: #1f2226;
+    --text-dim: #60646c;
+    --border-light: rgba(0, 0, 0, 0.22);
+    --border-focus: #2779f5;
+    
+    /* Специфичные блики линзы и стекла */
+    --gel-glare: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.2) 48%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.15) 100%);
+    --metal-chassis: linear-gradient(180deg, #ebecee 0%, #cbced4 50%, #b8bcc4 100%);
+    --metal-bevel: inset 1px 1px 0 #fff, inset -1px -1px 0 rgba(0,0,0,0.3), 0 3px 8px rgba(0,0,0,0.25);
+    --transition: 0.15s ease-in-out;
+}
+
+/* === ФОН: ЛЕГЕНДАРНЫЙ BRUSHED METAL + ТОНКИЕ PINSTRIPES СТОЛА === */
+body {
+    font-family: -apple-system, 'Inter', 'Lucida Grande', sans-serif;
+    background-color: var(--bg-main);
+    background-image: 
+        /* Микро-текстура шлифованного металла */
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.15) 0px, rgba(255, 255, 255, 0.15) 1px, transparent 1px, transparent 2px),
+        /* Общий металлический градиент */
+        linear-gradient(180deg, #dcdfe4 0%, #bcbfc7 50%, #abb0b9 100%);
+    color: var(--text-main);
+}
+
+#spectrogram-canvas {
+    opacity: 0.22;
+    filter: drop-shadow(0 0 10px #2779f5);
+}
+
+/* === 1. TITLE BAR: СВЕТОФОРЫ AQUA (GUMDROPS) И РЕЛЬЕФНАЯ СТЕКЛЯННАЯ ПЛАНКА === */
+.title-bar {
+    height: 36px;
+    background: linear-gradient(180deg, #e8e9ec 0%, #c4c7cd 50%, #b2b6be 100%);
+    border-bottom: 1px solid #7d818a;
+    box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 0 12px;
+}
+
+.title-text {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #2e3238;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.title-text::before {
+    content: ' ';
+    color: #2779f5;
+    font-size: 15px;
+}
+
+.window-controls {
+    gap: 7px;
+    align-items: center;
+}
+
+/* Классические круглые леденцы Mac OS X */
+.win-btn {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    border-radius: 50%;
+    font-size: 0;
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.3);
+    transition: var(--transition);
+}
+
+/* Кнопка закрытия (Красный рубиновый леденец) */
+.win-close {
+    background: radial-gradient(circle at 40% 35%, #ff8b85 0%, #ff4943 50%, #b51a14 100%);
+    border-color: #8f0f0a;
+}
+.win-close:hover {
+    background: radial-gradient(circle at 40% 35%, #ffa39e 0%, #ff2b24 50%, #8f0f0a 100%) !important;
+}
+
+/* Кнопка сворачивания (Янтарный леденец) */
+#win-min {
+    background: radial-gradient(circle at 40% 35%, #ffd666 0%, #ffb01f 50%, #b36e00 100%);
+    border-color: #8c5500;
+}
+#win-min:hover {
+    background: radial-gradient(circle at 40% 35%, #ffe18a 0%, #ff9f00 50%, #8c5500 100%);
+}
+
+/* Кнопка разворачивания (Изумрудный леденец) */
+#win-max {
+    background: radial-gradient(circle at 40% 35%, #6fe879 0%, #2ac439 50%, #11781c 100%);
+    border-color: #0b5913;
+}
+#win-max:hover {
+    background: radial-gradient(circle at 40% 35%, #8eff97 0%, #15b825 50%, #0b5913 100%);
+}
+
+/* Появление символов светофора при наведении на контролы */
+.window-controls:hover .win-close::after { content: '×'; font-size: 10px; font-weight: 900; color: #500000; position: absolute; top: -1px; left: 3px; }
+.window-controls:hover #win-min::after { content: '–'; font-size: 10px; font-weight: 900; color: #573300; position: absolute; top: -1px; left: 3px; }
+.window-controls:hover #win-max::after { content: '+'; font-size: 9px; font-weight: 900; color: #063d0c; position: absolute; top: 0px; left: 3px; }
+
+/* === 2. PLAYER STAGE & ПАНЕЛИ QUICKTIME 7 === */
+.player-stage {
+    gap: 18px;
+    padding: 22px 28px;
+}
+
+/* NOW PLAYING: ГЛЯНЦЕВЫЙ ЧЕРНЫЙ ЭКРАН QUICKTIME PRO */
+.now-playing-container {
+    background: linear-gradient(180deg, #18191d 0%, #0d0e10 100%);
+    border: 2px solid #5a5d66;
+    border-radius: 12px;
+    box-shadow: inset 0 2px 6px #000, 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(255,255,255,0.15);
+    position: relative;
+    padding: 20px 24px;
+}
+
+/* Диагональный стеклянный блик на дисплее */
+.now-playing-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border-radius: 10px 10px 0 0;
+    pointer-events: none;
+}
+
+/* Обложка альбома со стеклянным куполом */
+.cover-wrapper {
+    width: 86px;
+    height: 86px;
+    min-width: 86px;
+    border-radius: 8px;
+    background: #000;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.cover-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+#current-track-artwork {
+    border-radius: 6px;
+}
+
+.artwork-glow {
+    filter: blur(40px);
+    opacity: 0.3;
+    background-color: var(--accent);
+}
+
+.track-info h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.track-info p {
+    font-size: 13px;
+    font-weight: 500;
+    color: #4da2ff;
+    margin-top: 4px;
+    text-shadow: 0 0 10px rgba(77, 162, 255, 0.6);
+}
+
+/* ОСНОВНОЙ ПРИБОРНЫЙ БЛОК УПРАВЛЕНИЯ: BRUSHED METAL */
+#top-controls {
+    background: var(--metal-chassis);
+    border: 1px solid #757982;
+    border-radius: 12px;
+    box-shadow: var(--metal-bevel);
+    padding: 18px 24px;
+}
+
+.main-controls {
+    gap: 14px;
+}
+
+/* Металлические полированные кнопки перехода */
+#prev-btn, #next-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #ffffff 0%, #d8d9dc 45%, #b6b9be 50%, #9fa2a8 100%);
+    border: 1px solid #666970;
+    box-shadow: inset 0 1px 0 #fff, 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #e6e7eb 45%, #c8cbd2 50%, #b2b5bc 100%);
+    transform: scale(1.04);
+}
+
+#prev-btn:active, #next-btn:active {
+    background: linear-gradient(180deg, #8f9298 0%, #b2b5bc 100%);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#prev-btn::before { border-right-color: #3b3e44; }
+#next-btn::before { border-left-color: #3b3e44; }
+
+/* КНОПКА PLAY: САМЫЙ СОЧНЫЙ СИНИЙ AQUA GEL КРИСТАЛЛ */
+#play-pause-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    border: 1px solid #0d4294;
+    box-shadow: inset 0 1px 1px #fff, inset 0 -2px 4px rgba(0, 50, 150, 0.6), 0 3px 8px rgba(0, 0, 0, 0.4);
+    animation: aqua-gel-pulse 4s infinite ease-in-out;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+#play-pause-btn:hover {
+    filter: brightness(1.15);
+    transform: scale(1.06);
+}
+
+#play-pause-btn:active, #play-pause-btn.is-playing {
+    background: linear-gradient(180deg, #104ba1 0%, #1e62c9 50%, #3e8ff7 100%);
+    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+#play-pause-btn::before {
+    background: #ffffff;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* СЛАЙДЕРЫ AQUA: ОКРУГЛЫЕ ПАЗЫ С ХРОМИРОВАННЫМИ ПОЛЗУНКАМИ */
+.control-group label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #4b4e54;
+    letter-spacing: 0.5px;
+}
+
+.control-group input[type="range"] {
+    background: #a4a7ae;
+    height: 6px;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 0 #fff;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #ffffff 0%, #d8dade 45%, #b2b5ba 50%, #909399 100%);
+    border: 1px solid #5a5c61;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4), inset 0 1px 0 #fff;
+    cursor: pointer;
+}
+
+.control-input, .eq-band input[type="number"] {
+    background: #ffffff;
+    border: 1px solid #787c85;
+    border-radius: 4px;
+    color: var(--accent-dark);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+#track-volume-value, #speed-value {
+    font-size: 11px;
+    font-weight: 700;
+    color: #383b40;
+}
+
+/* === ВОЛНОВАЯ ФОРМА: СИНЯЯ ЖЕЛАТИНОВАЯ ШКАЛА ПРОГРЕССА === */
+.waveform-container {
+    background: #090a0c;
+    border: 2px solid #5c6068;
+    border-radius: 6px;
+    box-shadow: inset 0 2px 6px #000, 0 1px 0 #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Эффект анимированных леденцовых диагональных полос Mac OS */
+.waveform-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(39, 121, 245, 0.08) 0px,
+        rgba(39, 121, 245, 0.08) 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    animation: aqua-candy-stripes 2s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 6px #2779f5);
+}
+
+#time-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #3b3e44;
+}
+
+/* === ЭКВАЛАЙЗЕР: СЕКЦИЯ ITUNES EQUALIZER === */
+.eq-container-wrapper {
+    background: var(--metal-chassis);
+    border: 1px solid #757982;
+    border-radius: 12px;
+    box-shadow: var(--metal-bevel);
+}
+
+.eq-header-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #383b42;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.eq-band label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #484b52;
+}
+
+/* Вертикальные фейдеры пульта iTunes */
+.eq-band input[type="range"] {
+    width: 6px;
+    height: 68px;
+    background: #a4a7ae;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 0 #fff;
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 18px;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--accent-gradient);
+    border: 1px solid #0d4294;
+    box-shadow: inset 0 1px 0 #fff, 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* === РАЗДЕЛИТЕЛЬ: МЕТАЛЛИЧЕСКАЯ ГРАНЬ === */
+.resizer-bar {
+    width: 5px;
+    background: #9fa2a8;
+    border-left: 1px solid #82858b;
+    border-right: 1px solid #d0d3d8;
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+}
+
+/* === САЙДБАР: ITUNES SOURCE LIST (ГОЛУБЫЕ ВЫДЕЛЕНИЯ) === */
+.explorer-sidebar {
+    background: #e1e4ea;
+    border-left: 1px solid #858992;
+    box-shadow: inset 2px 0 6px rgba(0, 0, 0, 0.08);
+}
+
+.explorer-header {
+    background: linear-gradient(180deg, #d8dade 0%, #bfc2c9 100%);
+    border-bottom: 1px solid #8f929a;
+}
+
+.explorer-title {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #40434a;
+    text-shadow: 0 1px 0 #fff;
+}
+
+.explorer-header button {
+    background: linear-gradient(180deg, #ffffff 0%, #e2e4e8 45%, #c8cbd0 50%, #b8bbc0 100%);
+    border: 1px solid #72757c;
+    border-radius: 12px;
+    color: #26282c;
+    box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0, 0, 0, 0.2);
+    font-weight: 700;
+}
+
+.explorer-header button:hover {
+    background: var(--accent-gradient);
+    border-color: #0b4396;
+    color: #ffffff;
+}
+
+/* Плейлисты и папки источника */
+.folder-group h3 {
+    font-size: 12px;
+    font-weight: 700;
+    background: linear-gradient(180deg, #f0f2f5 0%, #d8dade 100%);
+    border: 1px solid #a8abb2;
+    border-radius: 5px;
+    color: #2b2e33;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.folder-group.open h3 {
+    background: var(--accent-gradient);
+    color: #ffffff;
+    border-color: #0b4396;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.track-item {
+    font-size: 12px;
+    font-weight: 600;
+    color: #3b3e45;
+    border-radius: 4px;
+    padding: 6px 10px;
+}
+
+.track-item:hover {
+    background: rgba(39, 121, 245, 0.15);
+    color: #0d4294;
+}
+
+/* Воспроизводимый трек: фирменная овальная плашка Mac OS X */
+.track-item.playing {
+    background: var(--accent-gradient) !important;
+    border-left: none !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* === 3. BOTTOM STATUS BAR: ПЛАТИНОВЫЙ СТАТУС === */
+.status-bar {
+    height: 32px;
+    background: linear-gradient(180deg, #d2d5db 0%, #b2b6bd 100%);
+    border-top: 1px solid #82868e;
+    box-shadow: inset 0 1px 0 #fff;
+    padding: 0 14px;
+}
+
+.status-btn {
+    font-size: 11px;
+    font-weight: 700;
+    color: #35383e;
+    background: linear-gradient(180deg, #ffffff 0%, #e2e4e8 45%, #c8cbd0 50%, #b8bbc0 100%);
+    border: 1px solid #72757c;
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.status-btn:hover {
+    background: #ffffff;
+    color: #000;
+}
+
+.status-btn.saved {
+    background: linear-gradient(180deg, #51cf66 0%, #2b8a3e 100%);
+    color: #ffffff;
+    border-color: #1e5e2a;
+}
+
+.status-search input {
+    background: #ffffff;
+    border: 1px solid #7b7f88;
+    border-radius: 12px;
+    color: #1a1c1f;
+    font-size: 11px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+    padding: 3px 12px;
+}
+
+.status-search input:focus {
+    border-color: #2779f5;
+    box-shadow: 0 0 6px rgba(39, 121, 245, 0.7);
+}
+
+.status-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: #3a3d44;
+}
+
+/* === 4. МОДАЛЬНЫЕ ОКНА: ДИАЛОГОВЫЕ ЛИСТЫ MAC OS X === */
+.modal-content {
+    background: var(--metal-chassis);
+    border: 2px solid #5a5d66;
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), var(--metal-bevel);
+    padding: 22px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #8c9098;
+}
+
+.modal-header h3 {
+    font-weight: 700;
+    color: #1a1c1f;
+    text-shadow: 0 1px 0 #fff;
+}
+
+.modal-body input {
+    background: #ffffff;
+    border: 1px solid #7a7e86;
+    border-radius: 6px;
+    color: #1a1c1f;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.modal-actions button {
+    background: var(--accent-gradient);
+    border: 1px solid #0d4294;
+    border-radius: 12px;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 #fff, 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.modal-actions button:hover {
+    filter: brightness(1.15);
+}

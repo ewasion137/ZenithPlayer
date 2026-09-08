@@ -812,7 +812,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'neumorphism.css',
         'skeumorph-cassette.css',
         'paper-dark.css',
-        'zen.css'
+        'zen.css',
+        'aqua-osx.css'
     ];
 
     function applyTheme(themeName) {
