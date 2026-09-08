@@ -813,7 +813,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'skeumorph-cassette.css',
         'paper-dark.css',
         'zen.css',
-        'aqua-osx.css'
+        'aqua-osx.css',
+        'amoled-pure.css'
     ];
 
     function applyTheme(themeName) {
