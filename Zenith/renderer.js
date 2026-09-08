@@ -810,7 +810,9 @@ document.addEventListener('DOMContentLoaded', () => {
         'kocmocunleashed.css',
         'vaporwave.css',
         'neumorphism.css',
-        'skeumorph-cassette.css'
+        'skeumorph-cassette.css',
+        'paper-dark.css',
+        'zen.css'
     ];
 
     function applyTheme(themeName) {
