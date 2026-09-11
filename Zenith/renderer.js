@@ -815,7 +815,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'zen.css',
         'aqua-osx.css',
         'amoled-pure.css',
-        'y2k-futurism.css'
+        'y2k-futurism.css',
+        'hell.css'
     ];
 
     function applyTheme(themeName) {
