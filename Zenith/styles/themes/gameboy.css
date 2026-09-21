@@ -1,0 +1,637 @@
+/* ==========================================================================
+   THEME: GAME BOY COLOR // ATOMIC PURPLE (CLEAR FROSTED PLASTIC & PCB CHIPS)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap');
+
+/* === KEYFRAMES: ПИКСЕЛЬНАЯ МАТРИЦА И СВЕТОДИОД БАТАРЕИ === */
+@keyframes battery-led-flicker {
+    0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px #ff1a1a); }
+    48% { opacity: 1; }
+    50% { opacity: 0.85; filter: drop-shadow(0 0 3px #cc0000); }
+    52% { opacity: 1; filter: drop-shadow(0 0 6px #ff1a1a); }
+}
+
+:root {
+    /* Полупрозрачный матовый фиолетовый корпус (Atomic Purple) */
+    --gb-purple-case: rgba(84, 34, 118, 0.82);
+    --gb-purple-deep: #31114a;
+    --gb-purple-border: rgba(186, 122, 230, 0.45);
+    
+    /* Текстолит материнской платы под пластиком */
+    --pcb-green: #0d2b1a;
+    --pcb-trace: rgba(200, 165, 85, 0.22);
+    --pcb-solder: rgba(180, 185, 195, 0.4);
+    
+    /* Цвета резиновых кнопок и элементов управления */
+    --btn-ab-maroon: #8f173f;
+    --btn-dpad-dark: #222226;
+    --btn-rubber-grey: #696a75;
+    
+    /* Оливково-серый рефлективный ЖК-экран Game Boy */
+    --lcd-bg: #8b956d;
+    --lcd-pixel: #1b2614;
+    --lcd-border: #444b36;
+    
+    --accent: #ba7ae6;
+    --accent-secondary: #00d26a;
+    --text-main: #ffffff;
+    --text-dim: #c5a9dd;
+    
+    /* Скевоморфизм выпуклого литого пластика конца 90-х */
+    --plastic-bevel: 
+        inset 2px 2px 3px rgba(255, 255, 255, 0.35),
+        inset -2px -2px 4px rgba(0, 0, 0, 0.5),
+        0 6px 18px rgba(0, 0, 0, 0.65);
+    --inner-screen-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.6);
+    --transition: 0.12s ease-out;
+}
+
+/* === ФОН: ДОРОЖКИ ПЕЧАТНОЙ ПЛАТЫ, ЧИПЫ И ПАЯНЫЕ КОНТАКТЫ === */
+body {
+    font-family: 'Chakra Petch', sans-serif;
+    background-color: var(--pcb-green);
+    background-image: 
+        /* Полупрозрачная тонированная оболочка Atomic Purple */
+        radial-gradient(circle at 50% 30%, rgba(105, 45, 148, 0.75) 0%, rgba(42, 14, 62, 0.95) 100%),
+        /* Золотые дорожки медной шины печатной платы */
+        repeating-linear-gradient(0deg, transparent 0px, transparent 28px, var(--pcb-trace) 28px, var(--pcb-trace) 30px),
+        repeating-linear-gradient(90deg, transparent 0px, transparent 38px, var(--pcb-trace) 38px, var(--pcb-trace) 40px),
+        /* Точки пайки DIP-компонентов */
+        radial-gradient(circle, var(--pcb-solder) 1.5px, transparent 2px),
+        /* Матрица кремниевых микросхем CPU Z80 */
+        linear-gradient(180deg, #091c11 0%, #06150d 100%);
+    background-size: 100% 100%, 60px 60px, 80px 80px, 16px 16px, 100% 100%;
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+#spectrogram-canvas {
+    opacity: 0.25;
+    filter: drop-shadow(0 0 8px var(--accent)) sepia(30%) hue-rotate(240deg);
+}
+
+/* === 1. TITLE BAR: ВЕРХНЯЯ КРОМКА КАРТРИДЖ-СЛОТА === */
+.title-bar {
+    height: 38px;
+    background: linear-gradient(180deg, rgba(120, 52, 168, 0.85) 0%, rgba(68, 26, 98, 0.92) 100%);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    padding: 0 14px;
+    position: relative;
+    backdrop-filter: blur(4px);
+}
+
+/* Тисненая надпись NINTENDO над экраном */
+.title-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #f0e6ff;
+    text-shadow: 1px 2px 0px rgba(0, 0, 0, 0.8), -1px -1px 0px rgba(255, 255, 255, 0.2);
+}
+
+.title-text::before {
+    content: 'Nintendo ';
+    font-style: italic;
+    color: #e5b3ff;
+}
+
+.window-controls {
+    gap: 6px;
+    align-items: center;
+}
+
+/* Овальные серые силиконовые кнопки START / SELECT */
+.win-btn {
+    width: 28px;
+    height: 14px;
+    border-radius: 7px;
+    background: linear-gradient(180deg, #787985 0%, #4f505a 100%);
+    border: 1px solid #28292d;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 1px 2px 3px rgba(0, 0, 0, 0.6);
+    color: #1a1a1e;
+    font-family: 'Silkscreen', monospace;
+    font-size: 8px;
+    transform: rotate(-25deg);
+    transition: var(--transition);
+}
+
+.win-btn:hover {
+    background: #8b8c99;
+    transform: rotate(-25deg) scale(1.08);
+}
+
+.win-close:hover {
+    background: var(--btn-ab-maroon) !important;
+    color: #ffffff !important;
+}
+
+/* === 2. PLAYER STAGE: КОРПУС С ЗАКРУГЛЕННЫМИ ФАСКАМИ === */
+.player-stage {
+    gap: 18px;
+    padding: 22px 28px;
+}
+
+/* NOW PLAYING: РАМКА ЭКРАНА С ЛОГОТИПОМ "COLOR" И ИНДИКАТОРОМ POWER */
+.now-playing-container {
+    background: linear-gradient(180deg, #2b2b34 0%, #1c1c22 100%);
+    border: 3px solid #131317;
+    border-radius: 10px 10px 30px 10px;
+    box-shadow: 
+        inset 0 0 10px rgba(0, 0, 0, 0.9),
+        0 6px 18px rgba(0, 0, 0, 0.7),
+        0 0 0 2px rgba(186, 122, 230, 0.25);
+    padding: 22px 26px;
+    position: relative;
+}
+
+/* Логотип GAME BOY COLOR внизу рамки дисплея */
+.now-playing-container::before {
+    content: 'GAME BOY COLOR';
+    position: absolute;
+    bottom: 4px;
+    left: 26px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: 2px;
+    color: #d1d2dc;
+    text-shadow: 1px 1px 0 #000;
+}
+
+/* Красный светодиод батареи (BATTERY / POWER LED) */
+.now-playing-container::after {
+    content: '• POWER';
+    position: absolute;
+    top: 8px;
+    left: 18px;
+    font-family: 'Silkscreen', monospace;
+    font-size: 8px;
+    color: #ff3333;
+    letter-spacing: 1px;
+    animation: battery-led-flicker 4s infinite;
+}
+
+/* Экранная вставка: рефлективная матрица */
+.cover-wrapper {
+    width: 88px;
+    height: 88px;
+    min-width: 88px;
+    border-radius: 4px;
+    background: var(--lcd-bg);
+    border: 3px solid var(--lcd-border);
+    box-shadow: var(--inner-screen-shadow);
+    position: relative;
+    padding: 2px;
+}
+
+/* Пиксельная сетка экрана поверх обложки */
+.cover-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events: none;
+    z-index: 5;
+}
+
+#current-track-artwork {
+    width: 100%;
+    height: 100%;
+    border-radius: 2px;
+    filter: contrast(130%) saturate(85%) sepia(20%);
+}
+
+.artwork-glow {
+    filter: blur(45px);
+    opacity: 0.35;
+    background-color: var(--accent);
+}
+
+.track-info h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #000000, 0 0 10px rgba(186, 122, 230, 0.5);
+}
+
+.track-info p {
+    font-family: 'Silkscreen', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 6px;
+    letter-spacing: 1px;
+}
+
+/* === ПАНЕЛЬ УПРАВЛЕНИЯ: КНОПКИ A/B И ФИОЛЕТОВЫЙ ПЛАСТИК === */
+#top-controls {
+    background: var(--gb-purple-case);
+    border: 2px solid var(--gb-purple-border);
+    border-radius: 12px;
+    box-shadow: var(--plastic-bevel);
+    backdrop-filter: blur(8px);
+    padding: 18px 24px;
+    position: relative;
+}
+
+.main-controls {
+    gap: 16px;
+}
+
+/* Кнопки Prev / Next в виде темных элементов крестовины D-PAD */
+#prev-btn, #next-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #32323a 0%, #1a1a1e 100%);
+    border: 2px solid #111114;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 4px 6px rgba(0, 0, 0, 0.6);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: #41414a;
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 6px 10px rgba(0, 0, 0, 0.7);
+}
+
+#prev-btn:active, #next-btn:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 2px 4px #000;
+}
+
+#prev-btn::before {
+    border-right: 8px solid #8e909d;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+#next-btn::before {
+    border-left: 8px solid #8e909d;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+/* КНОПКА PLAY: КУЛЬТОВАЯ КРУГЛАЯ КНОПКА "A" БОРДОВОГО ЦВЕТА */
+#play-pause-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #b82354 0%, #8f173f 60%, #520820 100%);
+    border: 2px solid #420619;
+    box-shadow: 
+        inset 1px 2px 3px rgba(255, 255, 255, 0.5),
+        inset -2px -3px 5px rgba(0, 0, 0, 0.7),
+        0 6px 14px rgba(0, 0, 0, 0.7);
+    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 
+        inset 1px 2px 4px rgba(255, 255, 255, 0.7),
+        0 8px 18px rgba(0, 0, 0, 0.8),
+        0 0 12px rgba(184, 35, 84, 0.6);
+}
+
+#play-pause-btn:active {
+    transform: scale(0.95);
+    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.8);
+}
+
+#play-pause-btn::before {
+    background: #ffffff;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    width: 14px;
+    height: 16px;
+}
+
+#play-pause-btn.is-playing::before {
+    background: #ffffff;
+    clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+}
+
+/* ПОЛЗУНКИ НАСТРОЙКИ В ВИДЕ ЗУБЧАТОГО КОЛЕСА VOLUME */
+.control-group label {
+    font-family: 'Silkscreen', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #e5b3ff;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.control-group input[type="range"] {
+    background: #190a26;
+    height: 8px;
+    border: 1px solid var(--gb-purple-border);
+    border-radius: 4px;
+    box-shadow: inset 0 2px 4px #000;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #44444e 0%, #1f1f23 100%);
+    border: 2px solid #8e90a0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    background: #12071c;
+    border: 1px solid var(--accent);
+    color: var(--accent-secondary);
+    border-radius: 3px;
+    box-shadow: inset 0 1px 3px #000;
+}
+
+#track-volume-value, #speed-value {
+    font-family: 'Silkscreen', monospace;
+    font-size: 10px;
+    color: var(--accent-secondary);
+}
+
+/* === ВОЛНОВАЯ ФОРМА: РЕФЛЕКТИВНАЯ ОЛИВКОВАЯ DOT-MATRIX ПАНЕЛЬ === */
+.waveform-container {
+    background: var(--lcd-bg);
+    border: 3px solid var(--lcd-border);
+    border-radius: 4px;
+    box-shadow: var(--inner-screen-shadow);
+    position: relative;
+}
+
+/* Сетка пикселей монохромного экрана */
+.waveform-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        radial-gradient(circle, rgba(27, 38, 20, 0.25) 1px, transparent 1px);
+    background-size: 3px 3px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 1px 0px rgba(27, 38, 20, 0.8)) hue-rotate(90deg) contrast(170%);
+}
+
+#time-display {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #e5b3ff;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 #000;
+}
+
+/* === ЭКВАЛАЙЗЕР: СЕКЦИЯ ЧИПТЮН-СИНТЕЗАТОРА (SOUND CHIP DMG-01) === */
+.eq-container-wrapper {
+    background: var(--gb-purple-case);
+    border: 2px solid var(--gb-purple-border);
+    border-radius: 12px;
+    box-shadow: var(--plastic-bevel);
+    backdrop-filter: blur(8px);
+    padding: 18px 24px;
+}
+
+.eq-header-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: #ffffff;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.eq-header-label::after {
+    content: ' [CHIP-SYNTH 8-BIT]';
+    color: var(--accent-secondary);
+}
+
+.eq-band label {
+    font-family: 'Silkscreen', monospace;
+    font-size: 9px;
+    color: #d1b8eb;
+}
+
+.eq-band input[type="range"] {
+    background: #140720;
+    border: 1px solid var(--gb-purple-border);
+    border-radius: 4px;
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 22px;
+    height: 12px;
+    border-radius: 2px;
+    background: var(--btn-ab-maroon);
+    border: 1px solid #ff7fa6;
+    box-shadow: 0 2px 4px #000;
+}
+
+/* === РАЗДЕЛИТЕЛЬ: СТЫК ФОРМОВАННОГО КОРПУСА === */
+.resizer-bar {
+    width: 6px;
+    background: rgba(49, 17, 74, 0.9);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: 1px solid #11051b;
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+}
+
+/* === САЙДБАР: КАРТРИДЖ-МЕНЕДЖЕР (GAME PAK DIRECTORY) === */
+.explorer-sidebar {
+    background: rgba(30, 11, 46, 0.94);
+    border-left: 2px solid var(--gb-purple-border);
+    box-shadow: inset 4px 0 15px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+}
+
+.explorer-header {
+    background: linear-gradient(180deg, rgba(84, 34, 118, 0.9) 0%, rgba(45, 16, 66, 0.9) 100%);
+    border-bottom: 2px solid var(--gb-purple-border);
+    padding: 12px 16px;
+}
+
+.explorer-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #ffffff;
+}
+
+.explorer-header button {
+    font-family: 'Silkscreen', monospace;
+    font-size: 10px;
+    background: #502170;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.explorer-header button:hover {
+    background: var(--btn-ab-maroon);
+    border-color: #ff6699;
+}
+
+.folder-group h3 {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(62, 23, 89, 0.6);
+    border: 1px solid rgba(186, 122, 230, 0.3);
+    border-radius: 4px;
+    color: #ebd7ff;
+}
+
+.folder-group.open h3 {
+    background: var(--gb-purple-deep);
+    color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+}
+
+.track-item {
+    font-family: 'Silkscreen', monospace;
+    font-size: 10px;
+    color: #bfa4db;
+    border-radius: 3px;
+    padding: 6px 10px;
+}
+
+.track-item:hover {
+    background: rgba(186, 122, 230, 0.2);
+    color: #ffffff;
+}
+
+/* Воспроизводимый трек в стиле подсветки экрана Game Boy */
+.track-item.playing {
+    background: rgba(0, 210, 106, 0.25) !important;
+    border-left: 3px solid var(--accent-secondary) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    text-shadow: 0 0 6px rgba(0, 210, 106, 0.8);
+}
+
+/* === 3. BOTTOM STATUS BAR: РАЗЪЕМ ДЛЯ НАУШНИКОВ И ПИТАНИЯ === */
+.status-bar {
+    height: 34px;
+    background: linear-gradient(180deg, #381454 0%, #200a31 100%);
+    border-top: 2px solid var(--gb-purple-border);
+    padding: 0 12px;
+}
+
+.status-btn {
+    font-family: 'Silkscreen', monospace;
+    font-size: 9px;
+    color: #e5b3ff;
+    background: #4c1a73;
+    border: 1px solid var(--gb-purple-border);
+    border-radius: 4px;
+    padding: 3px 8px;
+}
+
+.status-btn:hover {
+    background: var(--accent);
+    color: #1a0826;
+}
+
+.status-btn.saved {
+    background: #0f4c27;
+    color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+}
+
+.status-search input {
+    background: #170724;
+    border: 1px solid var(--gb-purple-border);
+    border-radius: 4px;
+    color: var(--accent-secondary);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    padding: 4px 8px;
+}
+
+.status-search input:focus {
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 8px rgba(0, 210, 106, 0.5);
+}
+
+.status-tag {
+    font-family: 'Silkscreen', monospace;
+    font-size: 10px;
+    color: var(--accent-secondary);
+}
+
+/* === 4. МОДАЛЬНЫЕ ОКНА: ДИАЛОГ СОХРАНЕНИЯ КАРТРИДЖА (SAVE STATE) === */
+.modal-content {
+    background: linear-gradient(180deg, #3d165c 0%, #210a33 100%);
+    border: 3px solid var(--accent);
+    border-radius: 8px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(186, 122, 230, 0.4);
+    padding: 20px;
+}
+
+.modal-header {
+    border-bottom: 2px solid var(--gb-purple-border);
+    padding-bottom: 10px;
+}
+
+.modal-header h3 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: #ffffff;
+    line-height: 1.5;
+}
+
+#close-rpc-modal, #close-url-modal {
+    background: var(--btn-ab-maroon);
+    border: 1px solid #ff7fa6;
+    color: #ffffff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    border-radius: 4px;
+}
+
+.modal-body label {
+    font-family: 'Silkscreen', monospace;
+    font-size: 11px;
+    color: #e5b3ff;
+}
+
+.modal-body input {
+    background: #140620;
+    border: 1px solid var(--gb-purple-border);
+    border-radius: 4px;
+    color: var(--accent-secondary);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+}
+
+.modal-actions button {
+    background: #502170;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: #ffffff;
+    font-family: 'Silkscreen', monospace;
+    font-size: 11px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.modal-actions button:hover {
+    background: var(--accent-secondary);
+    color: #061c0f;
+}

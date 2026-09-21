@@ -1,0 +1,656 @@
+/* ==========================================================================
+   THEME: CYBER-ALCHIMIA // DARK SOULS GRIMOIRE (FORBIDDEN TOME & BONFIRE)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;900&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&display=swap');
+
+/* === KEYFRAMES: ПУЛЬСАЦИЯ ТЛЕЮЩЕГО КОСТРА И ВРАЩЕНИЕ АЛХИМИЧЕСКИХ КОЛЕЦ === */
+@keyframes bonfire-ember-pulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 87, 34, 0.7), 0 0 45px rgba(212, 175, 55, 0.4), inset 0 0 15px #ff5722;
+    }
+    50% {
+        box-shadow: 0 0 35px rgba(255, 87, 34, 0.95), 0 0 70px rgba(255, 138, 101, 0.6), inset 0 0 25px #ffa726;
+    }
+}
+
+@keyframes alchemical-ring-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes alchemical-ring-reverse {
+    0% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
+}
+
+:root {
+    /* Кожа древнего переплета и железная оковка */
+    --bg-main: #0a0908;
+    --panel-bg: #14110e;
+    --surface: #1c1813;
+    
+    /* Сусальное золото, багряный сургуч и пламя костра */
+    --accent: #d4af37;              /* Алхимическое золото */
+    --accent-bright: #f5d77f;       /* Блик полированного золота */
+    --accent-fire: #ff5722;         /* Тлеющий уголь / Эстус */
+    --accent-blood: #8a151b;        /* Засохшая кровь манускрипта */
+    
+    --accent-gradient: linear-gradient(135deg, #d4af37 0%, #aa820a 50%, #5e4500 100%);
+    --gold-glow: 0 0 15px rgba(212, 175, 55, 0.45);
+    
+    --text-main: #f5eedf;           /* Выбеленная кость / Пергамент */
+    --text-dim: #998d7c;            /* Выцветшая латынь */
+    --border-light: rgba(212, 175, 55, 0.35);
+    --border-focus: #d4af37;
+    
+    /* Рамки с двойной золотой окантовкой */
+    --grimoire-frame: 
+        inset 0 0 0 1px rgba(212, 175, 55, 0.4),
+        inset 0 0 20px rgba(0, 0, 0, 0.9),
+        0 8px 30px rgba(0, 0, 0, 0.85);
+    --transition: 0.2s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+/* === ФОН: ТИСНЕНАЯ ЧЕРНАЯ КОЖА, РУНИЧЕСКИЕ КРУГИ И ПЫЛЬ ЭФИРА === */
+body {
+    font-family: 'Cormorant Garamond', serif;
+    background-color: var(--bg-main);
+    background-image:
+        /* Мистическое золотое свечение в центре фолианта */
+        radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 65%),
+        /* Концентрические астрономические сферы */
+        radial-gradient(circle at 50% 50%, transparent 280px, rgba(212, 175, 55, 0.04) 281px, transparent 283px),
+        radial-gradient(circle at 50% 50%, transparent 420px, rgba(212, 175, 55, 0.03) 421px, transparent 423px),
+        /* Текстура трещин состаренной кожи */
+        radial-gradient(circle at 20% 80%, rgba(0, 0, 0, 0.6) 0%, transparent 50%),
+        linear-gradient(180deg, #0d0b09 0%, #060504 100%);
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+#spectrogram-canvas {
+    opacity: 0.22;
+    filter: sepia(100%) hue-rotate(5deg) contrast(180%) drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+}
+
+/* === 1. TITLE BAR: КОВАНЫЙ КОРЕШОК ФОЛИАНТА С ЗОЛОТЫМ ТИСНЕНИЕМ === */
+.title-bar {
+    height: 38px;
+    background: linear-gradient(180deg, #1f1a14 0%, #110e0b 100%);
+    border-bottom: 2px solid var(--accent);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.9), 0 0 10px rgba(212, 175, 55, 0.2);
+    padding: 0 16px;
+    position: relative;
+}
+
+.title-text {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--accent-bright);
+    text-shadow: 0 1px 3px #000, var(--gold-glow);
+}
+
+.title-text::before {
+    content: '🕮 LIBER MAGICA // ';
+    color: var(--accent-fire);
+}
+
+.title-text::after {
+    content: ' [GRIMOIRE N° VII]';
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--text-dim);
+}
+
+.window-controls {
+    gap: 8px;
+    align-items: center;
+}
+
+/* Кнопки окна: золотые печати-печатки */
+.win-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #2a2219 0%, #15110c 100%);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    box-shadow: 0 2px 5px #000;
+    transition: var(--transition);
+}
+
+.win-btn:hover {
+    background: var(--accent);
+    color: #120e09;
+    box-shadow: 0 0 10px var(--accent);
+    transform: rotate(90deg);
+}
+
+.win-close:hover {
+    background: var(--accent-blood) !important;
+    border-color: #ff3344 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px #ff1744;
+}
+
+/* === 2. PLAYER STAGE: МАГИЧЕСКИЙ АЛТАРЬ И ГРАВИРОВАННЫЕ ПЛАСТИНЫ === */
+.player-stage {
+    gap: 20px;
+    padding: 24px 30px;
+}
+
+/* NOW PLAYING: СКРИЖАЛЬ ЗАКЛИНАНИЯ С ЗОЛОТОЙ ФИЛИГРАНЬЮ */
+.now-playing-container {
+    background: var(--panel-bg);
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    box-shadow: var(--grimoire-frame);
+    padding: 24px 28px;
+    position: relative;
+}
+
+/* Угловые геральдические завитки скрижали */
+.now-playing-container::before {
+    content: '✦ ARCANUM CANTUS ✦';
+    position: absolute;
+    top: 5px;
+    right: 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent);
+}
+
+/* ОБЛОЖКА ТРЕКА: АЛХИМИЧЕСКИЙ КРУГ ПРИЗЫВА (TRANSMUTATION CIRCLE) */
+.cover-wrapper {
+    width: 96px;
+    height: 96px;
+    min-width: 96px;
+    border-radius: 50%;
+    background: #0d0b08;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.35), inset 0 0 15px #000000;
+    position: relative;
+    padding: 4px;
+}
+
+/* Вращающееся внешнее кольцо древних глифов и рун */
+.cover-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: -10px; right: -10px; bottom: -10px;
+    border-radius: 50%;
+    border: 1px dashed var(--accent);
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+    animation: alchemical-ring-spin 16s linear infinite;
+    pointer-events: none;
+}
+
+/* Внутреннее обратное кольцо звездных координат */
+.cover-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -16px; left: -16px; right: -16px; bottom: -16px;
+    border-radius: 50%;
+    border: 1px dotted rgba(212, 175, 55, 0.6);
+    border-left-color: transparent;
+    animation: alchemical-ring-reverse 24s linear infinite;
+    pointer-events: none;
+}
+
+#current-track-artwork {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    filter: sepia(40%) contrast(120%) brightness(0.9);
+}
+
+.artwork-glow {
+    filter: blur(55px);
+    opacity: 0.35;
+    background-color: var(--accent);
+}
+
+/* Заголовки: каллиграфия средневекового инкунабула */
+.track-info h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent-bright);
+    text-shadow: 0 2px 4px #000, 0 0 10px rgba(212, 175, 55, 0.4);
+    margin: 0;
+}
+
+.track-info p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-style: italic;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+/* === ПАНЕЛЬ УПРАВЛЕНИЯ: РИТУАЛЬНЫЙ АЛТАРЬ С ПЕЧАТЯМИ === */
+#top-controls {
+    background: var(--panel-bg);
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    box-shadow: var(--grimoire-frame);
+    padding: 20px 26px;
+    position: relative;
+}
+
+.main-controls {
+    gap: 16px;
+}
+
+#prev-btn, #next-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #241e17 0%, #120f0b 100%);
+    border: 2px solid var(--accent);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: #332a1f;
+    box-shadow: 0 0 15px var(--accent);
+    transform: scale(1.08);
+}
+
+#prev-btn::before {
+    border-right: 8px solid var(--accent);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+#next-btn::before {
+    border-left: 8px solid var(--accent);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+/* КНОПКА PLAY: ПЫЛАЮЩИЙ КОСТЕР ДУШ (BONFIRE OF SOULS) */
+#play-pause-btn {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffa726 0%, #e65100 55%, #3e1204 100%);
+    border: 3px double var(--accent-bright);
+    box-shadow: 0 0 25px rgba(255, 87, 34, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.7);
+    animation: bonfire-ember-pulse 4s infinite ease-in-out;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.1) rotate(10deg);
+}
+
+#play-pause-btn:active {
+    transform: scale(0.95);
+}
+
+#play-pause-btn::before {
+    background: #ffffff;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    width: 14px;
+    height: 16px;
+    box-shadow: 0 0 8px #ffffff;
+}
+
+#play-pause-btn.is-playing::before {
+    background: #ffffff;
+    clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+}
+
+/* РИТУАЛЬНЫЕ РЕГУЛЯТОРЫ И ПОЛЗУНКИ */
+.control-group label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1.5px;
+}
+
+.control-group input[type="range"] {
+    background: #0a0806;
+    height: 5px;
+    border: 1px solid var(--border-light);
+    border-radius: 1px;
+    box-shadow: inset 0 1px 3px #000;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff 0%, var(--accent) 70%, #6e5200 100%);
+    border: 1px solid #1a1405;
+    box-shadow: 0 0 8px var(--accent);
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-weight: 700;
+    background: #0f0d0a;
+    border: 1px solid var(--accent);
+    color: var(--accent-bright);
+    border-radius: 2px;
+}
+
+#track-volume-value, #speed-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+/* === ВОЛНОВАЯ ФОРМА: ПОЛОСА ЗДОРОВЬЯ БОССА (DARK SOULS BOSS HP BAR) === */
+.waveform-container {
+    background: #080605;
+    border: 2px solid var(--accent);
+    border-radius: 2px;
+    box-shadow: 
+        inset 0 0 25px rgba(138, 21, 27, 0.4),
+        0 4px 15px rgba(0, 0, 0, 0.9);
+    position: relative;
+}
+
+/* Имя древнего владыки над полосой здоровья */
+.waveform-container::before {
+    content: '⚔ LORD OF CINDER // HEIR OF FIRE';
+    position: absolute;
+    top: 2px;
+    left: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent-bright);
+    text-shadow: 0 1px 2px #000;
+    pointer-events: none;
+    z-index: 5;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 6px var(--accent-fire)) hue-rotate(340deg) saturate(180%);
+}
+
+#time-display {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1.5px;
+}
+
+/* === ЭКВАЛАЙЗЕР: СФЕРА СЕМИТОНОВ АЛХИМИИ (SEVEN PLANETARY METALS) === */
+.eq-container-wrapper {
+    background: var(--panel-bg);
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    box-shadow: var(--grimoire-frame);
+    padding: 18px 24px;
+}
+
+.eq-header-label {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent-bright);
+    text-shadow: var(--gold-glow);
+}
+
+.eq-header-label::after {
+    content: ' — [HARMONIA SPHAERARUM]';
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--accent-fire);
+}
+
+.eq-band label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--text-dim);
+}
+
+.eq-band input[type="range"] {
+    background: #0d0a07;
+    border: 1px solid var(--border-light);
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 20px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--accent);
+    border: 1px solid #ffffff;
+    box-shadow: 0 0 6px var(--accent);
+}
+
+/* === РАЗДЕЛИТЕЛЬ: КОВАНАЯ ЖЕЛЕЗНАЯ ЗАКЛАДКА === */
+.resizer-bar {
+    width: 5px;
+    background: #19140e;
+    border-left: 1px solid var(--accent);
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--accent-fire);
+    box-shadow: 0 0 15px var(--accent-fire);
+}
+
+/* === САЙДБАР: РЕЕСТР ДРЕВНИХ СВИТКОВ И ПЕСНОПЕНИЙ === */
+.explorer-sidebar {
+    background: #0f0d0a;
+    border-left: 2px solid var(--accent);
+    box-shadow: inset 5px 0 20px rgba(0, 0, 0, 0.85);
+}
+
+.explorer-header {
+    background: #18140f;
+    border-bottom: 2px solid var(--accent);
+    padding: 12px 16px;
+}
+
+.explorer-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent-bright);
+}
+
+.explorer-header button {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 700;
+    background: #241d14;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    color: var(--accent-bright);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+.explorer-header button:hover {
+    background: var(--accent);
+    color: #120e08;
+    box-shadow: 0 0 10px var(--accent);
+}
+
+.folder-group h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    background: #1a140e;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 2px;
+    color: var(--text-main);
+}
+
+.folder-group.open h3 {
+    background: #2b2216;
+    color: var(--accent-bright);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.folder-group.open h3::before {
+    color: var(--accent-fire);
+}
+
+.track-item {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #a89d8b;
+    border-radius: 2px;
+    padding: 5px 10px;
+}
+
+.track-item:hover {
+    background: rgba(212, 175, 55, 0.12);
+    color: #ffffff;
+}
+
+/* Воспроизводимый манускрипт: пылающий багряно-золотой свиток */
+.track-item.playing {
+    background: linear-gradient(90deg, rgba(212, 175, 55, 0.3) 0%, transparent 100%) !important;
+    border-left: 3px solid var(--accent-bright) !important;
+    color: #fff4d4 !important;
+    font-weight: 700;
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.7);
+}
+
+/* === 3. BOTTOM STATUS BAR: ПОДНОЖИЕ АЛТАРЯ И СЧЁТЧИК ДУШ === */
+.status-bar {
+    height: 34px;
+    background: #110e0a;
+    border-top: 2px solid var(--accent);
+    padding: 0 14px;
+}
+
+.status-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    background: #1c160f;
+    border: 1px solid var(--border-light);
+    border-radius: 2px;
+    padding: 3px 8px;
+}
+
+.status-btn:hover {
+    background: var(--accent);
+    color: #120e08;
+    box-shadow: 0 0 8px var(--accent);
+}
+
+.status-btn.saved {
+    background: var(--accent-blood);
+    color: #ffffff;
+    border-color: #ff3344;
+}
+
+.status-search input {
+    background: #0a0806;
+    border: 1px solid var(--border-light);
+    border-radius: 2px;
+    color: var(--accent-bright);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    padding: 3px 8px;
+}
+
+.status-search input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* Счетчик душ и статус человечности */
+.status-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-bright);
+}
+
+.status-tag::before {
+    content: '🕈 SOULS: 999,999 // ';
+    color: var(--accent-fire);
+}
+
+/* === 4. МОДАЛЬНЫЕ ОКНА: СВЯЩЕННЫЙ ПАКТ ПРИЗЫВА === */
+.modal-content {
+    background: #14110d;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), 0 0 25px rgba(212, 175, 55, 0.35);
+    padding: 24px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 10px;
+}
+
+.modal-header h3 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 14px;
+    color: var(--accent-bright);
+    text-shadow: var(--gold-glow);
+}
+
+#close-rpc-modal, #close-url-modal {
+    background: #1f1811;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+.modal-body label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    color: var(--accent);
+}
+
+.modal-body input {
+    background: #0a0806;
+    border: 1px solid var(--border-light);
+    border-radius: 2px;
+    color: var(--accent-bright);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+}
+
+.modal-actions button {
+    background: #241d14;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    color: var(--accent-bright);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.modal-actions button:hover {
+    background: var(--accent);
+    color: #120e08;
+    box-shadow: 0 0 12px var(--accent);
+}

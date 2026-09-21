@@ -1,0 +1,566 @@
+/* ==========================================================================
+   THEME: HYPRLAND // ARCH RICE (CATPPUCCIN MOCHA / WAYBAR PILLS / UNIXPORN)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,800;1,400;1,700&display=swap');
+
+/* === KEYFRAMES: АНИМИРОВАННАЯ ГРАДИЕНТНАЯ ГРАНИЦА HYPRLAND ACTIVE_BORDER === */
+@keyframes hypr-border-gradient {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes waybar-pulse {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
+}
+
+:root {
+    /* Фирменная палитра Catppuccin Mocha */
+    --base: #1e1e2e;
+    --mantle: #181825;
+    --crust: #11111b;
+    
+    --mauve: #cba6f7;               /* Основной фиолетовый Hyprland */
+    --blue: #89b4fa;                /* Arch Cyan / Blue */
+    --sapphire: #74c7ec;
+    --green: #a6e3a1;               /* Playing indicator */
+    --red: #f38ba8;                 /* Close btn */
+    --yellow: #f9e2af;              /* Warning / tags */
+    --peach: #fab387;
+    
+    --accent: #cba6f7;
+    --accent-secondary: #89b4fa;
+    --text-main: #cdd6f4;
+    --text-dim: #6c7086;
+    
+    /* Тонкие полупрозрачные границы Wayland-композитора */
+    --hypr-border-inactive: rgba(108, 112, 134, 0.3);
+    --hypr-gaps: 12px;
+    --hypr-radius: 12px;
+    --hypr-bezier: cubic-bezier(0.05, 0.9, 0.1, 1.05);
+    --transition: 0.18s var(--hypr-bezier);
+}
+
+/* === ФОН: АНИМЕ/КИБЕРПАНК ОБОИ С ГЛУБОКИМ БЛЮРОМ В СТИЛЕ HYPRLAND === */
+body {
+    font-family: 'JetBrains Mono', monospace;
+    background-color: var(--crust);
+    background-image:
+        /* Фоновые мягкие пятна подсветки рабочего стола */
+        radial-gradient(circle at 10% 20%, rgba(203, 166, 247, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(137, 180, 250, 0.12) 0%, transparent 40%),
+        linear-gradient(180deg, #11111b 0%, #181825 100%);
+    color: var(--text-main);
+    overflow: hidden;
+    padding: var(--hypr-gaps); /* Фирменные отступы (gaps_out: 12) вокруг всего приложения */
+    box-sizing: border-box;
+}
+
+#spectrogram-canvas {
+    opacity: 0.25;
+    filter: drop-shadow(0 0 12px var(--mauve)) hue-rotate(220deg);
+}
+
+/* === 1. TITLE BAR: ВЕРХНИЙ ПЛАВАЮЩИЙ ХЕДЕР ТИПИЧНОГО RICE === */
+.title-bar {
+    height: 34px;
+    background: rgba(24, 24, 37, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid var(--mauve);
+    border-radius: var(--hypr-radius);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    margin-bottom: var(--hypr-gaps);
+    padding: 0 12px;
+    animation: hypr-border-gradient 8s linear infinite;
+}
+
+.title-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--text-main);
+}
+
+.title-text::before {
+    content: '󰣇 archlinux // hyprland • ';
+    color: var(--blue);
+}
+
+.title-text::after {
+    content: ' [workspace 1]';
+    color: var(--mauve);
+    font-weight: 600;
+}
+
+.window-controls {
+    gap: 8px;
+    align-items: center;
+}
+
+/* Минималистичные круглые индикаторы Wayland-окна */
+.win-btn {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--blue);
+    border: none;
+    font-size: 0px; /* Скрываем текст, делаем кругляши macOS / Hyprland */
+    transition: var(--transition);
+}
+
+.win-btn:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 8px var(--blue);
+}
+
+.win-close {
+    background: var(--red);
+}
+
+.win-close:hover {
+    background: var(--red) !important;
+    box-shadow: 0 0 10px var(--red);
+}
+
+/* === 2. PLAYER STAGE: ТАЙЛИНГОВЫЕ ОКНА С ОТСТУПАМИ (GAPS_IN: 12) === */
+.player-stage {
+    gap: var(--hypr-gaps);
+    padding: 0;
+}
+
+/* NOW PLAYING БЛОК: ПЛАВАЮЩЕЕ СТЕКЛЯННОЕ ОКНО */
+.now-playing-container {
+    background: rgba(30, 30, 46, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid var(--hypr-border-inactive);
+    border-radius: var(--hypr-radius);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    padding: 20px 24px;
+    position: relative;
+    transition: var(--transition);
+}
+
+.now-playing-container:hover {
+    border-color: var(--mauve);
+    box-shadow: 0 8px 30px rgba(203, 166, 247, 0.2);
+}
+
+.now-playing-container::before {
+    content: ' spotify / mpd client';
+    position: absolute;
+    top: 6px;
+    right: 18px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-dim);
+}
+
+.cover-wrapper {
+    width: 86px;
+    height: 86px;
+    min-width: 86px;
+    border-radius: 10px;
+    border: 1.5px solid var(--mauve);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+#current-track-artwork {
+    border-radius: 8px;
+}
+
+.artwork-glow {
+    filter: blur(40px);
+    opacity: 0.4;
+    background-color: var(--mauve);
+}
+
+.track-info h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+}
+
+.track-info p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--mauve);
+    margin-top: 4px;
+}
+
+/* === УПРАВЛЕНИЕ: МИНИМАЛИСТИЧНЫЙ ЦЕНТР УПРАВЛЕНИЯ ПЛЕЕРОМ === */
+#top-controls {
+    background: rgba(30, 30, 46, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1.5px solid var(--hypr-border-inactive);
+    border-radius: var(--hypr-radius);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    padding: 18px 24px;
+    transition: var(--transition);
+}
+
+#top-controls:hover {
+    border-color: var(--sapphire);
+}
+
+.main-controls {
+    gap: 14px;
+}
+
+#prev-btn, #next-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--hypr-border-inactive);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: var(--mauve);
+    border-color: var(--mauve);
+    transform: translateY(-2px);
+}
+
+#prev-btn::before { border-right-color: var(--text-main); }
+#next-btn::before { border-left-color: var(--text-main); }
+
+#prev-btn:hover::before { border-right-color: var(--crust); }
+#next-btn:hover::before { border-left-color: var(--crust); }
+
+/* КНОПКА PLAY: КАПСУЛА С ГРАДИЕНТОМ CATPPUCCIN */
+#play-pause-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--mauve) 0%, var(--blue) 100%);
+    border: none;
+    box-shadow: 0 6px 18px rgba(203, 166, 247, 0.4);
+    transition: var(--transition);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(203, 166, 247, 0.6);
+}
+
+#play-pause-btn:active {
+    transform: scale(0.95);
+}
+
+#play-pause-btn::before {
+    background: var(--crust);
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+#play-pause-btn.is-playing::before {
+    background: var(--crust);
+}
+
+/* ПОЛЗУНКИ ГРОМКОСТИ И СКОРОСТИ В ВИДЕ ПОЛОС WAYBAR */
+.control-group label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--blue);
+}
+
+.control-group input[type="range"] {
+    background: var(--mantle);
+    height: 6px;
+    border-radius: 3px;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--mauve);
+    box-shadow: 0 0 8px var(--mauve);
+    border: none;
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: var(--mantle);
+    border: 1px solid var(--hypr-border-inactive);
+    color: var(--sapphire);
+    border-radius: 6px;
+}
+
+/* === ВОЛНОВАЯ ФОРМА: КАСТОМНЫЙ КАВА-ВИЗУАЛИЗАТОР (CAVA) === */
+.waveform-container {
+    background: var(--mantle);
+    border: 1px solid var(--hypr-border-inactive);
+    border-radius: 8px;
+    position: relative;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 8px var(--mauve));
+}
+
+#time-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--blue);
+}
+
+/* === ЭКВАЛАЙЗЕР: СЕКЦИЯ ALSA / PIPWIRE === */
+.eq-container-wrapper {
+    background: rgba(30, 30, 46, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1.5px solid var(--hypr-border-inactive);
+    border-radius: var(--hypr-radius);
+    padding: 18px 22px;
+}
+
+.eq-header-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.eq-header-label::before {
+    content: '󰓃 ';
+    color: var(--mauve);
+}
+
+.eq-band label {
+    font-size: 10px;
+    color: var(--text-dim);
+}
+
+.eq-band input[type="range"] {
+    background: var(--mantle);
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 16px;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--mauve);
+}
+
+/* === РАЗДЕЛИТЕЛЬ: ТОНКИЙ ЗАЗОР GAPS === */
+.resizer-bar {
+    width: var(--hypr-gaps);
+    background: transparent;
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--mauve);
+    border-radius: 4px;
+    box-shadow: 0 0 10px var(--mauve);
+}
+
+/* === САЙДБАР: ФАЙЛОВЫЙ МЕНЕДЖЕР RANGER / YAZI === */
+.explorer-sidebar {
+    background: rgba(24, 24, 37, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1.5px solid var(--hypr-border-inactive);
+    border-radius: var(--hypr-radius);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.explorer-header {
+    background: rgba(17, 17, 27, 0.6);
+    border-bottom: 1px solid var(--hypr-border-inactive);
+    padding: 12px 16px;
+}
+
+.explorer-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--blue);
+}
+
+.explorer-title::before {
+    content: ' ';
+}
+
+.explorer-header button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid var(--hypr-border-inactive);
+    color: var(--text-main);
+    border-radius: 6px;
+    padding: 4px 10px;
+}
+
+.explorer-header button:hover {
+    background: var(--mauve);
+    color: var(--crust);
+    border-color: var(--mauve);
+}
+
+.folder-group h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--text-main);
+    margin: 4px 0;
+}
+
+.folder-group.open h3 {
+    background: rgba(203, 166, 247, 0.15);
+    border-color: var(--mauve);
+    color: var(--mauve);
+}
+
+.track-item {
+    font-size: 11px;
+    color: var(--text-dim);
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+.track-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.track-item.playing {
+    background: rgba(166, 227, 161, 0.15) !important;
+    border-left: 3px solid var(--green) !important;
+    color: var(--green) !important;
+    font-weight: 700;
+}
+
+/* === 3. BOTTOM STATUS BAR: ПЛАВАЮЩИЕ ПИЛЮЛИ WAYBAR === */
+.status-bar {
+    height: 34px;
+    background: transparent;
+    border: none;
+    margin-top: var(--hypr-gaps);
+    padding: 0;
+    gap: 8px;
+}
+
+/* Каждая группа превращается в отдельную плавающую капсулу Waybar */
+.status-left, .status-right, .status-center {
+    background: rgba(24, 24, 37, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--hypr-border-inactive);
+    border-radius: 20px;
+    padding: 3px 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.status-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--blue);
+    background: transparent;
+    border: none;
+    padding: 2px 6px;
+}
+
+.status-btn:hover {
+    color: var(--mauve);
+}
+
+.status-btn.saved {
+    color: var(--green);
+}
+
+.status-search input {
+    background: var(--mantle);
+    border: 1px solid var(--hypr-border-inactive);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+}
+
+.status-search input:focus {
+    border-color: var(--mauve);
+}
+
+.status-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--mauve);
+}
+
+.status-tag::before {
+    content: '󰅐 ';
+    color: var(--yellow);
+}
+
+/* === 4. МОДАЛЬНЫЕ ОКНА: ПЛАВАЮЩИЙ ЛАУНЧЕР ROFI / WOFI === */
+.modal-content {
+    background: rgba(30, 30, 46, 0.95);
+    backdrop-filter: blur(20px);
+    border: 2px solid var(--mauve);
+    border-radius: var(--hypr-radius);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(203, 166, 247, 0.3);
+    padding: 20px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--hypr-border-inactive);
+}
+
+.modal-header h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--mauve);
+}
+
+#close-rpc-modal, #close-url-modal {
+    background: var(--surface);
+    border: 1px solid var(--hypr-border-inactive);
+    color: var(--red);
+    border-radius: 6px;
+}
+
+.modal-body label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--blue);
+}
+
+.modal-body input {
+    background: var(--mantle);
+    border: 1px solid var(--hypr-border-inactive);
+    border-radius: 6px;
+    color: var(--text-main);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.modal-actions button {
+    background: var(--surface);
+    border: 1px solid var(--mauve);
+    border-radius: 6px;
+    color: var(--mauve);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.modal-actions button:hover {
+    background: var(--mauve);
+    color: var(--crust);
+}

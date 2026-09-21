@@ -1,0 +1,687 @@
+/* ==========================================================================
+   THEME: PERSONA 5 // ALL-OUT ATTACK (TAKE YOUR HEART / ACID JAZZ)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=JetBrains+Mono:wght@800&family=Oswald:wght@700;900&display=swap');
+
+/* === KEYFRAMES: КОМИКСНЫЙ ДРАЙВ И ВСПЫШКИ ЗВЕЗД === */
+@keyframes p5-bg-pan {
+    0% { background-position: 0 0, 0 0, 0 0; }
+    100% { background-position: 100px 200px, 0 0, 0 0; }
+}
+
+@keyframes p5-glitch-jitter {
+    0%, 100% { transform: skew(-4deg) translate(0, 0); }
+    20% { transform: skew(-7deg) translate(-2px, 1px); }
+    40% { transform: skew(-2deg) translate(2px, -1px); }
+    60% { transform: skew(-5deg) translate(-1px, -1px); }
+    80% { transform: skew(-3deg) translate(1px, 2px); }
+}
+
+@keyframes p5-star-spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.08); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* === СИСТЕМНЫЕ ПЕРЕМЕННЫЕ ПЕРСОНЫ === */
+:root {
+    --bg-main: #0a0a0c;
+    --panel-bg: #121216;
+    --surface: #1a1a22;
+    
+    /* Фирменная палитра Призрачных Похитителей */
+    --accent: #e60012;              /* Phantom Crimson Red */
+    --accent-secondary: #ffffff;    /* Stark Paper White */
+    --accent-yellow: #ffe600;       /* Warning Alert Yellow */
+    --accent-dark: #000000;         /* Deep Ink Black */
+    
+    --accent-gradient: linear-gradient(135deg, #e60012 0%, #a8000d 100%);
+    --text-main: #ffffff;
+    --text-dim: #9999a5;
+    --border-light: rgba(230, 0, 18, 0.4);
+    --border-focus: #ffe600;
+    
+    /* Жесткие комиксные тени со смещением (без размытия) */
+    --p5-shadow: 6px 6px 0px #000000;
+    --p5-shadow-red: 5px 5px 0px #e60012;
+    --p5-shadow-white: 4px 4px 0px #ffffff;
+    --transition: 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+/* === ФОН: ДИАГОНАЛЬНЫЙ КАРМИН, HALFTONE DOTS И ЛИНИИ СКОРОСТИ === */
+body {
+    font-family: 'Oswald', 'Impact', sans-serif;
+    background-color: var(--bg-main);
+    background-image:
+        /* Комиксный точечный растр (Halftone pattern) */
+        radial-gradient(circle, rgba(230, 0, 18, 0.3) 1.5px, transparent 1.5px),
+        /* Диагональные динамичные полосы манги */
+        repeating-linear-gradient(-35deg, rgba(0, 0, 0, 0.8) 0px, rgba(0, 0, 0, 0.8) 25px, rgba(20, 20, 24, 0.8) 25px, rgba(20, 20, 24, 0.8) 50px),
+        /* Резкая красная вспышка под углом */
+        linear-gradient(115deg, #e60012 -10%, #400005 35%, #0a0a0c 70%);
+    background-size: 16px 16px, 100% 100%, 100% 100%;
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+#spectrogram-canvas {
+    opacity: 0.35;
+    filter: drop-shadow(0 0 10px #e60012) contrast(200%);
+    mix-blend-mode: screen;
+}
+
+/* === 1. TITLE BAR: ШЕВРОН ПРИЗРАЧНОГО ПОХИТИТЕЛЯ === */
+.title-bar {
+    height: 38px;
+    background: #000000;
+    border-bottom: 3px solid #e60012;
+    box-shadow: 0 4px 0px rgba(0, 0, 0, 0.9);
+    padding: 0 12px;
+    position: relative;
+    z-index: 1000;
+}
+
+.title-bar::after {
+    content: 'TAKE YOUR HEART';
+    position: absolute;
+    left: 45%;
+    transform: translateX(-50%) skew(-15deg);
+    background: #e60012;
+    color: #ffffff;
+    padding: 2px 14px;
+    font-family: 'Bangers', cursive;
+    font-size: 14px;
+    letter-spacing: 2px;
+    box-shadow: 3px 3px 0px #000;
+}
+
+.title-text {
+    font-family: 'Bangers', cursive;
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: #ffffff;
+    transform: skew(-10deg);
+}
+
+.title-text::before {
+    content: '★ ';
+    color: var(--accent-yellow);
+}
+
+.window-controls {
+    gap: 4px;
+}
+
+.win-btn {
+    width: 28px;
+    height: 24px;
+    background: #18181e;
+    color: #ffffff;
+    font-family: 'Anton', sans-serif;
+    font-size: 14px;
+    border: 2px solid #000000;
+    box-shadow: 2px 2px 0px #e60012;
+    transform: skew(-8deg);
+    border-radius: 0;
+}
+
+.win-btn:hover {
+    background: #ffffff;
+    color: #000000;
+    transform: skew(-8deg) scale(1.1);
+    box-shadow: 3px 3px 0px #000;
+}
+
+.win-close:hover {
+    background: #e60012 !important;
+    color: #ffffff !important;
+    box-shadow: 3px 3px 0px #fff;
+}
+
+/* === 2. PLAYER STAGE: ДИНАМИЧНЫЙ ДИАГОНАЛЬНЫЙ СРЕЗ === */
+.player-stage {
+    gap: 22px;
+    padding: 24px 30px;
+}
+
+/* NOW PLAYING КАРТОЧКА: ВЫРЕЗАННАЯ ИЗ ГАЗЕТЫ НАКЛЕЙКА */
+.now-playing-container {
+    background: #000000;
+    border: 3px solid #ffffff;
+    border-radius: 0px;
+    box-shadow: 8px 8px 0px #e60012, 14px 14px 0px #000000;
+    padding: 24px 28px;
+    position: relative;
+    clip-path: polygon(0% 0%, 100% 2%, 98% 100%, 1% 97%);
+    transform: skew(-2deg);
+}
+
+.now-playing-container::before {
+    content: 'CONFIDENTIAL // PHANTOM';
+    position: absolute;
+    top: 0px;
+    right: 30px;
+    background: #ffe600;
+    color: #000000;
+    font-family: 'Anton', sans-serif;
+    font-size: 11px;
+    padding: 2px 10px;
+    transform: skew(-12deg) rotate(2deg);
+    box-shadow: 2px 2px 0px #000000;
+    z-index: 10;
+}
+
+/* Обложка трека: черная звезда и агрессивный угол */
+.cover-wrapper {
+    width: 96px;
+    height: 96px;
+    min-width: 96px;
+    border-radius: 0px;
+    background: #e60012;
+    border: 3px solid #ffffff;
+    box-shadow: 5px 5px 0px #000000;
+    transform: rotate(-5deg);
+    position: relative;
+    overflow: visible;
+}
+
+.cover-wrapper::after {
+    content: '★';
+    position: absolute;
+    bottom: -14px;
+    left: -14px;
+    font-size: 32px;
+    color: #ffe600;
+    text-shadow: 3px 3px 0px #000000;
+    z-index: 5;
+    animation: p5-star-spin 12s linear infinite;
+}
+
+#current-track-artwork {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    filter: contrast(140%) saturate(120%);
+    display: block;
+}
+
+.artwork-glow {
+    filter: blur(40px);
+    opacity: 0.35;
+    background-color: #e60012;
+}
+
+/* Название трека и автор: газетные вырезки (Ransom Note Effect) */
+.track-info h1 {
+    font-family: 'Bangers', cursive;
+    font-size: 26px;
+    letter-spacing: 1.5px;
+    color: #000000;
+    background: #ffffff;
+    display: inline-block;
+    padding: 2px 12px;
+    transform: skew(-6deg) rotate(-1deg);
+    box-shadow: 4px 4px 0px #e60012;
+    margin: 0 0 6px 0;
+    max-width: 95%;
+}
+
+.track-info p {
+    font-family: 'Anton', sans-serif;
+    font-size: 14px;
+    color: #ffffff;
+    background: #e60012;
+    display: inline-block;
+    padding: 2px 10px;
+    transform: skew(-6deg) rotate(1deg);
+    box-shadow: 3px 3px 0px #000000;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+/* === УПРАВЛЕНИЕ: ДЖАЗОВАЯ ПАНЕЛЬ С РЕЗКИМИ СРЕЗАМИ === */
+#top-controls {
+    background: #111116;
+    border: 3px solid #000000;
+    border-radius: 0px;
+    clip-path: polygon(1% 0%, 100% 0%, 99% 100%, 0% 98%);
+    box-shadow: 7px 7px 0px #e60012, 12px 12px 0px #000000;
+    padding: 20px 24px;
+    transform: skew(-2deg);
+}
+
+.main-controls {
+    gap: 16px;
+}
+
+#prev-btn, #next-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 0px;
+    background: #ffffff;
+    border: 3px solid #000000;
+    box-shadow: 4px 4px 0px #000000;
+    transform: skew(-8deg);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: #ffe600;
+    transform: skew(-8deg) scale(1.1) translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #000000;
+}
+
+#prev-btn:active, #next-btn:active {
+    transform: skew(-8deg) translate(2px, 2px);
+    box-shadow: 1px 1px 0px #000000;
+}
+
+#prev-btn::before {
+    border-right: 9px solid #000000;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+}
+
+#next-btn::before {
+    border-left: 9px solid #000000;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+}
+
+/* КНОПКА PLAY: ОГРОМНЫЙ КРАСНЫЙ ШЕВРОН ALL-OUT ATTACK */
+#play-pause-btn {
+    width: 58px;
+    height: 58px;
+    border-radius: 0px;
+    background: #e60012;
+    border: 3px solid #ffffff;
+    box-shadow: 5px 5px 0px #000000, 8px 8px 0px #ffffff;
+    transform: skew(-10deg) rotate(3deg);
+    transition: var(--transition);
+}
+
+#play-pause-btn:hover {
+    background: #ff1a2d;
+    transform: skew(-10deg) rotate(6deg) scale(1.12);
+    box-shadow: 7px 7px 0px #000000, 11px 11px 0px #ffe600;
+}
+
+#play-pause-btn:active {
+    transform: skew(-10deg) translate(3px, 3px);
+    box-shadow: 2px 2px 0px #000000;
+}
+
+#play-pause-btn::before {
+    background: #ffffff;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    width: 16px;
+    height: 18px;
+}
+
+#play-pause-btn.is-playing::before {
+    background: #ffffff;
+    clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+}
+
+/* ПОЛЗУНКИ СКОРОСТИ И ГРОМКОСТИ: ЧЕРНО-ЖЕЛТЫЕ ИНДИКАТОРЫ */
+.control-group label {
+    font-family: 'Bangers', cursive;
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #000000;
+    transform: skew(-6deg);
+}
+
+.control-group input[type="range"] {
+    background: #000000;
+    height: 8px;
+    border: 2px solid #ffffff;
+    border-radius: 0px;
+    box-shadow: 2px 2px 0px #e60012;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 14px;
+    height: 18px;
+    border-radius: 0px;
+    background: #ffe600;
+    border: 2px solid #000000;
+    box-shadow: 2px 2px 0px #000000;
+    transform: skew(-12deg);
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'Anton', sans-serif;
+    font-size: 13px;
+    background: #000000;
+    border: 2px solid #ffffff;
+    color: #ffe600;
+    border-radius: 0px;
+    transform: skew(-6deg);
+    box-shadow: 2px 2px 0px #000000;
+}
+
+#track-volume-value, #speed-value {
+    font-family: 'Bangers', cursive;
+    font-size: 14px;
+    color: #ffe600;
+}
+
+/* === ВОЛНОВАЯ ФОРМА: ВСПЫШКА МАНГИ И ДИНАМИЧНЫЙ ТАЙМИНГ === */
+.waveform-container {
+    background: #000000;
+    border: 3px solid #ffffff;
+    border-radius: 0px;
+    box-shadow: 5px 5px 0px #e60012;
+    position: relative;
+    transform: skew(-2deg);
+}
+
+.waveform-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg, transparent 0px, transparent 18px, rgba(230, 0, 18, 0.15) 19px, transparent 20px);
+    pointer-events: none;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 4px #e60012) contrast(180%);
+}
+
+#time-display {
+    font-family: 'Bangers', cursive;
+    font-size: 16px;
+    color: #ffffff;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0px #e60012;
+    transform: skew(-4deg);
+}
+
+/* === ГРАФИЧЕСКИЙ ЭКВАЛАЙЗЕР: СЕКЦИЯ ДЖАЗОВОГО МИКШЕРА === */
+.eq-container-wrapper {
+    background: #0c0c10;
+    border: 3px solid #ffffff;
+    border-radius: 0px;
+    box-shadow: 7px 7px 0px #000000, 11px 11px 0px #e60012;
+    transform: skew(-2deg);
+    padding: 18px 22px;
+}
+
+.eq-header-label {
+    font-family: 'Bangers', cursive;
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: #000000;
+    background: #ffe600;
+    display: inline-block;
+    padding: 2px 10px;
+    transform: skew(-8deg);
+    box-shadow: 3px 3px 0px #000000;
+    margin-bottom: 14px;
+}
+
+.eq-header-label::after {
+    content: ' // ALL-OUT FREQUENCY';
+    color: #e60012;
+}
+
+.eq-band label {
+    font-family: 'Anton', sans-serif;
+    font-size: 11px;
+    color: #ffffff;
+    transform: skew(-6deg);
+}
+
+.eq-band input[type="range"] {
+    background: #000000;
+    border: 2px solid #e60012;
+    border-radius: 0px;
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 22px;
+    height: 12px;
+    border-radius: 0px;
+    background: #ffffff;
+    border: 2px solid #000000;
+    box-shadow: 2px 2px 0px #e60012;
+    transform: skew(-10deg);
+}
+
+/* === РАЗДЕЛИТЕЛЬ: ЧЕРНЫЙ ЗУБЧАТЫЙ НОЖ === */
+.resizer-bar {
+    width: 6px;
+    background: #000000;
+    border-left: 2px solid #e60012;
+    border-right: 2px solid #ffffff;
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: #ffe600;
+    box-shadow: 0 0 15px #ffe600;
+}
+
+/* === САЙДБАР: СПИСОК ЦЕЛЕЙ (PHANTOM TARGET DIRECTORY) === */
+.explorer-sidebar {
+    background: #08080a;
+    border-left: 3px solid #e60012;
+    box-shadow: -8px 0px 0px rgba(0, 0, 0, 0.9);
+}
+
+.explorer-header {
+    background: #000000;
+    border-bottom: 3px solid #ffffff;
+    padding: 14px 16px;
+}
+
+.explorer-title {
+    font-family: 'Bangers', cursive;
+    font-size: 17px;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #e60012;
+    transform: skew(-6deg);
+}
+
+.explorer-header button {
+    font-family: 'Bangers', cursive;
+    font-size: 13px;
+    letter-spacing: 1px;
+    background: #e60012;
+    color: #ffffff;
+    border: 2px solid #000000;
+    box-shadow: 3px 3px 0px #ffffff;
+    border-radius: 0px;
+    transform: skew(-6deg);
+    padding: 4px 10px;
+}
+
+.explorer-header button:hover {
+    background: #ffe600;
+    color: #000000;
+    box-shadow: 4px 4px 0px #000000;
+}
+
+.folder-group h3 {
+    font-family: 'Anton', sans-serif;
+    font-size: 13px;
+    background: #14141a;
+    border: 2px solid #000000;
+    border-radius: 0px;
+    color: #ffffff;
+    box-shadow: 3px 3px 0px #e60012;
+    transform: skew(-4deg);
+    margin: 4px 2px;
+    transition: var(--transition);
+}
+
+.folder-group.open h3 {
+    background: #ffffff;
+    color: #000000;
+    border-color: #000000;
+    box-shadow: 4px 4px 0px #e60012;
+    transform: skew(-6deg) scale(1.02);
+}
+
+.folder-group.open h3::before {
+    color: #e60012;
+}
+
+.track-item {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #c0c0cc;
+    border-radius: 0px;
+    transform: skew(-4deg);
+    border-left: 4px solid transparent;
+    margin: 3px 0;
+}
+
+.track-item:hover {
+    background: #1e1e26;
+    color: #ffe600;
+    border-left-color: #ffe600;
+    transform: skew(-6deg) translateX(5px);
+}
+
+/* Воспроизводимый трек: плашка All-Out Attack */
+.track-item.playing {
+    background: #e60012 !important;
+    color: #ffffff !important;
+    border-left: 6px solid #ffffff !important;
+    font-weight: 900;
+    box-shadow: 4px 4px 0px #000000;
+    transform: skew(-6deg) translateX(4px);
+}
+
+/* === 3. BOTTOM STATUS BAR: ПОЛОСА МЕТА-НАВИГАЦИИ === */
+.status-bar {
+    height: 36px;
+    background: #000000;
+    border-top: 3px solid #e60012;
+    padding: 0 12px;
+}
+
+.status-btn {
+    font-family: 'Bangers', cursive;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    color: #ffffff;
+    background: #1a1a22;
+    border: 2px solid #000000;
+    box-shadow: 2px 2px 0px #e60012;
+    border-radius: 0px;
+    transform: skew(-8deg);
+    padding: 2px 10px;
+}
+
+.status-btn:hover {
+    background: #ffe600;
+    color: #000000;
+    box-shadow: 3px 3px 0px #000000;
+}
+
+.status-btn.saved {
+    background: #e60012;
+    color: #ffffff;
+    box-shadow: 2px 2px 0px #ffffff;
+}
+
+.status-search input {
+    background: #111116;
+    border: 2px solid #ffffff;
+    border-radius: 0px;
+    color: #ffe600;
+    font-family: 'Anton', sans-serif;
+    font-size: 13px;
+    transform: skew(-6deg);
+    box-shadow: 2px 2px 0px #000000;
+    padding: 3px 8px;
+}
+
+.status-search input:focus {
+    border-color: #ffe600;
+    box-shadow: 3px 3px 0px #e60012;
+}
+
+.status-tag {
+    font-family: 'Bangers', cursive;
+    font-size: 14px;
+    color: #ffe600;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 0px #000000;
+    transform: skew(-6deg);
+}
+
+/* === 4. МОДАЛЬНЫЕ ОКНА: ВИЗИТНАЯ КАРТОЧКА ПРИЗРАКОВ (CALLING CARD) === */
+.modal-content {
+    background: #0a0a0e;
+    border: 4px solid #ffffff;
+    border-radius: 0px;
+    box-shadow: 12px 12px 0px #e60012, 18px 18px 0px #000000;
+    transform: rotate(-1deg) skew(-2deg);
+    padding: 22px;
+}
+
+.modal-header {
+    border-bottom: 3px solid #e60012;
+    padding-bottom: 10px;
+}
+
+.modal-header h3 {
+    font-family: 'Bangers', cursive;
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #e60012;
+}
+
+#close-rpc-modal, #close-url-modal {
+    background: #e60012;
+    color: #ffffff;
+    font-family: 'Anton', sans-serif;
+    border: 2px solid #000000;
+    box-shadow: 2px 2px 0px #ffffff;
+    transform: skew(-6deg);
+    cursor: pointer;
+}
+
+.modal-body label {
+    font-family: 'Bangers', cursive;
+    font-size: 14px;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+.modal-body input {
+    background: #000000;
+    border: 2px solid #ffffff;
+    border-radius: 0px;
+    color: #ffe600;
+    font-family: 'Anton', sans-serif;
+    font-size: 14px;
+    transform: skew(-4deg);
+    box-shadow: 3px 3px 0px #e60012;
+}
+
+.modal-actions button {
+    background: #ffffff;
+    border: 3px solid #000000;
+    border-radius: 0px;
+    color: #000000;
+    font-family: 'Bangers', cursive;
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    box-shadow: 4px 4px 0px #e60012;
+    transform: skew(-8deg);
+    padding: 6px 14px;
+}
+
+.modal-actions button:hover {
+    background: #ffe600;
+    box-shadow: 5px 5px 0px #000000;
+}

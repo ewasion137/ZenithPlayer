@@ -1,0 +1,649 @@
+/* ==========================================================================
+   THEME: VINTAGE HI-FI 1974 // MARANTZ CLASSIC STEREOPHONIC RECEIVER
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@500;700;900&display=swap');
+
+/* === ТАКТИЛЬНЫЕ И СВЕТОВЫЕ ЭФФЕКТЫ ЛАМП НАКАЛИВАНИЯ === */
+@keyframes warm-bulb-glow {
+    0%, 100% {
+        box-shadow: inset 0 0 35px rgba(255, 179, 71, 0.4), 0 0 15px rgba(255, 179, 71, 0.2);
+    }
+    50% {
+        box-shadow: inset 0 0 45px rgba(255, 179, 71, 0.55), 0 0 22px rgba(255, 179, 71, 0.3);
+    }
+}
+
+:root {
+    /* Фоновые материалы ресивера: ореховое дерево и шлифованный металл */
+    --bg-main: #140d09;
+    --panel-bg: #dcd8cf;
+    --surface: #cecac0;
+    
+    /* Шлифованный алюминий цвета шампанского */
+    --metal-light: #f5f3ec;
+    --metal-mid: #dcd8cf;
+    --metal-dark: #b8b3a7;
+    --metal-shadow: #8f8a7e;
+    
+    /* Ламповый янтарный свет шкалы настройки */
+    --accent: #d97706;              /* Тёплый янтарь ламп */
+    --accent-glow: #ffb347;         /* Янтарный накал шкалы */
+    --accent-secondary: #2563eb;    /* Синяя стерео-индикация Marantz */
+    
+    --text-main: #1c1917;           /* Черная шелкография гравировки */
+    --text-dim: #57534e;            /* Гравированные технические метки */
+    --wood-border: #3d2314;         /* Ореховый шпон */
+    
+    /* Скевоморфичные металлические фаски и объемные тени */
+    --bevel-knob: 
+        inset 1px 1px 2px rgba(255, 255, 255, 0.9), 
+        inset -2px -2px 4px rgba(0, 0, 0, 0.5), 
+        3px 5px 12px rgba(0, 0, 0, 0.6);
+    --panel-chassis-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.8), 
+        inset 0 -2px 0 rgba(0, 0, 0, 0.4), 
+        0 8px 24px rgba(0, 0, 0, 0.7);
+    --transition: 0.15s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+/* === ФОН: ШПОН ТЁМНОГО ОРЕХА И ВИНТАЖНЫЙ ГРИЛЬ АКУСТИКИ === */
+body {
+    font-family: 'Montserrat', -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    background-image: 
+        /* Текстура волокон орехового дерева */
+        repeating-linear-gradient(90deg, rgba(35, 18, 11, 0.95) 0px, rgba(48, 26, 16, 0.95) 20px, rgba(28, 14, 8, 0.98) 40px, rgba(53, 29, 18, 0.95) 70px),
+        /* Тканевый акустический гриль усилителя */
+        radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.9) 100%);
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+#spectrogram-canvas {
+    opacity: 0.2;
+    filter: sepia(100%) hue-rotate(350deg) saturate(250%) contrast(140%);
+}
+
+/* === 1. TITLE BAR: ВЕРХНЯЯ ДЕРЕВЯННАЯ КРОМКА КОРПУСА === */
+.title-bar {
+    height: 36px;
+    background: linear-gradient(180deg, #452617 0%, #2e180d 70%, #1a0d07 100%);
+    border-bottom: 2px solid #140b06;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.8);
+    padding: 0 16px;
+}
+
+.title-text {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: #f5eedb;
+    text-shadow: 0 1px 2px #000;
+}
+
+.title-text::after {
+    content: ' // MODEL 2270 STEREOPHONIC RECEIVER';
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--accent-glow);
+    letter-spacing: 1.5px;
+    margin-left: 6px;
+}
+
+.window-controls {
+    gap: 8px;
+    align-items: center;
+}
+
+/* Винтажные латунные винты с прорезью под плоскую шлицевую отвертку */
+.win-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #f2ede1 0%, #bebaa8 50%, #7d7869 100%);
+    border: 1px solid #4a463b;
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.8), 1px 2px 4px rgba(0, 0, 0, 0.6);
+    color: #2b2720;
+    font-size: 11px;
+    font-weight: 900;
+    position: relative;
+    transition: var(--transition);
+}
+
+.win-btn:hover {
+    background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ded9cb 50%, #999485 100%);
+    transform: rotate(45deg);
+}
+
+.win-close:hover {
+    background: radial-gradient(circle at 35% 35%, #ef4444 0%, #b91c1c 70%, #7f1d1d 100%) !important;
+    color: #ffffff !important;
+}
+
+/* === 2. PLAYER STAGE: ШЛИФОВАННАЯ АЛЮМИНИЕВАЯ ПАНЕЛЬ С ВИНТАМИ === */
+.player-stage {
+    gap: 18px;
+    padding: 22px 28px;
+    background: rgba(18, 12, 8, 0.6);
+}
+
+/* NOW PLAYING: ОТСЕК КАССЕТЫ / БОБИНЫ С ЛАМПОВОЙ ПОДСВЕТКОЙ */
+.now-playing-container {
+    background: 
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 4px),
+        linear-gradient(180deg, var(--metal-light) 0%, var(--metal-mid) 40%, var(--metal-dark) 100%);
+    border: 1px solid #7c776d;
+    border-radius: 2px;
+    box-shadow: var(--panel-chassis-shadow);
+    padding: 22px 28px;
+    position: relative;
+}
+
+/* Угловые прецизионные винты крепления передней панели */
+.now-playing-container::before, .now-playing-container::after {
+    content: '—';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    line-height: 12px;
+    text-align: center;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #eee 0%, #aaa 60%, #555 100%);
+    border: 1px solid #333;
+    font-size: 11px;
+    color: #222;
+    box-shadow: inset 1px 1px 1px #fff, 1px 2px 3px rgba(0, 0, 0, 0.5);
+}
+.now-playing-container::before { top: 8px; left: 10px; transform: rotate(25deg); }
+.now-playing-container::after { top: 8px; right: 10px; transform: rotate(115deg); }
+
+/* Обложка альбома: окно кассетного девайса со стеклом и антибликом */
+.cover-wrapper {
+    width: 90px;
+    height: 90px;
+    min-width: 90px;
+    border-radius: 3px;
+    border: 3px solid #352e25;
+    background: #110e0b;
+    box-shadow: inset 0 0 15px #000, 0 3px 8px rgba(0, 0, 0, 0.4);
+    position: relative;
+    padding: 3px;
+}
+
+.cover-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 5;
+}
+
+#current-track-artwork {
+    width: 100%;
+    height: 100%;
+    border-radius: 1px;
+    filter: contrast(105%) sepia(20%);
+}
+
+.artwork-glow {
+    filter: blur(50px);
+    opacity: 0.25;
+    background-color: var(--accent-glow);
+}
+
+/* Шелкография гравированных надписей черной краской */
+.track-info h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 21px;
+    font-weight: 800;
+    color: #1a1613;
+    letter-spacing: 1px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.track-info p {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #594f43;
+    letter-spacing: 2px;
+    margin-top: 4px;
+}
+
+/* === ПАНЕЛЬ УПРАВЛЕНИЯ: МЕТАЛЛИЧЕСКИЕ ПЕРЕКЛЮЧАТЕЛИ И РУЧКИ === */
+#top-controls {
+    background: 
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 1px, transparent 1px, transparent 3px),
+        linear-gradient(180deg, var(--metal-light) 0%, var(--metal-mid) 40%, var(--metal-dark) 100%);
+    border: 1px solid #7c776d;
+    border-radius: 2px;
+    box-shadow: var(--panel-chassis-shadow);
+    padding: 20px 26px;
+    position: relative;
+}
+
+.main-controls {
+    gap: 16px;
+}
+
+/* Кнопки Prev / Next: прямоугольные полированные переключатели-тумблеры */
+#prev-btn, #next-btn {
+    width: 36px;
+    height: 52px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #f8f6f0 0%, #b5b0a3 50%, #878275 100%);
+    border: 1px solid #5a554a;
+    box-shadow: 
+        inset 1px 1px 1px rgba(255, 255, 255, 0.9),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.4),
+        0 4px 8px rgba(0, 0, 0, 0.4);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #c8c3b5 50%, #9a9486 100%);
+    transform: translateY(-2px);
+}
+
+#prev-btn:active, #next-btn:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+#prev-btn::before {
+    border-right: 8px solid #2a251e;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+#next-btn::before {
+    border-left: 8px solid #2a251e;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+/* КНОПКА PLAY: МАССИВНАЯ АЛЮМИНИЕВАЯ РУЧКА ГРОМКОСТИ С РИФЛЕНИЕМ */
+#play-pause-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: 
+        radial-gradient(circle at center, #eee8db 0%, #bbb4a3 65%, #6f6a5b 100%);
+    border: 3px solid #8e8879;
+    box-shadow: 
+        inset 0 0 10px rgba(0, 0, 0, 0.4),
+        0 6px 16px rgba(0, 0, 0, 0.6),
+        0 0 0 2px #d4cfc2;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.06) rotate(15deg);
+    box-shadow: 
+        inset 0 0 12px rgba(0, 0, 0, 0.3),
+        0 8px 22px rgba(0, 0, 0, 0.7),
+        0 0 0 2px var(--accent);
+}
+
+#play-pause-btn:active {
+    transform: scale(0.96) rotate(-10deg);
+}
+
+#play-pause-btn::before {
+    background: #1c1813;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    width: 14px;
+    height: 16px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+#play-pause-btn.is-playing::before {
+    background: #1c1813;
+    clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+}
+
+/* МЕТАЛЛИЧЕСКИЕ ПОЛЗУНКИ С ГРАВИРОВКОЙ ДЕЛЕНИЙ */
+.control-group label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #3b352c;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.control-group input[type="range"] {
+    background: #24201b;
+    height: 6px;
+    border: 1px solid #5a5448;
+    border-radius: 1px;
+    box-shadow: inset 0 2px 4px #000;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 16px;
+    height: 24px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #fdfbf7 0%, #c4bfae 45%, #6a6558 100%);
+    border: 1px solid #3d392f;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    background: #1f1b16;
+    border: 1px solid #554e42;
+    color: var(--accent-glow);
+    border-radius: 2px;
+    box-shadow: inset 0 1px 4px #000;
+}
+
+#track-volume-value, #speed-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+/* === ВОЛНОВАЯ ФОРМА: ЛАМПОВЫЙ СТРЕЛОЧНЫЙ VU-МЕТР С ПОДСВЕТКОЙ === */
+.waveform-container {
+    background: #14100b;
+    border: 2px solid #3a3227;
+    border-radius: 2px;
+    box-shadow: inset 0 0 25px rgba(255, 179, 71, 0.3), 0 3px 8px rgba(0, 0, 0, 0.6);
+    position: relative;
+    animation: warm-bulb-glow 5s infinite ease-in-out;
+}
+
+/* Логарифмическая шкала аналогового децибел-метра (dB) */
+.waveform-container::before {
+    content: '-20   -10   -7   -5   -3   -1   0   +1   +3 dB';
+    position: absolute;
+    top: 3px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(255, 179, 71, 0.7);
+    letter-spacing: 1px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 6px rgba(255, 179, 71, 0.8)) sepia(80%) hue-rotate(345deg);
+}
+
+#time-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    text-shadow: 0 0 8px rgba(217, 119, 6, 0.6);
+}
+
+/* === ЭКВАЛАЙЗЕР: СЕКЦИЯ ТЕМБРОБЛОКА (BASS / MID / TREBLE) === */
+.eq-container-wrapper {
+    background: 
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 1px, transparent 1px, transparent 3px),
+        linear-gradient(180deg, var(--metal-light) 0%, var(--metal-mid) 40%, var(--metal-dark) 100%);
+    border: 1px solid #7c776d;
+    border-radius: 2px;
+    box-shadow: var(--panel-chassis-shadow);
+    padding: 18px 24px;
+}
+
+.eq-header-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #2b251f;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.eq-header-label::after {
+    content: ' — GRAPHIC TONE EQUALIZER CALIBRATION';
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    color: #665d50;
+}
+
+.eq-band label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: #423b32;
+}
+
+.eq-band input[type="range"] {
+    background: #201c17;
+    border: 1px solid #5a5345;
+    box-shadow: inset 0 1px 6px #000;
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 22px;
+    height: 12px;
+    border-radius: 1px;
+    background: linear-gradient(180deg, #f9f7f2 0%, #c4bfaa 50%, #686357 100%);
+    border: 1px solid #332f26;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* === РАЗДЕЛИТЕЛЬ: БОКОВАЯ СТОЙКА ШПОНА ОРЕХА === */
+.resizer-bar {
+    width: 7px;
+    background: linear-gradient(90deg, #2b170e 0%, #4a2717 50%, #201009 100%);
+    border-left: 1px solid #140b06;
+    border-right: 1px solid #5c321e;
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+}
+
+/* === САЙДБАР: ВИНИЛОВАЯ КАРТОТЕКА (ALBUM STORAGE RACK) === */
+.explorer-sidebar {
+    background: #18110b;
+    border-left: 2px solid #2e1a10;
+    box-shadow: inset 6px 0 15px rgba(0, 0, 0, 0.7);
+}
+
+.explorer-header {
+    background: linear-gradient(180deg, #29180f 0%, #1a0f09 100%);
+    border-bottom: 2px solid #3a2215;
+    padding: 12px 16px;
+}
+
+.explorer-title {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #e5dec9;
+    text-shadow: 0 1px 2px #000;
+}
+
+.explorer-header button {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    background: linear-gradient(180deg, #f7f4ec 0%, #bfbaa9 100%);
+    border: 1px solid #524c3e;
+    border-radius: 2px;
+    color: #24201a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.explorer-header button:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #dcd8c8 100%);
+    color: #000;
+}
+
+.folder-group h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    background: #231911;
+    border: 1px solid #3a2a1c;
+    border-radius: 2px;
+    color: #c7bfae;
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.folder-group.open h3 {
+    background: #362518;
+    color: var(--accent-glow);
+    border-color: var(--accent);
+}
+
+.folder-group.open h3::before {
+    color: var(--accent-glow);
+}
+
+.track-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #948b7a;
+    border-radius: 2px;
+    padding: 6px 10px;
+}
+
+.track-item:hover {
+    background: rgba(255, 179, 71, 0.08);
+    color: #f5eedc;
+}
+
+/* Воспроизводимый виниловый трек: янтарная подсветка дорожки */
+.track-item.playing {
+    background: linear-gradient(90deg, rgba(217, 119, 6, 0.3) 0%, transparent 100%) !important;
+    border-left: 3px solid var(--accent) !important;
+    color: #fff2db !important;
+    font-weight: 700;
+}
+
+/* === 3. BOTTOM STATUS BAR: НИЖНИЙ ЛИНЕЙНЫЙ ШЕВРОН РЕСИВЕРА === */
+.status-bar {
+    height: 32px;
+    background: linear-gradient(180deg, #2a180e 0%, #1b0e08 100%);
+    border-top: 2px solid #3d2315;
+    padding: 0 14px;
+}
+
+.status-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: #c2baa9;
+    background: #23150d;
+    border: 1px solid #452a1b;
+    border-radius: 2px;
+    padding: 3px 8px;
+}
+
+.status-btn:hover {
+    background: #382115;
+    color: #ffffff;
+    border-color: var(--accent);
+}
+
+.status-btn.saved {
+    background: #3d2611;
+    color: var(--accent-glow);
+    border-color: var(--accent);
+}
+
+.status-search input {
+    background: #140b06;
+    border: 1px solid #4a2d1d;
+    border-radius: 2px;
+    color: var(--accent-glow);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+}
+
+.status-search input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 8px rgba(217, 119, 6, 0.4);
+}
+
+.status-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent-glow);
+}
+
+/* === 4. МОДАЛЬНЫЕ ОКНА: ТЕХНИЧЕСКИЙ ПАСПОРТ ОБОРУДОВАНИЯ === */
+.modal-content {
+    background: 
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 4px),
+        linear-gradient(180deg, #ebe7dc 0%, #d0cbbe 100%);
+    border: 2px solid #554f42;
+    border-radius: 2px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.85);
+    padding: 22px;
+}
+
+.modal-header {
+    border-bottom: 2px solid #8e8777;
+    padding-bottom: 10px;
+}
+
+.modal-header h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #211c16;
+}
+
+#close-rpc-modal, #close-url-modal {
+    background: #ded9cb;
+    border: 1px solid #666052;
+    color: #211c16;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+.modal-body label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #3b352b;
+}
+
+.modal-body input {
+    background: #1f1a14;
+    border: 1px solid #5a5142;
+    border-radius: 2px;
+    color: var(--accent-glow);
+    font-family: 'DM Mono', monospace;
+}
+
+.modal-actions button {
+    background: linear-gradient(180deg, #f7f4ec 0%, #bfbaa9 100%);
+    border: 1px solid #4a4437;
+    border-radius: 2px;
+    color: #211c17;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.modal-actions button:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #dcd8c8 100%);
+    border-color: var(--accent);
+}

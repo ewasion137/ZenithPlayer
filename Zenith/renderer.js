@@ -730,6 +730,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopRenderLoop();
+            } else if (isPlaying) {
+                startRenderLoop();
+            }
+        });
+
         analyser.getByteFrequencyData(dataArray);
 
         const bufferLength = analyser.frequencyBinCount;
@@ -816,7 +824,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'aqua-osx.css',
         'amoled-pure.css',
         'y2k-futurism.css',
-        'hell.css'
+        'hell.css',
+        'persona5.css',
+        'vintage.css',
+        'gameboy.css',
+        'nerv.css',
+        'thermal.css',
+        'dsg.css',
+        'hyprland.css',
+        'winxp.css'
     ];
 
     function applyTheme(themeName) {

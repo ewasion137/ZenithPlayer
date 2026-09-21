@@ -6,12 +6,10 @@
 
 // --- MAIN RUNNING SCRIPT OF ZENITHPLAYER --- //
 
-const { app, BrowserWindow, ipcMain, dialog, globalShortcut, Tray, Menu, nativeImage } = require('electron');
+const { app, protocol, net, BrowserWindow, ipcMain, dialog, globalShortcut, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const play = require('play-dl');
 const musicMetadata = require('music-metadata');
-const ytdl = require('@distube/ytdl-core');
 const DiscordRPC = require('discord-rpc');
 
 let rpcClient = null;
@@ -22,6 +20,10 @@ let appSettings = {};
 let currentWatchers = [];
 let mainWindow = null;
 let tray = null;
+
+protocol.registerSchemesAsPrivileged([
+    { scheme: 'media', privileges: { stream: true, bypassCSP: true, supportFetchAPI: true } }
+]);
 
 const createWindow = () => {
     mainWindow = new BrowserWindow({
@@ -47,7 +49,20 @@ const createWindow = () => {
     registerShortcuts();
 };
 
+app.commandLine.appendSwitch('disable-background-networking');
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-breakpad'); // отключает сборщик крэшей
+app.commandLine.appendSwitch('disable-component-update');
+app.commandLine.appendSwitch('disable-domain-reliability');
+app.commandLine.appendSwitch('disable-sync');
+
 app.whenReady().then(() => {
+    protocol.handle('media', (req) => {
+        const filePath = decodeURIComponent(req.url.slice('media://'.length));
+        return net.fetch(`file://${filePath}`);
+    });
     loadSettings();
     createWindow();
 
@@ -116,7 +131,7 @@ let ytDlp = null;
 
 async function getEngine() {
     if (ytDlp && fs.existsSync(ytDlpBinaryPath)) return ytDlp;
-    
+
     if (!fs.existsSync(ytDlpBinaryPath)) {
         console.log('[Zenith] Downloading official yt-dlp engine...');
         await YTDlpWrap.downloadFromGithub(ytDlpBinaryPath);
@@ -142,7 +157,6 @@ ipcMain.on('save-web-tracks', (event, tracks) => {
     catch (e) { console.error(e); }
 });
 
-const { Innertube, UniversalCache } = require('youtubei.js');
 let ytClient = null;
 
 async function getYT() {

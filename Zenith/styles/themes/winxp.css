@@ -1,0 +1,516 @@
+/* ==========================================================================
+   THEME: WINDOWS XP // LUNA BLUE (2001 BLISS EDITION)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Tahoma&display=swap');
+
+:root {
+    /* Фирменная палитра Luna Blue */
+    --xp-blue-dark: #002d96;
+    --xp-blue-main: #0055ea;
+    --xp-blue-light: #3d88ff;
+    --xp-taskbar: #245edb;
+    --xp-start-green: #388e3c;
+    
+    /* Оттенки интерфейса окон и диалогов */
+    --bg-main: #5a7edc;
+    --panel-bg: #ece9d8;            /* Родной бежево-серый цвет окон XP */
+    --surface: #ffffff;
+    --accent: #245edb;
+    --accent-secondary: #388e3c;
+    --text-main: #000000;
+    --text-dim: #444444;
+    --border-light: #7f9db9;
+    --border-focus: #0055ea;
+    
+    /* Знаменитый глянец XP и рельефные фаски */
+    --xp-window-bevel: 
+        inset 1px 1px 0px #ffffff,
+        inset -1px -1px 0px #808080,
+        0 8px 24px rgba(0, 0, 0, 0.45);
+    --xp-btn-bevel: 
+        inset 1px 1px 0px #ffffff,
+        inset -1px -1px 0px #707070,
+        1px 1px 2px rgba(0, 0, 0, 0.3);
+    --transition: 0.1s ease;
+}
+
+/* === ФОН: ЛЕГЕНДАРНЫЕ ЗЕЛЕНЫЕ ХОЛМЫ И ГОЛУБОЕ НЕБО "BLISS" НА CSS === */
+body {
+    font-family: 'Tahoma', system-ui, sans-serif;
+    background-color: #4a80d6;
+    background-image:
+        /* Зеленые холмы Bliss */
+        radial-gradient(ellipse 130% 60% at 50% 105%, #4c8a2b 0%, #68a834 40%, #7dbb3f 65%, transparent 70%),
+        radial-gradient(ellipse 110% 50% at 20% 100%, #3e7522 0%, #56942b 50%, transparent 75%),
+        /* Голубое небо с мягким градиентом */
+        linear-gradient(180deg, #1b57ba 0%, #4684e9 40%, #87b9fd 75%, #bddcfd 100%);
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+#spectrogram-canvas {
+    opacity: 0.25;
+    filter: hue-rotate(180deg) saturate(160%);
+}
+
+/* === 1. TITLE BAR: КОРОЛЕВСКИЙ СИНИЙ ГЛЯНЕЦ LUNA === */
+.title-bar {
+    height: 30px;
+    background: linear-gradient(180deg, 
+        #0058ee 0%, 
+        #3593ff 8%, 
+        #288eff 12%, 
+        #0055eb 25%, 
+        #003dd7 75%, 
+        #0045e0 90%, 
+        #002db6 100%
+    );
+    border-top: 1px solid #7cb5ff;
+    border-bottom: 2px solid #00227a;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    padding: 0 6px 0 10px;
+}
+
+.title-text {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px #001f66;
+}
+
+.title-text::before {
+    content: '💽 Windows Media Player — ';
+    font-weight: normal;
+    color: #d1e4ff;
+}
+
+.window-controls {
+    gap: 3px;
+    align-items: center;
+}
+
+/* Круглые выпуклые леденцовые кнопки управления */
+.win-btn {
+    width: 21px;
+    height: 21px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #3d88ff 0%, #004fe3 50%, #0036b0 100%);
+    border: 1px solid #ffffff;
+    box-shadow: inset 1px 1px 1px #8fc0ff, 1px 1px 2px rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 18px;
+    text-shadow: 1px 1px 1px #00227a;
+}
+
+.win-btn:hover {
+    background: linear-gradient(180deg, #64a1ff 0%, #1e6bf5 50%, #0043c7 100%);
+}
+
+/* Культовая красная кнопка [X] */
+.win-close {
+    background: linear-gradient(180deg, #f06a4b 0%, #e04322 45%, #c12f12 100%) !important;
+    border-color: #ffffff !important;
+    box-shadow: inset 1px 1px 1px #ffaa94, 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.win-close:hover {
+    background: linear-gradient(180deg, #ff8266 0%, #f75331 45%, #d9391a 100%) !important;
+}
+
+/* === 2. PLAYER STAGE: ОКНО "EXPLORER" БЕЖЕВОГО ЦВЕТА === */
+.player-stage {
+    gap: 16px;
+    padding: 16px 20px;
+}
+
+/* NOW PLAYING БЛОК: РЕБРИСТЫЙ СЕРЫЙ ПЛАСТИК */
+.now-playing-container {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
+    box-shadow: var(--xp-window-bevel);
+    padding: 16px 20px;
+    position: relative;
+}
+
+.now-playing-container::before {
+    content: 'Now Playing • Visualizations';
+    position: absolute;
+    top: 4px;
+    left: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #003399;
+}
+
+.cover-wrapper {
+    width: 84px;
+    height: 84px;
+    min-width: 84px;
+    border-radius: 2px;
+    background: #000000;
+    border: 2px solid #7f9db9;
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.7), 1px 1px 0px #fff;
+    margin-top: 8px;
+}
+
+#current-track-artwork {
+    border-radius: 1px;
+}
+
+.artwork-glow {
+    filter: blur(40px);
+    opacity: 0.3;
+    background-color: var(--xp-blue-main);
+}
+
+.track-info h1 {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0c2e74;
+}
+
+.track-info p {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #555555;
+    margin-top: 2px;
+}
+
+/* === ПАНЕЛЬ УПРАВЛЕНИЯ: ВИНТАЖНЫЙ MEDIA PLAYER С СИНИМ ГЛЯНЦЕМ === */
+#top-controls {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
+    box-shadow: var(--xp-window-bevel);
+    padding: 16px 20px;
+}
+
+.main-controls {
+    gap: 12px;
+}
+
+#prev-btn, #next-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #ffffff 0%, #e2e1d7 45%, #c5c2b0 100%);
+    border: 1px solid #7f9db9;
+    box-shadow: var(--xp-btn-bevel);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #eef5ff 45%, #c7ddff 100%);
+    border-color: #316ac5;
+}
+
+#prev-btn::before { border-right: 7px solid #003399; }
+#next-btn::before { border-left: 7px solid #003399; }
+
+/* КНОПКА PLAY: ЗЕЛЕНЫЙ ГЛЯНЦЕВЫЙ ЛЕДЕНЕЦ В СТИЛЕ КНОПКИ "ПУСК" (START BUTTON) */
+#play-pause-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, 
+        #5ec45e 0%, 
+        #3aa83a 45%, 
+        #298729 60%, 
+        #1c681c 100%
+    );
+    border: 2px solid #ffffff;
+    box-shadow: 
+        inset 1px 2px 2px #a1f2a1,
+        inset -1px -2px 3px #0e400e,
+        1px 3px 6px rgba(0, 0, 0, 0.4);
+    transition: var(--transition);
+}
+
+#play-pause-btn:hover {
+    background: linear-gradient(180deg, #74d874 0%, #4bc24b 45%, #349e34 60%, #247a24 100%);
+    box-shadow: 
+        inset 1px 2px 3px #c2ffc2,
+        0 0 10px rgba(76, 175, 80, 0.7);
+}
+
+#play-pause-btn:active {
+    background: linear-gradient(180deg, #247524 0%, #2f8c2f 60%, #45b345 100%);
+    box-shadow: inset 0 2px 4px #0a330a;
+}
+
+#play-pause-btn::before {
+    background: #ffffff;
+    filter: drop-shadow(1px 1px 1px #0e420e);
+}
+
+/* КЛАССИЧЕСКИЕ СИНИЕ ПОЛЗУНКИ С БЕЛЫМИ РУЧКАМИ */
+.control-group label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #0c2e74;
+}
+
+.control-group input[type="range"] {
+    background: #ffffff;
+    height: 6px;
+    border: 1px solid #7f9db9;
+    border-radius: 3px;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 13px;
+    height: 20px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #ffffff 0%, #dedcd2 50%, #b5b2a2 100%);
+    border: 1px solid #5a5747;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.control-input, .eq-band input[type="number"] {
+    background: #ffffff;
+    border: 1px solid #7f9db9;
+    color: #000000;
+    border-radius: 0px;
+    box-shadow: inset 1px 1px 1px #ccc;
+}
+
+/* === ВОЛНОВАЯ ФОРМА: ПОЛОСА ЗАГРУЗКИ WINDOWS XP === */
+.waveform-container {
+    background: #ffffff;
+    border: 2px solid #7f9db9;
+    border-radius: 2px;
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 1px 2px #0055ea);
+}
+
+#time-display {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #0c2e74;
+}
+
+/* === ЭКВАЛАЙЗЕР: ДИАЛОГ СВОЙСТВ АУДИОУСТРОЙСТВ === */
+.eq-container-wrapper {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
+    box-shadow: var(--xp-window-bevel);
+    padding: 16px 20px;
+}
+
+.eq-header-label {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #0c2e74;
+    border-bottom: 1px solid #d0ccb8;
+    padding-bottom: 4px;
+}
+
+.eq-band label {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 10px;
+    color: #333333;
+}
+
+.eq-band input[type="range"] {
+    background: #ffffff;
+    border: 1px solid #7f9db9;
+}
+
+/* === РАЗДЕЛИТЕЛЬ: СИНИЙ БОРДЮР САЙДБАРА EXPLORER === */
+.resizer-bar {
+    width: 5px;
+    background: #7ba2e7;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #4a6da7;
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: #ffaa00;
+}
+
+/* === САЙДБАР: СИНИЙ ТАСКПЭЙН "ДРУГИЕ МЕСТА" (EXPLORER TASKS) === */
+.explorer-sidebar {
+    background: linear-gradient(180deg, #7ba2e7 0%, #6375d6 100%);
+    border-left: 1px solid #465bbd;
+}
+
+.explorer-header {
+    background: linear-gradient(180deg, #ffffff 0%, #dbe4f9 100%);
+    border-bottom: 1px solid #7ba2e7;
+    padding: 8px 12px;
+}
+
+.explorer-title {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #0c2e74;
+}
+
+.explorer-header button {
+    background: linear-gradient(180deg, #ffffff 0%, #ece9d8 100%);
+    border: 1px solid #7f9db9;
+    color: #000000;
+    font-size: 11px;
+    border-radius: 3px;
+    box-shadow: var(--xp-btn-bevel);
+}
+
+.explorer-header button:hover {
+    border-color: #316ac5;
+}
+
+/* Папки в стиле желтых папок Windows */
+.folder-group h3 {
+    font-size: 11px;
+    font-weight: 700;
+    background: #ffffff;
+    border: 1px solid #7f9db9;
+    border-radius: 2px;
+    color: #0c2e74;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.folder-group.open h3 {
+    background: #eef3ff;
+    border-color: #316ac5;
+    color: #00227a;
+}
+
+.track-item {
+    font-size: 11px;
+    color: #ffffff;
+    border-radius: 2px;
+}
+
+.track-item:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.track-item.playing {
+    background: #316ac5 !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* === 3. BOTTOM STATUS BAR: ТАСКБАР WINDOWS XP С КНОПКОЙ "START" === */
+.status-bar {
+    height: 32px;
+    background: linear-gradient(180deg, #3884e9 0%, #245edb 20%, #1941a5 90%, #1941a5 100%);
+    border-top: 1px solid #5599ff;
+    padding: 0 10px;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.status-btn {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(180deg, #3d88ff 0%, #1952c4 100%);
+    border: 1px solid #002d96;
+    box-shadow: inset 1px 1px 1px #80b3ff;
+    border-radius: 3px;
+    padding: 2px 10px;
+}
+
+.status-btn:hover {
+    background: linear-gradient(180deg, #579aff 0%, #2866e3 100%);
+}
+
+.status-btn.saved {
+    background: linear-gradient(180deg, #388e3c 0%, #236326 100%);
+    border-color: #133815;
+}
+
+.status-search input {
+    background: #ffffff;
+    border: 1px solid #7f9db9;
+    border-radius: 2px;
+    color: #000000;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+}
+
+.status-tag {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #ffffff;
+    text-shadow: 1px 1px 1px #001f66;
+}
+
+/* === 4. МОДАЛЬНЫЕ ОКНА: ДИАЛОГ СИСТЕМНОЙ ОШИБКИ / НАСТРОЕК === */
+.modal-content {
+    background: var(--panel-bg);
+    border: 2px solid #0055ea;
+    border-radius: 5px;
+    box-shadow: 4px 8px 30px rgba(0, 0, 0, 0.6);
+    padding: 6px;
+}
+
+.modal-header {
+    background: linear-gradient(180deg, #0058ee 0%, #003dd7 100%);
+    padding: 6px 10px;
+    border-radius: 3px 3px 0 0;
+}
+
+.modal-header h3 {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 12px;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+#close-rpc-modal, #close-url-modal {
+    background: linear-gradient(180deg, #f06a4b 0%, #c12f12 100%);
+    border: 1px solid #fff;
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+.modal-body label {
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    color: #000000;
+}
+
+.modal-body input {
+    background: #ffffff;
+    border: 1px solid #7f9db9;
+    border-radius: 2px;
+    color: #000000;
+    font-family: 'Tahoma', sans-serif;
+}
+
+.modal-actions button {
+    background: linear-gradient(180deg, #ffffff 0%, #ece9d8 100%);
+    border: 1px solid #7f9db9;
+    border-radius: 3px;
+    color: #000000;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    box-shadow: var(--xp-btn-bevel);
+    padding: 4px 14px;
+}
+
+.modal-actions button:hover {
+    border-color: #316ac5;
+}
