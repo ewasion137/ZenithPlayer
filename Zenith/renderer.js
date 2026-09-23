@@ -832,7 +832,9 @@ document.addEventListener('DOMContentLoaded', () => {
         'thermal.css',
         'dsg.css',
         'hyprland.css',
-        'winxp.css'
+        'winxp.css',
+        'dreamcore.css',
+        'fogcore.css'
     ];
 
     function applyTheme(themeName) {

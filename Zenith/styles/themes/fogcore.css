@@ -1,0 +1,760 @@
+/* ==========================================================================
+   THEME: FOGCORE // 霧 (DENSE OVERCAST / CONDENSATION / SILENT PINE VALLEYS)
+   "Visibility dropping below ten meters. The damp air swallows every sound."
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Special+Elite&display=swap');
+
+/* === КЛЮЧЕВЫЕ АНИМАЦИИ: МЕДЛЕННЫЙ ТУМАН, СТЕКАЮЩИЙ КОНДЕНСАТ И МАЯК === */
+@keyframes fog-drift-horizontal {
+    0% {
+        background-position: 0px 0px, 0px 0px, 0px 0px;
+    }
+    50% {
+        background-position: 150px 20px, -120px 40px, 80px -30px;
+    }
+    100% {
+        background-position: 300px 0px, -240px 0px, 160px 0px;
+    }
+}
+
+@keyframes condensation-pulse {
+    0%, 100% {
+        opacity: 0.75;
+        filter: blur(14px);
+    }
+    50% {
+        opacity: 0.95;
+        filter: blur(18px);
+    }
+}
+
+@keyframes beacon-warning-pulse {
+    0%, 100% {
+        opacity: 0.35;
+        text-shadow: 0 0 4px rgba(212, 163, 89, 0.4);
+    }
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 16px rgba(212, 163, 89, 0.95), 0 0 30px rgba(212, 163, 89, 0.6);
+    }
+}
+
+@keyframes damp-needle-twitch {
+    0%, 100% { transform: rotate(0deg); }
+    30% { transform: rotate(1deg); }
+    70% { transform: rotate(-0.5deg); }
+}
+
+:root {
+    /* Палитра сырого хвойного леса и тяжелой мглы */
+    --fog-void: #0b0e0e;
+    --fog-deep: #111616;
+    --fog-surface: #171f1e;
+    --fog-panel: rgba(19, 25, 24, 0.88);
+    --fog-moss: #33443b;
+    --fog-bark: #24211d;
+    --fog-slate: #5b6967;
+    --fog-mist: #a7b7b4;
+    --fog-water: rgba(185, 210, 205, 0.35);
+    --fog-droplet: rgba(255, 255, 255, 0.12);
+    --fog-amber: #d4a359;
+    --fog-beacon: #e2b067;
+    
+    --bg-main: #0c0f0f;
+    --panel-bg: rgba(18, 24, 23, 0.85);
+    --surface: #1b2423;
+    --accent: #92a8a4;
+    --accent-secondary: #748c84;
+    --accent-gradient: linear-gradient(135deg, #7c938f 0%, #445851 50%, #202b28 100%);
+    --text-main: #e2e8e6;
+    --text-dim: #798b87;
+    --border-light: rgba(167, 183, 180, 0.2);
+    --border-focus: #92a8a4;
+    
+    /* Матовая влажность и мягкая изоляция звука */
+    --mist-haze: 0 0 35px rgba(110, 133, 128, 0.25), inset 0 0 25px rgba(0, 0, 0, 0.8);
+    --damp-shadow: 
+        0 16px 36px rgba(4, 7, 7, 0.9), 
+        inset 0 1px 1px rgba(255, 255, 255, 0.18),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.85);
+    --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* === СЛОЙ ВЛАГИ И ЗАПОТЕВШЕГО СТЕКЛА С КАПЛЯМИ ПОВЕРХ ВСЕГО ОКНА === */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-image:
+        /* Капли дождя на лобовом стекле */
+        radial-gradient(1.5px 2.5px at 12% 18%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
+        radial-gradient(2px 3px at 35% 65%, rgba(255, 255, 255, 0.25) 0%, transparent 100%),
+        radial-gradient(1px 2px at 78% 28%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
+        radial-gradient(2px 4px at 85% 75%, rgba(255, 255, 255, 0.2) 0%, transparent 100%),
+        radial-gradient(1.5px 2px at 52% 82%, rgba(255, 255, 255, 0.22) 0%, transparent 100%),
+        /* Потеки конденсата */
+        repeating-linear-gradient(90deg, transparent 0px, transparent 48px, rgba(255, 255, 255, 0.015) 49px, transparent 50px),
+        /* Плотная дымчатая зернистость сырого воздуха */
+        radial-gradient(circle at 50% 50%, transparent 50%, rgba(8, 12, 12, 0.6) 100%);
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: screen;
+    opacity: 0.9;
+}
+
+/* Метеорологическая сводка на полях (лог наблюдения) */
+body::after {
+    content: 'DEW POINT: 8°C // REL. HUMIDITY: 99% // VISIBILITY: 12 METERS // STATION: NORTH-PINE-4';
+    position: fixed;
+    bottom: 34px;
+    right: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--fog-slate);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+    z-index: 10001;
+}
+
+/* === ФОН: ГЛУБОКИЙ СЫРОЙ ЛЕС В ПЕРИОД ОСЕННИХ ЗАМОРОЗКОВ === */
+body {
+    font-family: 'Cormorant Garamond', serif;
+    background-color: var(--fog-void);
+    background-image: 
+        /* Первый фронт ползущего тумана */
+        radial-gradient(ellipse 110% 55% at 50% 15%, rgba(146, 168, 164, 0.18) 0%, transparent 70%),
+        /* Нижний ярус лесного подлеска и мха */
+        radial-gradient(circle 500px at 15% 90%, rgba(51, 68, 59, 0.35) 0%, transparent 75%),
+        radial-gradient(circle 450px at 85% 85%, rgba(36, 33, 29, 0.45) 0%, transparent 70%),
+        /* Рассеянный свет сквозь густые кроны */
+        linear-gradient(180deg, #121818 0%, #0d1212 40%, #080b0b 100%);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+#spectrogram-canvas {
+    opacity: 0.28;
+    filter: blur(2px) grayscale(60%) brightness(0.9) contrast(140%);
+}
+
+/* === 1. TITLE BAR: МЕТЕОРОЛОГИЧЕСКАЯ РЕЙКА ИЗ ОКИСЛЕННОГО ЦИНКА === */
+.title-bar {
+    height: 38px;
+    background: linear-gradient(180deg, rgba(26, 35, 33, 0.95) 0%, rgba(16, 22, 21, 0.98) 100%);
+    border-bottom: 1px solid rgba(167, 183, 180, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    padding: 0 16px;
+    position: relative;
+    backdrop-filter: blur(16px);
+}
+
+.title-text {
+    font-family: 'Special Elite', cursive;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    color: var(--fog-mist);
+    text-shadow: 0 0 12px rgba(167, 183, 180, 0.4), 1px 1px 2px #000;
+}
+
+.title-text::before {
+    content: '▲ OVERCAST MONITOR // ';
+    color: var(--fog-amber);
+    animation: beacon-warning-pulse 5s infinite ease-in-out;
+}
+
+.title-text::after {
+    content: ' [SILENT FREQ]';
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--fog-slate);
+}
+
+.window-controls {
+    gap: 8px;
+    align-items: center;
+}
+
+/* Винты метеостанции с окислившимися шляпками */
+.win-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #2a3734 0%, #17201e 100%);
+    border: 1px solid rgba(167, 183, 180, 0.3);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 2px 5px rgba(0, 0, 0, 0.6);
+    color: var(--fog-mist);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    transition: var(--transition);
+}
+
+.win-btn:hover {
+    background: #394a46;
+    color: #ffffff;
+    border-color: var(--fog-mist);
+    box-shadow: 0 0 10px rgba(167, 183, 180, 0.3);
+}
+
+.win-close:hover {
+    background: #6e3333 !important;
+    border-color: #aa4d4d !important;
+    color: #ffdede !important;
+}
+
+/* === 2. PLAYER STAGE: ТИШИНА ЗАКРЫТОЙ ЛЕСНОЙ СТОЯНКИ === */
+.player-stage {
+    gap: 20px;
+    padding: 24px 30px;
+}
+
+/* NOW PLAYING: ТЯЖЁЛАЯ СМОТРОВАЯ РАМА ИЗ ЗАМОКШЕГО ДУБА И СТЕКЛА */
+.now-playing-container {
+    background: linear-gradient(135deg, rgba(25, 34, 32, 0.9) 0%, rgba(14, 19, 18, 0.96) 100%);
+    border: 1px solid rgba(167, 183, 180, 0.28);
+    border-radius: 6px;
+    box-shadow: 
+        var(--damp-shadow),
+        inset 0 0 40px rgba(0, 0, 0, 0.7);
+    padding: 24px 28px;
+    position: relative;
+    backdrop-filter: blur(20px);
+}
+
+/* Навигационный маркер высоты и координат вышки */
+.now-playing-container::before {
+    content: 'ELEV. 1420M  |  NORTHERN RIDGE  |  NO DIRECT SUNLIGHT';
+    position: absolute;
+    top: 6px;
+    left: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--fog-slate);
+}
+
+/* Предостерегающая лампочка барометра */
+.now-playing-container::after {
+    content: '◉ BAROMETER: 742 mmHg';
+    position: absolute;
+    top: 6px;
+    right: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--fog-amber);
+    animation: beacon-warning-pulse 4s infinite;
+}
+
+/* Рамка обложки: Окно в туман, покрытое микрокаплями */
+.cover-wrapper {
+    width: 96px;
+    height: 96px;
+    min-width: 96px;
+    border-radius: 4px;
+    background: #0d1211;
+    border: 1px solid rgba(167, 183, 180, 0.35);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.9),
+        inset 0 0 20px rgba(0, 0, 0, 0.8);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Текстура туманного запотевания стекла */
+.cover-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 5;
+}
+
+#current-track-artwork {
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+    filter: saturate(65%) contrast(115%) brightness(0.88);
+    transition: filter 0.5s ease;
+}
+
+.now-playing-container:hover #current-track-artwork {
+    filter: saturate(85%) contrast(120%) brightness(0.95);
+}
+
+.artwork-glow {
+    position: absolute;
+    top: -50%; left: -20%; width: 140%; height: 200%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(60px);
+    opacity: 0.35;
+    animation: condensation-pulse 9s ease-in-out infinite;
+    mix-blend-mode: screen;
+}
+
+.track-info h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: 1px;
+    color: var(--text-main);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 15px rgba(167, 183, 180, 0.2);
+}
+
+.track-info p {
+    font-family: 'Special Elite', cursive;
+    font-size: 13px;
+    color: var(--fog-slate);
+    margin-top: 4px;
+    letter-spacing: 1.5px;
+}
+
+/* === УПРАВЛЕНИЕ: ПОЛЕВОЙ РЕГИСТРАТОР В КОРПУСЕ С РЕЗИНОВЫМИ ПРОКЛАДКАМИ === */
+#top-controls {
+    background: linear-gradient(135deg, rgba(24, 32, 31, 0.92) 0%, rgba(15, 20, 19, 0.96) 100%);
+    border: 1px solid rgba(167, 183, 180, 0.25);
+    border-radius: 6px;
+    box-shadow: var(--damp-shadow);
+    padding: 18px 24px;
+    position: relative;
+    backdrop-filter: blur(16px);
+}
+
+.main-controls {
+    gap: 16px;
+}
+
+/* Тугие прорезиненные кнопки полевой аппаратуры */
+#prev-btn, #next-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #273432 0%, #151d1c 100%);
+    border: 1px solid rgba(167, 183, 180, 0.3);
+    box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.12),
+        0 4px 8px rgba(0, 0, 0, 0.7);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: #334441;
+    border-color: var(--fog-mist);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8), 0 0 10px rgba(167, 183, 180, 0.25);
+}
+
+#prev-btn::before {
+    border-right: 7px solid var(--fog-mist);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+#next-btn::before {
+    border-left: 7px solid var(--fog-mist);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+/* КНОПКА PLAY: ТЯЖЕЛЫЙ РОТОРНЫЙ ПЕРЕКЛЮЧАТЕЛЬ ИЗ ВОРОНЕНОЙ СТАЛИ */
+#play-pause-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #475a56 0%, #263330 60%, #121918 100%);
+    border: 2px solid rgba(167, 183, 180, 0.45);
+    box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.9),
+        inset 0 2px 4px rgba(255, 255, 255, 0.25),
+        0 0 15px rgba(116, 140, 132, 0.2);
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.08);
+    border-color: var(--fog-mist);
+    box-shadow: 
+        0 10px 25px rgba(0, 0, 0, 0.95),
+        0 0 25px rgba(167, 183, 180, 0.4);
+}
+
+#play-pause-btn:active {
+    transform: scale(0.95);
+    box-shadow: inset 0 2px 6px #000;
+}
+
+#play-pause-btn::before {
+    background: var(--text-main);
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    width: 14px;
+    height: 16px;
+}
+
+#play-pause-btn.is-playing::before {
+    background: var(--text-main);
+    clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+}
+
+/* ПОЛЗУНКИ НАСТРОЙКИ: ИНДИКАТОРЫ УРОВНЯ ВЛАГИ */
+.control-group label {
+    font-family: 'Special Elite', cursive;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--fog-mist);
+    text-shadow: 1px 1px 1px #000;
+}
+
+.control-group input[type="range"] {
+    background: #101615;
+    height: 6px;
+    border: 1px solid rgba(167, 183, 180, 0.25);
+    border-radius: 2px;
+    box-shadow: inset 0 1px 3px #000;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 14px;
+    height: 18px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #6c807b 0%, #2e3a37 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    background: #0f1514;
+    border: 1px solid rgba(167, 183, 180, 0.25);
+    color: var(--fog-amber);
+    border-radius: 3px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* === ВОЛНОВАЯ ФОРМА: ЭХОЛОКАЦИОННЫЙ СОНАР В ТУМАННОЙ ПАДИ === */
+.waveform-container {
+    background: linear-gradient(180deg, #0b0f0f 0%, #121817 100%);
+    border: 1px solid rgba(167, 183, 180, 0.3);
+    border-radius: 4px;
+    box-shadow: 
+        inset 0 0 25px rgba(0, 0, 0, 0.9),
+        0 4px 12px rgba(0, 0, 0, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Сетка дальности видимости */
+.waveform-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(167, 183, 180, 0.04) 0px,
+        rgba(167, 183, 180, 0.04) 1px,
+        transparent 1px,
+        transparent 30px
+    );
+    pointer-events: none;
+    z-index: 2;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 6px rgba(146, 168, 164, 0.4)) contrast(130%) brightness(0.9);
+}
+
+#time-display {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--fog-mist);
+    letter-spacing: 1px;
+    text-shadow: 0 1px 2px #000;
+}
+
+/* === ЭКВАЛАЙЗЕР: АКУСТИЧЕСКАЯ ИЗОЛЯЦИЯ (РЕЙКИ ИЗ ВЛАЖНОГО ТОРФА) === */
+.eq-container-wrapper {
+    background: linear-gradient(135deg, rgba(25, 33, 31, 0.9) 0%, rgba(14, 19, 18, 0.96) 100%);
+    border: 1px solid rgba(167, 183, 180, 0.25);
+    border-radius: 6px;
+    box-shadow: var(--damp-shadow);
+    padding: 18px 24px;
+    position: relative;
+    backdrop-filter: blur(16px);
+}
+
+.eq-header-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--fog-mist);
+    text-shadow: 0 1px 3px #000;
+}
+
+.eq-header-label::after {
+    content: ' // ACOUSTIC DAMPENING CHAMBER';
+    font-family: 'Special Elite', cursive;
+    color: var(--fog-slate);
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.eq-band label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--fog-slate);
+}
+
+.eq-band input[type="range"] {
+    background: #0f1514;
+    border: 1px solid rgba(167, 183, 180, 0.2);
+    border-radius: 2px;
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 18px;
+    height: 10px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #50615d 0%, #202b28 100%);
+    border: 1px solid rgba(167, 183, 180, 0.4);
+    box-shadow: 0 2px 4px #000;
+}
+
+/* === РАЗДЕЛИТЕЛЬ: ШОВ МЕЖДУ СТЕНОВЫМИ ПАНЕЛЯМИ БУНКЕРА === */
+.resizer-bar {
+    width: 5px;
+    background: #141c1a;
+    border-left: 1px solid rgba(167, 183, 180, 0.2);
+    border-right: 1px solid #080b0b;
+    transition: var(--transition);
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--fog-mist);
+    box-shadow: 0 0 12px rgba(167, 183, 180, 0.5);
+}
+
+/* === САЙДБАР: АРХИВ ПОЛЕВЫХ АУДИОЗАПИСЕЙ И КАРТОГРАФИИ === */
+.explorer-sidebar {
+    background: linear-gradient(180deg, rgba(18, 24, 23, 0.96) 0%, rgba(10, 14, 13, 0.98) 100%);
+    border-left: 1px solid rgba(167, 183, 180, 0.25);
+    box-shadow: inset 4px 0 25px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(18px);
+}
+
+.explorer-header {
+    background: rgba(26, 35, 33, 0.7);
+    border-bottom: 1px solid rgba(167, 183, 180, 0.2);
+    padding: 12px 18px;
+}
+
+.explorer-title {
+    font-family: 'Special Elite', cursive;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--fog-mist);
+    text-shadow: 0 1px 2px #000;
+}
+
+.explorer-header button {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    background: #1b2523;
+    border: 1px solid rgba(167, 183, 180, 0.3);
+    border-radius: 3px;
+    color: var(--fog-mist);
+    padding: 3px 10px;
+    transition: var(--transition);
+}
+
+.explorer-header button:hover {
+    background: var(--fog-mist);
+    color: #0d1312;
+    border-color: #ffffff;
+    box-shadow: 0 0 10px rgba(167, 183, 180, 0.4);
+}
+
+.folder-group h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(28, 38, 36, 0.6);
+    border: 1px solid rgba(167, 183, 180, 0.15);
+    border-radius: 3px;
+    color: var(--text-main);
+    margin: 4px 0;
+    transition: var(--transition);
+}
+
+.folder-group.open h3 {
+    background: rgba(43, 58, 55, 0.7);
+    color: #ffffff;
+    border-color: rgba(167, 183, 180, 0.4);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.track-item {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--fog-slate);
+    border-radius: 3px;
+    padding: 6px 12px;
+    transition: var(--transition);
+}
+
+.track-item:hover {
+    background: rgba(167, 183, 180, 0.1);
+    color: var(--text-main);
+    transform: translateX(3px);
+}
+
+/* Воспроизводимый трек словно зажжённый в тумане керосиновый фонарь */
+.track-item.playing {
+    background: linear-gradient(90deg, rgba(212, 163, 89, 0.2) 0%, rgba(167, 183, 180, 0.05) 100%) !important;
+    border-left: 3px solid var(--fog-amber) !important;
+    color: #f7e6c8 !important;
+    font-weight: 600;
+    text-shadow: 0 0 8px rgba(212, 163, 89, 0.5);
+}
+
+/* === 3. BOTTOM STATUS BAR: МЕТЕОСВОДКА И СТАТУС ВЕЩАНИЯ === */
+.status-bar {
+    height: 34px;
+    background: linear-gradient(180deg, rgba(24, 32, 31, 0.95) 0%, rgba(13, 17, 16, 0.98) 100%);
+    border-top: 1px solid rgba(167, 183, 180, 0.25);
+    padding: 0 14px;
+}
+
+.status-btn {
+    font-family: 'Special Elite', cursive;
+    font-size: 12px;
+    color: var(--fog-mist);
+    background: rgba(33, 44, 42, 0.6);
+    border: 1px solid rgba(167, 183, 180, 0.25);
+    border-radius: 3px;
+    padding: 2px 10px;
+}
+
+.status-btn:hover {
+    background: var(--fog-mist);
+    color: #0b0f0e;
+    box-shadow: 0 0 8px rgba(167, 183, 180, 0.4);
+}
+
+.status-btn.saved {
+    background: #25382e;
+    color: #a7dfc0;
+    border-color: #55876e;
+}
+
+.status-search input {
+    background: #0f1514;
+    border: 1px solid rgba(167, 183, 180, 0.25);
+    border-radius: 3px;
+    color: var(--text-main);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+}
+
+.status-search input:focus {
+    border-color: var(--fog-mist);
+    box-shadow: 0 0 8px rgba(167, 183, 180, 0.3);
+}
+
+.status-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--fog-amber);
+}
+
+/* === 4. МОДАЛЬНОЕ ОКНО: ЗАКРЫТЫЙ ГЕРМОБОКС С ДОКУМЕНТАЦИЕЙ === */
+.modal-content {
+    background: linear-gradient(135deg, rgba(27, 36, 34, 0.98) 0%, rgba(14, 18, 17, 0.99) 100%);
+    border: 1px solid rgba(167, 183, 180, 0.35);
+    border-radius: 6px;
+    box-shadow: 
+        0 25px 70px rgba(0, 0, 0, 0.95), 
+        0 0 30px rgba(0, 0, 0, 0.8),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    padding: 22px;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(167, 183, 180, 0.25);
+    padding-bottom: 12px;
+}
+
+.modal-header h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--text-main);
+    text-shadow: 0 1px 3px #000;
+}
+
+#close-rpc-modal, #close-url-modal {
+    background: #232e2c;
+    border: 1px solid rgba(167, 183, 180, 0.3);
+    color: var(--fog-mist);
+    border-radius: 3px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+#close-rpc-modal:hover, #close-url-modal:hover {
+    background: #502828;
+    color: #ffdede;
+    border-color: #8c4242;
+}
+
+.modal-body label {
+    font-family: 'Special Elite', cursive;
+    font-size: 12px;
+    color: var(--fog-mist);
+    letter-spacing: 1px;
+}
+
+.modal-body input {
+    background: #0f1514;
+    border: 1px solid rgba(167, 183, 180, 0.3);
+    border-radius: 3px;
+    color: var(--text-main);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+}
+
+.modal-body input:focus {
+    border-color: var(--fog-mist);
+    box-shadow: 0 0 10px rgba(167, 183, 180, 0.3);
+}
+
+.modal-actions button {
+    background: #283734;
+    border: 1px solid rgba(167, 183, 180, 0.35);
+    border-radius: 3px;
+    color: var(--text-main);
+    font-family: 'Special Elite', cursive;
+    font-size: 13px;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.modal-actions button:hover {
+    background: var(--fog-mist);
+    color: #0b0f0e;
+    box-shadow: 0 0 12px rgba(167, 183, 180, 0.4);
+}
