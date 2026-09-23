@@ -1,0 +1,732 @@
+/* ==========================================================================
+   THEME: BIOLUMINESCENCE // 深海 (DEEP ABYSS / JELLYFISH PELAGIC SANCTUARY)
+   "Four thousand meters beneath the swell. The silent, living glow of the abyss."
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap');
+
+/* === КЛЮЧЕВЫЕ АНИМАЦИИ: ПУЛЬСАЦИЯ МЕДУЗЫ, ВОДНЫЕ КАУСТИКИ И ПЛАВАЮЩИЙ ПЛАНКТОН === */
+@keyframes abyss-caustic-drift {
+    0% {
+        background-position: 0% 0%, 0% 0%, 0% 0%;
+    }
+    50% {
+        background-position: 100% 50%, -40px 60px, 50px -40px;
+    }
+    100% {
+        background-position: 0% 0%, 0% 0%, 0% 0%;
+    }
+}
+
+@keyframes jellyfish-propel {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 16px rgba(0, 240, 255, 0.6)) drop-shadow(0 0 35px rgba(139, 92, 246, 0.4));
+    }
+    40% {
+        transform: scale(1.08, 0.94);
+        filter: drop-shadow(0 0 26px rgba(0, 240, 255, 0.9)) drop-shadow(0 0 50px rgba(139, 92, 246, 0.65));
+    }
+    60% {
+        transform: scale(0.96, 1.04);
+    }
+}
+
+@keyframes photophore-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+:root {
+    /* Палитра океанической бездны и живого холодного неона */
+    --abyss-void: #03060c;
+    --abyss-trench: #070c18;
+    --abyss-marine: #0d1527;
+    --abyss-panel: rgba(11, 20, 38, 0.78);
+    --abyss-glass: rgba(14, 27, 52, 0.65);
+    --abyss-cyan: #00f0ff;
+    --abyss-azure: #38bdf8;
+    --abyss-violet: #8b5cf6;
+    --abyss-indigo: #6366f1;
+    --abyss-seafoam: #6ee7b7;
+    --abyss-pearl: #ecfeff;
+    --abyss-spore: rgba(0, 240, 255, 0.35);
+    
+    --bg-main: #040813;
+    --panel-bg: rgba(10, 18, 35, 0.82);
+    --surface: #12203d;
+    --accent: #00f0ff;
+    --accent-secondary: #8b5cf6;
+    --accent-gradient: linear-gradient(135deg, #00f0ff 0%, #38bdf8 45%, #8b5cf6 100%);
+    --text-main: #ecfeff;
+    --text-dim: #7388a8;
+    --border-light: rgba(0, 240, 255, 0.22);
+    --border-focus: #00f0ff;
+    
+    /* Мягкий рассеянный подводный свет и гладкое гидростатическое стекло */
+    --oceanic-glow: 
+        0 0 25px rgba(0, 240, 255, 0.35), 
+        0 0 60px rgba(139, 92, 246, 0.2);
+    --glass-hull: 
+        inset 1px 1px 2px rgba(255, 255, 255, 0.25), 
+        inset -1px -1px 3px rgba(0, 0, 0, 0.7),
+        0 14px 35px rgba(2, 4, 10, 0.85);
+    --inner-depth-shadow: inset 0 0 30px rgba(2, 5, 12, 0.9);
+    --transition: 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* === СЛОЙ СВЕТЯЩЕГОСЯ ПЛАНКТОНА И БЛИКОВ ВОДЫ ПОВЕРХ ВСЕГО ИНТЕРФЕЙСА === */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-image: 
+        /* Плавающие светящиеся точки фотофоров и микроорганизмов */
+        radial-gradient(1.5px 1.5px at 15% 22%, rgba(0, 240, 255, 0.6) 0%, transparent 100%),
+        radial-gradient(2px 2px at 32% 68%, rgba(139, 92, 246, 0.55) 0%, transparent 100%),
+        radial-gradient(1px 1px at 78% 34%, rgba(0, 240, 255, 0.7) 0%, transparent 100%),
+        radial-gradient(2.5px 2.5px at 85% 78%, rgba(110, 231, 183, 0.5) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 54% 86%, rgba(56, 189, 248, 0.6) 0%, transparent 100%),
+        /* Мягкие преломления глубинных каустик */
+        radial-gradient(ellipse 70% 40% at 50% 10%, rgba(0, 240, 255, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: screen;
+    opacity: 0.85;
+}
+
+/* Навигационный глубиномер батискафа */
+body::after {
+    content: 'DEPTH: -4,280M // PELAGIC TRANQUILITY // PHOTOPHORE FREQ: 480nm // O2: 99.8%';
+    position: fixed;
+    bottom: 34px;
+    right: 20px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--abyss-azure);
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+    pointer-events: none;
+    z-index: 10001;
+    opacity: 0.85;
+}
+
+/* === ФОН: БЕЗДОННАЯ БАРХАТНАЯ СИНЕВА ТИХООКЕАНСКОГО ЖЁЛОБА === */
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background-color: var(--abyss-void);
+    background-image: 
+        /* Главное лазурно-фиолетовое сердце свечения на глубине */
+        radial-gradient(circle 550px at 50% 20%, rgba(0, 240, 255, 0.12) 0%, rgba(139, 92, 246, 0.08) 50%, transparent 80%),
+        /* Мягкие боковые потоки апвеллинга */
+        radial-gradient(circle 600px at 10% 85%, rgba(14, 116, 144, 0.16) 0%, transparent 70%),
+        radial-gradient(circle 500px at 90% 75%, rgba(109, 40, 217, 0.14) 0%, transparent 70%),
+        linear-gradient(180deg, #091122 0%, #050b18 45%, #020409 100%);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+#spectrogram-canvas {
+    opacity: 0.35;
+    filter: blur(1.5px) drop-shadow(0 0 14px rgba(0, 240, 255, 0.6)) hue-rotate(185deg) saturate(180%);
+}
+
+/* === 1. TITLE BAR: ТИТАНОВАЯ КРОМКА НАБЛЮДАТЕЛЬНОГО ИЛЛЮМИНАТОРА === */
+.title-bar {
+    height: 38px;
+    background: linear-gradient(180deg, rgba(14, 25, 48, 0.94) 0%, rgba(8, 15, 30, 0.96) 100%);
+    border-bottom: 1.5px solid rgba(0, 240, 255, 0.35);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 240, 255, 0.15);
+    padding: 0 16px;
+    position: relative;
+    backdrop-filter: blur(16px);
+}
+
+.title-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: var(--abyss-pearl);
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.7), 1px 1px 2px #000;
+}
+
+.title-text::before {
+    content: '🪼 ABYSSAL DRIFT // ';
+    color: var(--abyss-cyan);
+}
+
+.title-text::after {
+    content: ' [BATHYPELAGIC]';
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--abyss-violet);
+}
+
+.window-controls {
+    gap: 8px;
+    align-items: center;
+}
+
+/* Кнопки как гидростатические сенсорные жемчужины */
+.win-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #38bdf8 0%, #0c4a6e 60%, #031c2b 100%);
+    border: 1px solid rgba(0, 240, 255, 0.5);
+    box-shadow: inset 1px 1px 2px #fff, 0 2px 6px rgba(0, 0, 0, 0.8);
+    color: #ecfeff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.win-btn:hover {
+    background: radial-gradient(circle at 35% 35%, #a78bfa 0%, #6d28d9 60%, #2e1065 100%);
+    border-color: #c4b5fd;
+    color: #ffffff;
+    transform: scale(1.15);
+    box-shadow: 0 0 14px rgba(167, 139, 250, 0.8);
+}
+
+.win-close:hover {
+    background: radial-gradient(circle at 35% 35%, #f472b6 0%, #be185d 60%, #500724 100%) !important;
+    border-color: #fbcfe8 !important;
+}
+
+/* === 2. PLAYER STAGE: ГЛУБОКОВОДНЫЙ АКВАРИУМ СВЕТЯЩИХСЯ СУЩЕСТВ === */
+.player-stage {
+    gap: 20px;
+    padding: 24px 28px;
+}
+
+/* NOW PLAYING: КАПСУЛА ИЗ ВЫПУКЛОГО ОРГАНИЧЕСКОГО СТЕКЛА */
+.now-playing-container {
+    background: linear-gradient(135deg, rgba(13, 23, 44, 0.82) 0%, rgba(7, 13, 26, 0.92) 100%);
+    border: 1.5px solid rgba(0, 240, 255, 0.35);
+    border-radius: 16px;
+    box-shadow: var(--glass-hull), 0 0 20px rgba(0, 240, 255, 0.12);
+    padding: 24px 28px;
+    position: relative;
+    backdrop-filter: blur(20px);
+}
+
+/* Индикатор гидростатического давления */
+.now-playing-container::before {
+    content: '◈ PELAGIC LAB // SPECIMEN 01: CNIDARIA';
+    position: absolute;
+    top: 6px;
+    right: 24px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--abyss-azure);
+    opacity: 0.8;
+}
+
+/* Оправа обложки: Сферический глубоководный порт с неоновым венчиком */
+.cover-wrapper {
+    width: 96px;
+    height: 96px;
+    min-width: 96px;
+    border-radius: 50%;
+    background: #040914;
+    border: 2px solid var(--abyss-cyan);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.9),
+        0 0 20px rgba(0, 240, 255, 0.5),
+        inset 0 0 15px rgba(139, 92, 246, 0.4);
+    position: relative;
+    padding: 3px;
+    overflow: hidden;
+}
+
+/* Водная преломляющая линза поверх обложки */
+.cover-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, transparent 100%);
+    border-radius: 50px 50px 0 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+#current-track-artwork {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    filter: saturate(135%) contrast(110%) hue-rotate(10deg);
+    transition: transform 0.6s ease;
+}
+
+.now-playing-container:hover #current-track-artwork {
+    transform: scale(1.08) rotate(3deg);
+}
+
+.artwork-glow {
+    filter: blur(60px);
+    opacity: 0.5;
+    background-color: var(--abyss-cyan);
+}
+
+.track-info h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(0, 240, 255, 0.6), 1px 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.track-info p {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--abyss-azure);
+    margin-top: 4px;
+    letter-spacing: 1px;
+}
+
+/* === УПРАВЛЕНИЕ: ГИДРОДИНАМИЧЕСКИЙ ПУЛЬТ УПРАВЛЕНИЯ БАТИСКАФА === */
+#top-controls {
+    background: linear-gradient(135deg, rgba(13, 23, 44, 0.85) 0%, rgba(7, 13, 26, 0.94) 100%);
+    border: 1.5px solid rgba(0, 240, 255, 0.3);
+    border-radius: 14px;
+    box-shadow: var(--glass-hull);
+    padding: 18px 24px;
+    backdrop-filter: blur(18px);
+}
+
+.main-controls {
+    gap: 16px;
+}
+
+#prev-btn, #next-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #132442 0%, #091325 100%);
+    border: 1.5px solid rgba(0, 240, 255, 0.4);
+    box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.2),
+        0 4px 10px rgba(0, 0, 0, 0.8);
+    transition: var(--transition);
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: #1c345f;
+    border-color: var(--abyss-cyan);
+    transform: translateY(-2px);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.6);
+}
+
+#prev-btn::before {
+    border-right: 8px solid var(--abyss-pearl);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+#next-btn::before {
+    border-left: 8px solid var(--abyss-pearl);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+}
+
+/* КНОПКА PLAY: ПУЛЬСИРУЮЩИЙ КУПОЛ МЕДУЗЫ (JELLYFISH BELL) */
+#play-pause-btn {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #67e8f9 0%, #06b6d4 45%, #6366f1 80%, #1e1b4b 100%);
+    border: 2px solid #a5f3fc;
+    box-shadow: 
+        0 0 25px rgba(0, 240, 255, 0.8),
+        0 8px 20px rgba(0, 0, 0, 0.85),
+        inset 0 2px 4px rgba(255, 255, 255, 0.6);
+    animation: jellyfish-propel 6s ease-in-out infinite;
+    transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+#play-pause-btn:hover {
+    transform: scale(1.12) rotate(6deg);
+    box-shadow: 
+        0 0 40px rgba(0, 240, 255, 1),
+        0 0 60px rgba(139, 92, 246, 0.6);
+}
+
+#play-pause-btn::before {
+    background: #020712;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    width: 14px;
+    height: 16px;
+}
+
+#play-pause-btn.is-playing::before {
+    background: #020712;
+    clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+}
+
+/* ПОЛЗУНКИ: СТЕКЛЯННЫЕ ПРИЛИВНЫЕ ШКАЛЫ С НЕОНОВОЙ ЖИДКОСТЬЮ */
+.control-group label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--abyss-azure);
+}
+
+.control-group input[type="range"] {
+    background: #081120;
+    height: 6px;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 3px;
+    box-shadow: inset 0 1px 3px #000;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffffff 0%, #00f0ff 65%, #0284c7 100%);
+    border: 1px solid #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 240, 255, 0.8);
+    cursor: pointer;
+}
+
+.control-input, .eq-band input[type="number"] {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    background: #091325;
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    color: var(--abyss-pearl);
+    border-radius: 4px;
+    box-shadow: inset 0 1px 3px #000;
+}
+
+/* === ВОЛНОВАЯ ФОРМА: ЛЮМИНИСЦЕНТНЫЙ ЭХОЛОТ ГЛУБИННОГО СКАНИРОВАНИЯ === */
+.waveform-container {
+    background: linear-gradient(180deg, #050b16 0%, #0b172d 100%);
+    border: 1.5px solid rgba(0, 240, 255, 0.35);
+    border-radius: 8px;
+    box-shadow: var(--inner-depth-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Сетка гидроакустического эхолота */
+.waveform-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        90deg, 
+        rgba(0, 240, 255, 0.04) 0px, 
+        rgba(0, 240, 255, 0.04) 1px, 
+        transparent 1px, 
+        transparent 24px
+    );
+    pointer-events: none;
+    z-index: 2;
+}
+
+#waveform-canvas {
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.8)) drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
+}
+
+#time-display {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--abyss-azure);
+    letter-spacing: 1px;
+}
+
+/* === ЭКВАЛАЙЗЕР: ГРЕБНЕВИКИ (COMB JELLY) С РАДУЖНЫМИ РЕСНИЧКАМИ === */
+.eq-container-wrapper {
+    background: linear-gradient(135deg, rgba(13, 23, 44, 0.85) 0%, rgba(7, 13, 26, 0.94) 100%);
+    border: 1.5px solid rgba(0, 240, 255, 0.3);
+    border-radius: 14px;
+    box-shadow: var(--glass-hull);
+    padding: 18px 24px;
+    backdrop-filter: blur(18px);
+}
+
+.eq-header-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--abyss-pearl);
+}
+
+.eq-header-label::after {
+    content: ' [PHOTORECEPTOR HARMONICS]';
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--abyss-cyan);
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.eq-band label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--abyss-dim);
+}
+
+.eq-band input[type="range"] {
+    background: #081222;
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 3px;
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 20px;
+    height: 12px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #a5f3fc 0%, #06b6d4 60%, #0369a1 100%);
+    border: 1px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 240, 255, 0.6);
+}
+
+/* === РАЗДЕЛИТЕЛЬ: СТРУНА ПОДВОДНОЙ СВЯЗИ === */
+.resizer-bar {
+    width: 6px;
+    background: #0c1830;
+    border-left: 1px solid rgba(0, 240, 255, 0.3);
+    border-right: 1px solid #030710;
+    transition: var(--transition);
+}
+
+.resizer-bar:hover, .resizer-bar.resizing {
+    background: var(--abyss-cyan);
+    box-shadow: 0 0 16px var(--abyss-cyan);
+}
+
+/* === САЙДБАР: РЕЕСТР ПЕЛАГИЧЕСКИХ ОРГАНИЗМОВ И ЭХОЗАПИСЕЙ === */
+.explorer-sidebar {
+    background: linear-gradient(180deg, rgba(10, 18, 35, 0.96) 0%, rgba(5, 9, 18, 0.98) 100%);
+    border-left: 1.5px solid rgba(0, 240, 255, 0.3);
+    box-shadow: inset 4px 0 24px rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+}
+
+.explorer-header {
+    background: rgba(14, 26, 50, 0.8);
+    border-bottom: 1.5px solid rgba(0, 240, 255, 0.25);
+    padding: 12px 18px;
+}
+
+.explorer-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--abyss-pearl);
+}
+
+.explorer-header button {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    background: #112344;
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    border-radius: 4px;
+    color: var(--abyss-pearl);
+    padding: 4px 10px;
+    transition: var(--transition);
+}
+
+.explorer-header button:hover {
+    background: var(--abyss-cyan);
+    color: #020712;
+    border-color: #ffffff;
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.7);
+}
+
+.folder-group h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(16, 30, 58, 0.6);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 4px;
+    color: var(--text-main);
+    margin: 4px 0;
+    transition: var(--transition);
+}
+
+.folder-group.open h3 {
+    background: rgba(26, 48, 92, 0.7);
+    color: var(--abyss-cyan);
+    border-color: var(--abyss-cyan);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+}
+
+.track-item {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-radius: 4px;
+    padding: 6px 12px;
+    transition: var(--transition);
+}
+
+.track-item:hover {
+    background: rgba(0, 240, 255, 0.12);
+    color: #ffffff;
+    transform: translateX(4px);
+}
+
+/* Воспроизводимый трек словно светящееся тело медузы */
+.track-item.playing {
+    background: linear-gradient(90deg, rgba(0, 240, 255, 0.25) 0%, transparent 100%) !important;
+    border-left: 3px solid var(--abyss-cyan) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+}
+
+/* === 3. BOTTOM STATUS BAR: ПАНЕЛЬ БАТИМЕТРИЧЕСКОЙ ТЕЛЕМЕТРИИ === */
+.status-bar {
+    height: 34px;
+    background: linear-gradient(180deg, rgba(11, 20, 38, 0.96) 0%, rgba(5, 10, 20, 0.98) 100%);
+    border-top: 1.5px solid rgba(0, 240, 255, 0.3);
+    padding: 0 14px;
+}
+
+.status-btn {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--abyss-pearl);
+    background: rgba(18, 34, 65, 0.6);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 4px;
+    padding: 2px 10px;
+}
+
+.status-btn:hover {
+    background: var(--abyss-cyan);
+    color: #020712;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+}
+
+.status-btn.saved {
+    background: #064e3b;
+    color: #6ee7b7;
+    border-color: #10b981;
+}
+
+.status-search input {
+    background: #07101e;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 4px;
+    color: var(--abyss-pearl);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    padding: 3px 10px;
+}
+
+.status-search input:focus {
+    border-color: var(--abyss-cyan);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+}
+
+.status-tag {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--abyss-cyan);
+}
+
+/* === 4. МОДАЛЬНОЕ ОКНО: ГИДРОИЗОЛИРОВАННЫЙ ШЛЮЗОВЫЙ КЕЙС === */
+.modal-content {
+    background: linear-gradient(135deg, rgba(13, 24, 46, 0.98) 0%, rgba(6, 12, 24, 0.99) 100%);
+    border: 2px solid var(--abyss-cyan);
+    border-radius: 14px;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.95),
+        0 0 35px rgba(0, 240, 255, 0.35);
+    padding: 24px;
+}
+
+.modal-header {
+    border-bottom: 1.5px solid rgba(0, 240, 255, 0.3);
+    padding-bottom: 12px;
+}
+
+.modal-header h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--abyss-pearl);
+    letter-spacing: 1px;
+}
+
+#close-rpc-modal, #close-url-modal {
+    background: #102140;
+    border: 1px solid var(--abyss-cyan);
+    color: var(--abyss-pearl);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+}
+
+#close-rpc-modal:hover, #close-url-modal:hover {
+    background: #be185d;
+    color: #fff;
+    border-color: #f472b6;
+}
+
+.modal-body label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--abyss-azure);
+}
+
+.modal-body input {
+    background: #07101e;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 4px;
+    color: var(--abyss-pearl);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+}
+
+.modal-actions button {
+    background: #112242;
+    border: 1.5px solid var(--abyss-cyan);
+    border-radius: 4px;
+    color: var(--abyss-pearl);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.modal-actions button:hover {
+    background: var(--abyss-cyan);
+    color: #020712;
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.7);
+}

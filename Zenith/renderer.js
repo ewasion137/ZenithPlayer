@@ -834,7 +834,11 @@ document.addEventListener('DOMContentLoaded', () => {
         'hyprland.css',
         'winxp.css',
         'dreamcore.css',
-        'fogcore.css'
+        'fogcore.css',
+        'claymorphism.css',
+        'botanical.css',
+        'lofi.css',
+        'bioluminescence.css'
     ];
 
     function applyTheme(themeName) {
