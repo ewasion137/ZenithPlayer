@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
+    if (window.ThemeFX) window.ThemeFX.setAudioContext(analyser, dataArray);
     const eqFrequencies = [60, 170, 350, 1000, 3500, 10000, 14000];
     const eqFilters = eqFrequencies.map(freq => {
         const filter = audioContext.createBiquadFilter();
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })(currentSource.stop);
 
         currentSource.start(0, offsetSeconds);
-
+        if (window.ThemeFX) window.ThemeFX.setPlayingState(true);
         isPlaying = true;
         playbackStartedAtCtx = audioContext.currentTime - offsetSeconds / currentSource.playbackRate.value;
 
@@ -274,6 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         isPlaying = false;
         stopRenderLoop();
+        if (window.ThemeFX) window.ThemeFX.setPlayingState(false);
     }
 
     async function loadAndPlayTrack(trackPath, trackElement) {
@@ -687,6 +688,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 spectrogramCtx.clearRect(0, 0, specCanvasW * dpr, specCanvasH * dpr);
             }
         }
+        
+        // ВЫРУБАЕМ/ВКЛЮЧАЕМ ВСЕ JS-ЭФФЕКТЫ ТЕМ:
+        if (window.ThemeFX) {
+            window.ThemeFX.setEnabled(visualsEnabled);
+        }
+
         if (currentTrackBuffer) renderWaveform();
     });
 
@@ -847,6 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             themeLink.href = `styles/themes/${themeName}`;
         }
+        if (window.ThemeFX) window.ThemeFX.applyThemeFX(themeName);
         setTimeout(() => {
             updateThemeCache();
             if (currentTrackBuffer) renderWaveform();
