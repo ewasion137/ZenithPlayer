@@ -845,7 +845,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'claymorphism.css',
         'botanical.css',
         'lofi.css',
-        'bioluminescence.css'
+        'bioluminescence.css',
+        'night-shift.css'
     ];
 
     function applyTheme(themeName) {

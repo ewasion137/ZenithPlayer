@@ -152,6 +152,9 @@ class ThemeFXEngine {
             case 'bioluminescence.css':
                 this.initBioluminescence();
                 break;
+            case 'nightshift.css':
+                this.initNightShift();
+                break;
             default:
                 break;
         }
@@ -632,9 +635,9 @@ class ThemeFXEngine {
                     const tx = (t / 2.5) * (j.r * 0.7);
                     ctx.moveTo(tx, 0);
                     ctx.quadraticCurveTo(
-                        tx + Math.sin(j.phase + t) * 8, 
-                        j.r * 0.8, 
-                        tx + Math.sin(j.phase + t * 0.5) * 12, 
+                        tx + Math.sin(j.phase + t) * 8,
+                        j.r * 0.8,
+                        tx + Math.sin(j.phase + t * 0.5) * 12,
                         j.r * 1.6
                     );
                     ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
@@ -647,6 +650,166 @@ class ThemeFXEngine {
             animId = requestAnimationFrame(loop);
         };
         loop();
+
+        // =========================================================================
+        // 9. NIGHT SHIFT 1987 (SURVEILLANCE, FLASHLIGHT & POWER/CLOCK HUD)
+        // =========================================================================
+        initNightShift() {
+            // 1. Создаем Canvas для луча фонарика, видеопомех и глаз в темноте
+            const canvas = document.createElement('canvas');
+            canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:95;';
+            this.container.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+
+            let w = canvas.width = window.innerWidth;
+            let h = canvas.height = window.innerHeight;
+            const resize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
+            window.addEventListener('resize', resize);
+
+            // Координаты мыши (луч фонарика)
+            let mouse = { x: w * 0.5, y: h * 0.5, targetX: w * 0.5, targetY: h * 0.5 };
+            const onMouseMove = (e) => { mouse.targetX = e.clientX; mouse.targetY = e.clientY; };
+            window.addEventListener('mousemove', onMouseMove);
+
+            // 2. Создаем аутентичный HUD охранника: Часы (12 AM - 6 AM) и батарея
+            const hud = document.createElement('div');
+            hud.id = 'nightshift-hud';
+            hud.style.cssText = `
+            position: fixed; top: 48px; right: 26px; z-index: 1000; pointer-events: none;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+            font-family: 'VT323', monospace; color: #25d366; text-shadow: 0 0 6px #25d366;
+        `;
+            hud.innerHTML = `
+            <div id="shift-clock" style="font-size: 32px; letter-spacing: 2px;">12 AM</div>
+            <div style="display: flex; align-items: center; gap: 8px; font-family: 'Share Tech Mono', monospace; font-size: 11px;">
+                <span>POWER LEFT:</span>
+                <span id="shift-power" style="color: #25d366; font-weight: bold;">99%</span>
+            </div>
+            <div id="shift-usage" style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #e67e22;">
+                USAGE: <span style="color:#25d366">■</span><span>■</span><span>□</span><span>□</span>
+            </div>
+        `;
+            document.body.appendChild(hud);
+
+            const clockEl = document.getElementById('shift-clock');
+            const powerEl = document.getElementById('shift-power');
+            const usageEl = document.getElementById('shift-usage');
+
+            // Призрачные механические огоньки глаз в дальних углах
+            const eyes = [
+                { x: w * 0.08, y: h * 0.88, alpha: 0, targetAlpha: 0.6, nextTwitch: 200 },
+                { x: w * 0.42, y: h * 0.09, alpha: 0, targetAlpha: 0, nextTwitch: 450 }
+            ];
+
+            let animId;
+            let glitchCounter = 0;
+
+            const loop = () => {
+                if (!this.enabled) return;
+                ctx.clearRect(0, 0, w, h);
+
+                // Плавное следование луча фонарика за мышью
+                mouse.x += (mouse.targetX - mouse.x) * 0.15;
+                mouse.y += (mouse.targetY - mouse.y) * 0.15;
+
+                const bass = this.getBassEnergy();
+
+                // --- А) ЛУЧ ТАКТИЧЕСКОГО ФОНАРИКА В ТЕМНОТЕ ---
+                const beamRadius = 140 + Math.sin(Date.now() * 0.005) * 8;
+                const darkMask = ctx.createRadialGradient(mouse.x, mouse.y, 25, mouse.x, mouse.y, beamRadius);
+                darkMask.addColorStop(0, 'rgba(230, 255, 235, 0.06)');
+                darkMask.addColorStop(0.6, 'rgba(37, 211, 102, 0.025)');
+                darkMask.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+                ctx.save();
+                ctx.fillStyle = darkMask;
+                ctx.fillRect(0, 0, w, h);
+                ctx.restore();
+
+                // --- Б) БЕЛЫЙ ШУМ И СТАТИКА КАМЕР ПРИ УДАРЕ БАСА ---
+                if (bass > 0.65 || glitchCounter > 0) {
+                    if (bass > 0.65) glitchCounter = 4;
+                    glitchCounter--;
+
+                    ctx.save();
+                    ctx.fillStyle = `rgba(37, 211, 102, ${0.12 + Math.random() * 0.18})`;
+                    for (let i = 0; i < 18; i++) {
+                        const lineY = Math.random() * h;
+                        const lineH = 1 + Math.random() * 4;
+                        ctx.fillRect(0, lineY, w, lineH);
+                    }
+                    ctx.restore();
+                }
+
+                // --- В) МЕРЦАЮЩИЕ ГЛАЗА АНИМАТРОНИКА В ТЕНИ ---
+                for (const eye of eyes) {
+                    // Если рядом фонарик или грохочет бас — глаза прячутся
+                    const distToLight = Math.hypot(eye.x - mouse.x, eye.y - mouse.y);
+                    const isHidden = distToLight < beamRadius || bass > 0.5;
+
+                    eye.alpha += ((isHidden ? 0 : eye.targetAlpha) - eye.alpha) * 0.05;
+
+                    if (Math.random() < 0.01) {
+                        eye.targetAlpha = eye.targetAlpha > 0 ? 0 : 0.75;
+                    }
+
+                    if (eye.alpha > 0.03) {
+                        ctx.save();
+                        ctx.fillStyle = `rgba(255, 255, 255, ${eye.alpha})`;
+                        ctx.shadowColor = '#25d366';
+                        ctx.shadowBlur = 8;
+                        // Два маленьких круглых зрачка
+                        ctx.beginPath();
+                        ctx.arc(eye.x - 7, eye.y, 2.5, 0, Math.PI * 2);
+                        ctx.arc(eye.x + 7, eye.y, 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                }
+
+                // --- Г) СИНХРОНИЗАЦИЯ ЧАСОВ 12 AM -> 6 AM ПО ХОДУ ТРЕКА ---
+                const progressSlider = document.getElementById('progress-slider');
+                if (progressSlider && clockEl) {
+                    const pct = Number(progressSlider.value || 0) / 1000;
+                    let hour = 12;
+                    if (pct < 0.16) hour = '12 AM';
+                    else if (pct < 0.33) hour = '1 AM';
+                    else if (pct < 0.50) hour = '2 AM';
+                    else if (pct < 0.67) hour = '3 AM';
+                    else if (pct < 0.83) hour = '4 AM';
+                    else if (pct < 0.98) hour = '5 AM';
+                    else hour = '6 AM 🔔';
+
+                    clockEl.textContent = hour;
+                    if (hour === '6 AM 🔔') {
+                        clockEl.style.color = '#ffff00';
+                        clockEl.style.textShadow = '0 0 15px #ffff00';
+                    } else {
+                        clockEl.style.color = '#25d366';
+                        clockEl.style.textShadow = '0 0 6px #25d366';
+                    }
+
+                    // Расход батареи от 99% до 5%
+                    const remainingPower = Math.max(1, Math.round(99 - pct * 94));
+                    if (powerEl) {
+                        powerEl.textContent = `${remainingPower}%`;
+                        powerEl.style.color = remainingPower < 20 ? '#ff1a1a' : (remainingPower < 50 ? '#e67e22' : '#25d366');
+                    }
+                }
+
+                animId = requestAnimationFrame(loop);
+            };
+            loop();
+
+            // Очистка при смене темы или GFX: OFF
+            this.cleanupFn = () => {
+                cancelAnimationFrame(animId);
+                window.removeEventListener('resize', resize);
+                window.removeEventListener('mousemove', onMouseMove);
+                canvas.remove();
+                if (hud.parentNode) hud.remove();
+            };
+        }
 
         this.cleanupFn = () => {
             cancelAnimationFrame(animId);
