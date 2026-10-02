@@ -1017,9 +1017,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalBars = waveformPeaks.length;
         const gap = 2;
-        const barWidth = (waveCanvasW - (totalBars - 1) * gap) / totalBars;
+        const barWidth = Math.max(1, (waveCanvasW - (totalBars - 1) * gap) / totalBars);
         const progress = currentTrackBuffer ? (getCurrentTime() / currentTrackBuffer.duration) : 0;
         const progressX = progress * waveCanvasW;
+
+        // === 1. МЯГКИЙ НЕОНОВЫЙ ШЛЕЙФ-ЗАЛИВКА (AREA GLOW) ДО КУРСОРА ===
+        if (progressX > 0 && visualsEnabled) {
+            waveformCtx.save();
+            waveformCtx.beginPath();
+            
+            // Верхняя огибающая волны
+            waveformCtx.moveTo(0, waveCanvasH / 2);
+            for (let i = 0; i < totalBars; i++) {
+                const x = i * (barWidth + gap);
+                if (x > progressX) break;
+                const barH = waveformPeaks[i] * (waveCanvasH - 8);
+                const y = (waveCanvasH - barH) / 2;
+                waveformCtx.lineTo(x + barWidth / 2, y);
+            }
+            waveformCtx.lineTo(progressX, waveCanvasH / 2);
+
+            // Нижняя огибающая (зеркально)
+            for (let i = totalBars - 1; i >= 0; i--) {
+                const x = i * (barWidth + gap);
+                if (x > progressX) continue;
+                const barH = waveformPeaks[i] * (waveCanvasH - 8);
+                const y = (waveCanvasH + barH) / 2;
+                waveformCtx.lineTo(x + barWidth / 2, y);
+            }
+            waveformCtx.closePath();
+
+            // Заливаем пройденную площадь сочным градиентом темы
+            const areaGrad = waveformCtx.createLinearGradient(0, 0, progressX, 0);
+            areaGrad.addColorStop(0, cachedAccent);
+            areaGrad.addColorStop(1, cachedAccentSec);
+            waveformCtx.fillStyle = areaGrad;
+            waveformCtx.globalAlpha = 0.28; // Прозрачность световой заливки
+            waveformCtx.fill();
+            waveformCtx.restore();
+        }
+
+        // === 2. СТОЛБИКИ С ГРАДИЕНТОМ И ПЛАВНЫМ СРЕЗОМ ===
+        const barGrad = waveformCtx.createLinearGradient(0, 0, waveCanvasW, 0);
+        barGrad.addColorStop(0, cachedAccent);
+        barGrad.addColorStop(1, cachedAccentSec);
 
         for (let i = 0; i < totalBars; i++) {
             const x = i * (barWidth + gap);
@@ -1027,25 +1068,43 @@ document.addEventListener('DOMContentLoaded', () => {
             const y = (waveCanvasH - barH) / 2;
 
             if (x + barWidth <= progressX) {
-                waveformCtx.fillStyle = cachedAccent;
-                waveformCtx.globalAlpha = 0.9;
-            } else {
-                waveformCtx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-                waveformCtx.globalAlpha = 0.5;
-            }
+                // Пройденные столбики (сочные, цветные)
+                waveformCtx.fillStyle = barGrad;
+                waveformCtx.globalAlpha = 0.95;
+                waveformCtx.fillRect(x, y, barWidth, barH);
+            } else if (x < progressX) {
+                // Столбик, на котором прямо сейчас стоит линия (ровный срез без рывков)
+                const playedPart = progressX - x;
+                waveformCtx.fillStyle = barGrad;
+                waveformCtx.globalAlpha = 0.95;
+                waveformCtx.fillRect(x, y, playedPart, barH);
 
-            waveformCtx.fillRect(x, y, Math.max(1, barWidth), barH);
+                waveformCtx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                waveformCtx.globalAlpha = 0.4;
+                waveformCtx.fillRect(progressX, y, barWidth - playedPart, barH);
+            } else {
+                // Еще не сыгранные столбики (приглушенные)
+                waveformCtx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                waveformCtx.globalAlpha = 0.35;
+                waveformCtx.fillRect(x, y, barWidth, barH);
+            }
         }
 
-        // Белая линия курсора
-        if (currentTrackBuffer) {
+        // === 3. ЛАЗЕРНАЯ ЛИНИЯ-КУРСОР СО СВЕЧЕНИЕМ ===
+        if (currentTrackBuffer && progressX > 0) {
+            waveformCtx.save();
             waveformCtx.fillStyle = '#ffffff';
             waveformCtx.globalAlpha = 1.0;
             if (visualsEnabled) {
-                waveformCtx.shadowColor = cachedAccent;
-                waveformCtx.shadowBlur = 8;
+                waveformCtx.shadowColor = cachedAccentSec;
+                waveformCtx.shadowBlur = 10;
             }
             waveformCtx.fillRect(progressX - 1, 0, 2, waveCanvasH);
+
+            // Неоновый индикаторный бегунок по центру линии
+            waveformCtx.fillStyle = cachedAccent;
+            waveformCtx.fillRect(progressX - 2, (waveCanvasH - 14) / 2, 4, 14);
+            waveformCtx.restore();
         }
 
         waveformCtx.restore();
