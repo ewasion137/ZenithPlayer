@@ -1,8 +1,3 @@
-/**
- * ZENITH PLAYER — THEME EFFECTS & INTERACTIVE WIDGETS ENGINE (theme-fx.js)
- * High-performance engine with TRUE 0% GPU freeze on GFX: OFF / low-gfx mode.
- */
-
 class ThemeFXEngine {
     constructor() {
         this.currentTheme = null;
@@ -18,27 +13,23 @@ class ThemeFXEngine {
     }
 
     init() {
-        // Создаем корневой слой эффектов
         this.container = document.createElement('div');
         this.container.id = 'theme-fx-layer';
         this.container.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:90;overflow:hidden;';
         document.body.appendChild(this.container);
 
-        // 1. Слушаем смену темы в <link id="theme-link">
         const themeLink = document.getElementById('theme-link');
         if (themeLink) {
             const themeObserver = new MutationObserver(() => this.detectTheme());
             themeObserver.observe(themeLink, { attributes: true, attributeFilter: ['href'] });
         }
 
-        // 2. АВТО-ДЕТЕКЦИЯ РЕЖИМА LOW-GFX (GFX: OFF)
         const gfxObserver = new MutationObserver(() => {
             const isLowGfx = document.body.classList.contains('low-gfx');
             this.setEnabled(!isLowGfx);
         });
         gfxObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-        // 3. Засыпание при сворачивании окна (экономия батареи и GPU)
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 this.pauseLoops();
@@ -47,7 +38,6 @@ class ThemeFXEngine {
             }
         });
 
-        // Проверяем начальное состояние
         if (document.body.classList.contains('low-gfx')) {
             this.enabled = false;
             this.container.style.display = 'none';
@@ -61,12 +51,10 @@ class ThemeFXEngine {
         this.enabled = enabled;
 
         if (!this.enabled) {
-            // Мгновенный сброс: вырубаем всё
             this.pauseLoops();
             this.container.style.display = 'none';
             this.container.innerHTML = '';
         } else {
-            // Включаем обратно
             this.container.style.display = 'block';
             this.resumeLoops();
         }
@@ -125,44 +113,29 @@ class ThemeFXEngine {
         this.pauseLoops();
         this.container.innerHTML = '';
 
-        if (!this.enabled) return; // При GFX: OFF ничего не инициализируем
+        if (!this.enabled) return;
 
         switch (themeName) {
             case 'frutigeraero.css':
                 this.initFrutigerAero();
                 break;
-            case 'kocmocunleashed.css':
-                this.initKocmocUnleashed();
-                break;
-            case 'aqua-osx.css':
-                this.initAquaOSX();
-                break;
-            case 'hyprland.css':
-                this.initHyprland();
+            case 'y2k-futurism.css':
+                this.initY2K();
                 break;
             case 'dreamcore.css':
                 this.initDreamcore();
                 break;
-            case 'fogcore.css':
-                this.initFogcore();
-                break;
             case 'lofi.css':
                 this.initLofi();
                 break;
-            case 'bioluminescence.css':
-                this.initBioluminescence();
-                break;
-            case 'nightshift.css':
-                this.initNightShift();
+            case 'kinetic.css':
+                this.initKinetic();
                 break;
             default:
                 break;
         }
     }
 
-    // =========================================================================
-    // 1. FRUTIGER AERO
-    // =========================================================================
     initFrutigerAero() {
         const canvas = document.createElement('canvas');
         canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:auto;cursor:default;';
@@ -175,33 +148,20 @@ class ThemeFXEngine {
         window.addEventListener('resize', resize);
 
         const bubbles = [];
-        for (let i = 0; i < 26; i++) {
+        for (let i = 0; i < 16; i++) {
             bubbles.push({
                 x: Math.random() * w,
                 y: h + Math.random() * h,
-                r: 10 + Math.random() * 26,
-                vy: 0.6 + Math.random() * 1.4,
+                r: 8 + Math.random() * 16,
+                vy: 0.7 + Math.random() * 1.2,
                 wobble: Math.random() * Math.PI * 2,
-                wobbleSpeed: 0.02 + Math.random() * 0.03
+                wobbleSpeed: 0.02 + Math.random() * 0.02
             });
         }
 
         let mouse = { x: -1000, y: -1000 };
         const onMouseMove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
-        const onClick = (e) => {
-            for (let i = 0; i < bubbles.length; i++) {
-                const b = bubbles[i];
-                const dx = e.clientX - b.x;
-                const dy = e.clientY - b.y;
-                if (Math.sqrt(dx * dx + dy * dy) < b.r + 10) {
-                    b.y = h + 20;
-                    b.x = Math.random() * w;
-                    break;
-                }
-            }
-        };
         window.addEventListener('mousemove', onMouseMove);
-        canvas.addEventListener('click', onClick);
 
         let animId;
         const loop = () => {
@@ -210,21 +170,12 @@ class ThemeFXEngine {
             const bass = this.getBassEnergy();
 
             for (const b of bubbles) {
-                b.y -= b.vy * (1 + bass * 1.8);
+                b.y -= b.vy * (1 + bass * 1.5);
                 b.wobble += b.wobbleSpeed;
-                b.x += Math.sin(b.wobble) * 0.8;
-
-                const dx = b.x - mouse.x;
-                const dy = b.y - mouse.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 80) {
-                    const force = (80 - dist) / 80;
-                    b.x += (dx / dist) * force * 5;
-                    b.y += (dy / dist) * force * 5;
-                }
+                b.x += Math.sin(b.wobble) * 0.6;
 
                 if (b.y + b.r < 0) {
-                    b.y = h + b.r + Math.random() * 100;
+                    b.y = h + b.r + Math.random() * 50;
                     b.x = Math.random() * w;
                 }
 
@@ -233,21 +184,15 @@ class ThemeFXEngine {
                 ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
 
                 const grad = ctx.createRadialGradient(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.1, b.x, b.y, b.r);
-                grad.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
-                grad.addColorStop(0.4, 'rgba(0, 210, 255, 0.25)');
-                grad.addColorStop(0.8, 'rgba(56, 239, 125, 0.2)');
-                grad.addColorStop(1, 'rgba(0, 114, 255, 0.45)');
+                grad.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+                grad.addColorStop(0.5, 'rgba(0, 210, 255, 0.2)');
+                grad.addColorStop(1, 'rgba(56, 239, 125, 0.3)');
                 ctx.fillStyle = grad;
                 ctx.fill();
 
-                ctx.lineWidth = 1.5;
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
                 ctx.stroke();
-
-                ctx.beginPath();
-                ctx.ellipse(b.x - b.r * 0.35, b.y - b.r * 0.35, b.r * 0.35, b.r * 0.2, -Math.PI / 4, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-                ctx.fill();
                 ctx.restore();
             }
             animId = requestAnimationFrame(loop);
@@ -258,17 +203,41 @@ class ThemeFXEngine {
             cancelAnimationFrame(animId);
             window.removeEventListener('resize', resize);
             window.removeEventListener('mousemove', onMouseMove);
-            canvas.removeEventListener('click', onClick);
             canvas.remove();
         };
     }
 
-    // =========================================================================
-    // 2. KOCMOC UNLEASHED
-    // =========================================================================
-    initKocmocUnleashed() {
+    initY2K() {
+        const cover = document.querySelector('.cover-wrapper');
+        if (!cover) return;
+
+        let animId;
+        let angle = 0;
+        const loop = () => {
+            if (!this.enabled) return;
+            if (this.audioData.isPlaying) {
+                const bass = this.getBassEnergy();
+                angle = (angle + 1.2 + bass * 3) % 360;
+                cover.style.transform = `rotate(${angle}deg)`;
+            }
+            animId = requestAnimationFrame(loop);
+        };
+        loop();
+
+        this.cleanupFn = () => {
+            cancelAnimationFrame(animId);
+            if (cover) cover.style.transform = 'none';
+        };
+    }
+
+    // Kinetic Centered Monochrome Engine
+    initKinetic() {
+        const coverWrapper = document.querySelector('.cover-wrapper');
+        const island = document.querySelector('.now-playing-container');
+        const playBtn = document.getElementById('play-pause-btn');
+
         const canvas = document.createElement('canvas');
-        canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+        canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:95;';
         this.container.appendChild(canvas);
         const ctx = canvas.getContext('2d');
 
@@ -277,56 +246,60 @@ class ThemeFXEngine {
         const resize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
         window.addEventListener('resize', resize);
 
-        const getHoleCenter = () => {
-            const cover = document.querySelector('.cover-wrapper');
-            if (cover) {
-                const rect = cover.getBoundingClientRect();
-                return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-            }
-            return { x: w * 0.25, y: h * 0.25 };
-        };
-
-        const particles = [];
-        for (let i = 0; i < 80; i++) {
-            particles.push({
-                angle: Math.random() * Math.PI * 2,
-                dist: 60 + Math.random() * 320,
-                speed: 0.015 + Math.random() * 0.03,
-                size: 1 + Math.random() * 2.5
+        const ripples = [];
+        const onPointerDown = (e) => {
+            if (!this.enabled) return;
+            ripples.push({
+                x: e.clientX,
+                y: e.clientY,
+                r: 4,
+                maxR: 90,
+                alpha: 0.25
             });
-        }
+        };
+        window.addEventListener('pointerdown', onPointerDown);
 
+        let currentScale = 1;
         let animId;
+
         const loop = () => {
             if (!this.enabled) return;
             ctx.clearRect(0, 0, w, h);
-            const center = getHoleCenter();
+
             const bass = this.getBassEnergy();
+            const targetScale = this.audioData.isPlaying ? 1 + bass * 0.045 : 1;
+            currentScale += (targetScale - currentScale) * 0.14;
 
-            if (bass > 0.6) {
+            if (coverWrapper) {
+                coverWrapper.style.transform = `scale(${currentScale.toFixed(4)})`;
+            }
+
+            if (island && this.audioData.isPlaying) {
+                const islandScale = 1 + (currentScale - 1) * 0.25;
+                island.style.transform = `scale(${islandScale.toFixed(4)})`;
+            } else if (island) {
+                island.style.transform = 'scale(1)';
+            }
+
+            if (playBtn && this.audioData.isPlaying) {
+                const btnScale = 1 + (currentScale - 1) * 0.8;
+                playBtn.style.transform = `scale(${btnScale.toFixed(4)})`;
+            }
+
+            for (let i = ripples.length - 1; i >= 0; i--) {
+                const r = ripples[i];
+                r.r += (r.maxR - r.r) * 0.12;
+                r.alpha *= 0.9;
+
                 ctx.beginPath();
-                ctx.arc(center.x, center.y, 45 + bass * 55, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(255, 255, 255, ${bass * 0.5})`;
-                ctx.lineWidth = 2;
+                ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(255, 255, 255, ${r.alpha})`;
+                ctx.lineWidth = 1;
                 ctx.stroke();
+
+                if (r.alpha < 0.005) ripples.splice(i, 1);
             }
 
-            for (const p of particles) {
-                p.angle += p.speed * (1 + bass * 2.5);
-                p.dist -= 0.45 * (1 + bass);
-
-                if (p.dist < 28) {
-                    p.dist = 220 + Math.random() * 150;
-                    p.angle = Math.random() * Math.PI * 2;
-                }
-
-                const px = center.x + Math.cos(p.angle) * p.dist;
-                const py = center.y + Math.sin(p.angle) * (p.dist * 0.5);
-
-                const alpha = Math.min(1, (p.dist - 28) / 80);
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.fillRect(px, py, p.size, p.size);
-            }
             animId = requestAnimationFrame(loop);
         };
         loop();
@@ -334,217 +307,44 @@ class ThemeFXEngine {
         this.cleanupFn = () => {
             cancelAnimationFrame(animId);
             window.removeEventListener('resize', resize);
+            window.removeEventListener('pointerdown', onPointerDown);
             canvas.remove();
+            if (coverWrapper) coverWrapper.style.transform = 'none';
+            if (island) island.style.transform = 'none';
+            if (playBtn) playBtn.style.transform = 'none';
         };
     }
 
-    // =========================================================================
-    // 3. AQUA OS X
-    // =========================================================================
-    initAquaOSX() {
-        const controls = document.getElementById('top-controls');
-        if (!controls) return;
-
-        const qtDisplay = document.createElement('div');
-        qtDisplay.id = 'qt7-hud-display';
-        qtDisplay.style.cssText = `
-            display: flex; align-items: center; justify-content: space-between;
-            background: #000; border: 1px solid #5a5d66; border-radius: 4px;
-            padding: 3px 10px; margin-top: 6px; font-family: 'JetBrains Mono', monospace;
-            font-size: 10px; color: #4da2ff; box-shadow: inset 0 1px 4px #000;
-        `;
-        qtDisplay.innerHTML = `
-            <span>QT7 // PRO</span>
-            <span id="qt7-level-bar" style="letter-spacing: 2px; color: #2779f5;">[■■■■■□□□□□]</span>
-            <span id="qt7-fps">44.1 kHz • STEREO</span>
-        `;
-        controls.appendChild(qtDisplay);
-
-        let animId;
-        const levelBar = document.getElementById('qt7-level-bar');
-        const loop = () => {
-            if (!this.enabled) return;
-            if (levelBar) {
-                const bass = this.getBassEnergy();
-                const total = 10;
-                const filled = Math.min(total, Math.round(bass * 14));
-                levelBar.textContent = '[' + '■'.repeat(filled) + '□'.repeat(total - filled) + ']';
-                levelBar.style.color = filled > 7 ? '#ff3b30' : (filled > 4 ? '#ffd666' : '#2779f5');
-            }
-            animId = requestAnimationFrame(loop);
-        };
-        loop();
-
-        this.cleanupFn = () => {
-            cancelAnimationFrame(animId);
-            if (qtDisplay.parentNode) qtDisplay.remove();
-        };
-    }
-
-    // =========================================================================
-    // 4. HYPRLAND
-    // =========================================================================
-    initHyprland() {
-        const titleText = document.querySelector('.title-text');
-        if (!titleText) return;
-
-        const cavaSpan = document.createElement('span');
-        cavaSpan.id = 'hypr-cava';
-        cavaSpan.style.cssText = 'color: #cba6f7; margin-left: 14px; font-family: monospace; font-size: 12px;';
-        titleText.appendChild(cavaSpan);
-
-        const bars = [' ', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
-        let animId;
-
-        const loop = () => {
-            if (!this.enabled) return;
-            if (this.audioData.analyser && this.audioData.dataArray) {
-                this.audioData.analyser.getByteFrequencyData(this.audioData.dataArray);
-                let out = '';
-                for (let i = 0; i < 12; i++) {
-                    const idx = Math.floor(i * (this.audioData.analyser.frequencyBinCount / 16));
-                    const val = (this.audioData.dataArray[idx] || 0) / 255;
-                    const bIdx = Math.min(7, Math.floor(val * 8));
-                    out += bars[bIdx];
-                }
-                cavaSpan.textContent = `| ${out} |`;
-            } else {
-                cavaSpan.textContent = '|            |';
-            }
-            animId = requestAnimationFrame(loop);
-        };
-        loop();
-
-        this.cleanupFn = () => {
-            cancelAnimationFrame(animId);
-            cavaSpan.remove();
-        };
-    }
-
-    // =========================================================================
-    // 5. DREAMCORE
-    // =========================================================================
     initDreamcore() {
         const eyeWrapper = document.createElement('div');
-        eyeWrapper.style.cssText = `
-            position: absolute; top: 12px; right: 28px; width: 64px; height: 32px;
-            display: flex; gap: 8px; pointer-events: none; z-index: 1000;
-        `;
+        eyeWrapper.style.cssText = 'position:fixed;top:10px;right:24px;width:30px;height:30px;pointer-events:none;z-index:100;';
 
-        const createEye = () => {
-            const eye = document.createElement('div');
-            eye.style.cssText = `
-                width: 26px; height: 26px; border-radius: 50%; background: #ffffff;
-                border: 2px solid #ffd1dc; box-shadow: 0 0 10px #ffd1dc; position: relative;
-                overflow: hidden; display: flex; align-items: center; justify-content: center;
-            `;
-            const pupil = document.createElement('div');
-            pupil.style.cssText = `
-                width: 10px; height: 10px; border-radius: 50%; background: #1a1622;
-                box-shadow: 0 0 6px #ffd1dc; position: absolute;
-            `;
-            eye.appendChild(pupil);
-            return { eye, pupil };
-        };
+        const eye = document.createElement('div');
+        eye.style.cssText = 'width:24px;height:24px;border-radius:50%;background:#ffffff;border:1.5px solid #ffd1dc;box-shadow:0 0 8px #ffd1dc;position:relative;overflow:hidden;';
 
-        const eye1 = createEye();
-        const eye2 = createEye();
-        eyeWrapper.append(eye1.eye, eye2.eye);
+        const pupil = document.createElement('div');
+        pupil.style.cssText = 'width:8px;height:8px;border-radius:50%;background:#140e1c;position:absolute;top:7px;left:7px;';
+
+        eye.appendChild(pupil);
+        eyeWrapper.appendChild(eye);
         this.container.appendChild(eyeWrapper);
 
         const onMouseMove = (e) => {
             if (!this.enabled) return;
-            [eye1, eye2].forEach(item => {
-                const rect = item.eye.getBoundingClientRect();
-                const ex = rect.left + rect.width / 2;
-                const ey = rect.top + rect.height / 2;
-                const angle = Math.atan2(e.clientY - ey, e.clientX - ex);
-                item.pupil.style.transform = `translate(${Math.cos(angle) * 5}px, ${Math.sin(angle) * 5}px)`;
-            });
+            const rect = eye.getBoundingClientRect();
+            const ex = rect.left + rect.width / 2;
+            const ey = rect.top + rect.height / 2;
+            const angle = Math.atan2(e.clientY - ey, e.clientX - ex);
+            pupil.style.transform = `translate(${Math.cos(angle) * 4}px, ${Math.sin(angle) * 4}px)`;
         };
         window.addEventListener('mousemove', onMouseMove);
 
-        let blinkInterval = setInterval(() => {
-            if (!this.enabled) return;
-            eye1.eye.style.transform = 'scaleY(0.1)';
-            eye2.eye.style.transform = 'scaleY(0.1)';
-            setTimeout(() => {
-                eye1.eye.style.transform = 'scaleY(1)';
-                eye2.eye.style.transform = 'scaleY(1)';
-            }, 140);
-        }, 4200);
-
         this.cleanupFn = () => {
-            clearInterval(blinkInterval);
             window.removeEventListener('mousemove', onMouseMove);
             eyeWrapper.remove();
         };
     }
 
-    // =========================================================================
-    // 6. FOGCORE
-    // =========================================================================
-    initFogcore() {
-        const canvas = document.createElement('canvas');
-        canvas.style.cssText = `
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: auto; z-index: 80; opacity: 0.88;
-        `;
-        this.container.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
-
-        let w = canvas.width = window.innerWidth;
-        let h = canvas.height = window.innerHeight;
-        const resize = () => {
-            w = canvas.width = window.innerWidth;
-            h = canvas.height = window.innerHeight;
-            fillFog();
-        };
-
-        const fillFog = () => {
-            ctx.fillStyle = 'rgba(16, 22, 21, 0.9)';
-            ctx.fillRect(0, 0, w, h);
-        };
-        fillFog();
-        window.addEventListener('resize', resize);
-
-        const wipe = (x, y) => {
-            if (!this.enabled) return;
-            ctx.save();
-            ctx.globalCompositeOperation = 'destination-out';
-            const grad = ctx.createRadialGradient(x, y, 10, x, y, 48);
-            grad.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
-            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(x, y, 48, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        };
-
-        const onMouseMove = (e) => wipe(e.clientX, e.clientY);
-        canvas.addEventListener('mousemove', onMouseMove);
-
-        let refogInterval = setInterval(() => {
-            if (!this.enabled) return;
-            ctx.save();
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.fillStyle = 'rgba(16, 22, 21, 0.025)';
-            ctx.fillRect(0, 0, w, h);
-            ctx.restore();
-        }, 120);
-
-        this.cleanupFn = () => {
-            clearInterval(refogInterval);
-            window.removeEventListener('resize', resize);
-            canvas.removeEventListener('mousemove', onMouseMove);
-            canvas.remove();
-        };
-    }
-
-    // =========================================================================
-    // 7. RAINY LO-FI
-    // =========================================================================
     initLofi() {
         const cover = document.querySelector('.cover-wrapper');
         if (!cover) return;
@@ -552,269 +352,29 @@ class ThemeFXEngine {
         const tonearm = document.createElement('div');
         tonearm.id = 'lofi-tonearm';
         tonearm.style.cssText = `
-            position: absolute; top: -6px; right: -8px; width: 44px; height: 75px;
-            pointer-events: none; z-index: 25; transform-origin: 36px 8px;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute; top: -4px; right: -6px; width: 36px; height: 64px;
+            pointer-events: none; z-index: 25; transform-origin: 28px 6px;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform: rotate(-35deg);
         `;
         tonearm.innerHTML = `
-            <svg width="44" height="75" viewBox="0 0 44 75" fill="none">
-                <circle cx="36" cy="8" r="7" fill="#2d1d16" stroke="#c8963e" stroke-width="2"/>
-                <circle cx="36" cy="8" r="3" fill="#ffaa40"/>
-                <path d="M36 8 L18 52 L12 68" stroke="#c8963e" stroke-width="2.5" stroke-linecap="round"/>
-                <rect x="8" y="66" width="8" height="6" rx="1" fill="#451a03" stroke="#ffaa40"/>
+            <svg width="36" height="64" viewBox="0 0 36 64" fill="none">
+                <circle cx="28" cy="6" r="5" fill="#201510" stroke="#c8963e" stroke-width="1.5"/>
+                <path d="M28 6 L14 44 L10 58" stroke="#c8963e" stroke-width="2" stroke-linecap="round"/>
+                <rect x="6" y="56" width="7" height="5" rx="1" fill="#451a03" stroke="#ffaa40"/>
             </svg>
         `;
         cover.style.position = 'relative';
         cover.appendChild(tonearm);
 
         const setArmState = (playing) => {
-            tonearm.style.transform = playing ? 'rotate(5deg)' : 'rotate(-35deg)';
+            tonearm.style.transform = playing ? 'rotate(4deg)' : 'rotate(-35deg)';
         };
         setArmState(this.audioData.isPlaying);
         this.onPlaybackChange = setArmState;
 
         this.cleanupFn = () => {
             tonearm.remove();
-        };
-    }
-
-    // =========================================================================
-    // 8. BIOLUMINESCENCE
-    // =========================================================================
-    initBioluminescence() {
-        const canvas = document.createElement('canvas');
-        canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
-        this.container.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
-
-        let w = canvas.width = window.innerWidth;
-        let h = canvas.height = window.innerHeight;
-        const resize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
-        window.addEventListener('resize', resize);
-
-        const jellies = [
-            { x: w * 0.15, y: h * 0.7, r: 24, vy: 0.5, phase: 0 },
-            { x: w * 0.82, y: h * 0.5, r: 34, vy: 0.35, phase: 2 }
-        ];
-
-        let animId;
-        const loop = () => {
-            if (!this.enabled) return;
-            ctx.clearRect(0, 0, w, h);
-            const bass = this.getBassEnergy();
-
-            for (const j of jellies) {
-                j.phase += 0.03 + bass * 0.05;
-                j.y -= j.vy * (1 + bass * 2);
-                if (j.y + j.r * 2 < 0) j.y = h + 100;
-
-                const squish = Math.sin(j.phase) * 0.2;
-
-                ctx.save();
-                ctx.translate(j.x, j.y);
-                ctx.scale(1 + squish, 1 - squish);
-
-                ctx.beginPath();
-                ctx.arc(0, 0, j.r, Math.PI, 0, false);
-                ctx.quadraticCurveTo(0, j.r * 0.4, -j.r, 0);
-
-                const grad = ctx.createRadialGradient(0, -j.r * 0.3, 2, 0, 0, j.r);
-                grad.addColorStop(0, 'rgba(0, 240, 255, 0.75)');
-                grad.addColorStop(0.6, 'rgba(139, 92, 246, 0.35)');
-                grad.addColorStop(1, 'rgba(0, 240, 255, 0.05)');
-                ctx.fillStyle = grad;
-                ctx.fill();
-
-                ctx.strokeStyle = `rgba(0, 240, 255, ${0.4 + bass * 0.5})`;
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                for (let t = -2; t <= 2; t++) {
-                    ctx.beginPath();
-                    const tx = (t / 2.5) * (j.r * 0.7);
-                    ctx.moveTo(tx, 0);
-                    ctx.quadraticCurveTo(
-                        tx + Math.sin(j.phase + t) * 8,
-                        j.r * 0.8,
-                        tx + Math.sin(j.phase + t * 0.5) * 12,
-                        j.r * 1.6
-                    );
-                    ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }
-
-                ctx.restore();
-            }
-            animId = requestAnimationFrame(loop);
-        };
-        loop();
-
-        // =========================================================================
-        // 9. NIGHT SHIFT 1987 (SURVEILLANCE, FLASHLIGHT & POWER/CLOCK HUD)
-        // =========================================================================
-        initNightShift() {
-            // 1. Создаем Canvas для луча фонарика, видеопомех и глаз в темноте
-            const canvas = document.createElement('canvas');
-            canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:95;';
-            this.container.appendChild(canvas);
-            const ctx = canvas.getContext('2d');
-
-            let w = canvas.width = window.innerWidth;
-            let h = canvas.height = window.innerHeight;
-            const resize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
-            window.addEventListener('resize', resize);
-
-            // Координаты мыши (луч фонарика)
-            let mouse = { x: w * 0.5, y: h * 0.5, targetX: w * 0.5, targetY: h * 0.5 };
-            const onMouseMove = (e) => { mouse.targetX = e.clientX; mouse.targetY = e.clientY; };
-            window.addEventListener('mousemove', onMouseMove);
-
-            // 2. Создаем аутентичный HUD охранника: Часы (12 AM - 6 AM) и батарея
-            const hud = document.createElement('div');
-            hud.id = 'nightshift-hud';
-            hud.style.cssText = `
-            position: fixed; top: 48px; right: 26px; z-index: 1000; pointer-events: none;
-            display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
-            font-family: 'VT323', monospace; color: #25d366; text-shadow: 0 0 6px #25d366;
-        `;
-            hud.innerHTML = `
-            <div id="shift-clock" style="font-size: 32px; letter-spacing: 2px;">12 AM</div>
-            <div style="display: flex; align-items: center; gap: 8px; font-family: 'Share Tech Mono', monospace; font-size: 11px;">
-                <span>POWER LEFT:</span>
-                <span id="shift-power" style="color: #25d366; font-weight: bold;">99%</span>
-            </div>
-            <div id="shift-usage" style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #e67e22;">
-                USAGE: <span style="color:#25d366">■</span><span>■</span><span>□</span><span>□</span>
-            </div>
-        `;
-            document.body.appendChild(hud);
-
-            const clockEl = document.getElementById('shift-clock');
-            const powerEl = document.getElementById('shift-power');
-            const usageEl = document.getElementById('shift-usage');
-
-            // Призрачные механические огоньки глаз в дальних углах
-            const eyes = [
-                { x: w * 0.08, y: h * 0.88, alpha: 0, targetAlpha: 0.6, nextTwitch: 200 },
-                { x: w * 0.42, y: h * 0.09, alpha: 0, targetAlpha: 0, nextTwitch: 450 }
-            ];
-
-            let animId;
-            let glitchCounter = 0;
-
-            const loop = () => {
-                if (!this.enabled) return;
-                ctx.clearRect(0, 0, w, h);
-
-                // Плавное следование луча фонарика за мышью
-                mouse.x += (mouse.targetX - mouse.x) * 0.15;
-                mouse.y += (mouse.targetY - mouse.y) * 0.15;
-
-                const bass = this.getBassEnergy();
-
-                // --- А) ЛУЧ ТАКТИЧЕСКОГО ФОНАРИКА В ТЕМНОТЕ ---
-                const beamRadius = 140 + Math.sin(Date.now() * 0.005) * 8;
-                const darkMask = ctx.createRadialGradient(mouse.x, mouse.y, 25, mouse.x, mouse.y, beamRadius);
-                darkMask.addColorStop(0, 'rgba(230, 255, 235, 0.06)');
-                darkMask.addColorStop(0.6, 'rgba(37, 211, 102, 0.025)');
-                darkMask.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-                ctx.save();
-                ctx.fillStyle = darkMask;
-                ctx.fillRect(0, 0, w, h);
-                ctx.restore();
-
-                // --- Б) БЕЛЫЙ ШУМ И СТАТИКА КАМЕР ПРИ УДАРЕ БАСА ---
-                if (bass > 0.65 || glitchCounter > 0) {
-                    if (bass > 0.65) glitchCounter = 4;
-                    glitchCounter--;
-
-                    ctx.save();
-                    ctx.fillStyle = `rgba(37, 211, 102, ${0.12 + Math.random() * 0.18})`;
-                    for (let i = 0; i < 18; i++) {
-                        const lineY = Math.random() * h;
-                        const lineH = 1 + Math.random() * 4;
-                        ctx.fillRect(0, lineY, w, lineH);
-                    }
-                    ctx.restore();
-                }
-
-                // --- В) МЕРЦАЮЩИЕ ГЛАЗА АНИМАТРОНИКА В ТЕНИ ---
-                for (const eye of eyes) {
-                    // Если рядом фонарик или грохочет бас — глаза прячутся
-                    const distToLight = Math.hypot(eye.x - mouse.x, eye.y - mouse.y);
-                    const isHidden = distToLight < beamRadius || bass > 0.5;
-
-                    eye.alpha += ((isHidden ? 0 : eye.targetAlpha) - eye.alpha) * 0.05;
-
-                    if (Math.random() < 0.01) {
-                        eye.targetAlpha = eye.targetAlpha > 0 ? 0 : 0.75;
-                    }
-
-                    if (eye.alpha > 0.03) {
-                        ctx.save();
-                        ctx.fillStyle = `rgba(255, 255, 255, ${eye.alpha})`;
-                        ctx.shadowColor = '#25d366';
-                        ctx.shadowBlur = 8;
-                        // Два маленьких круглых зрачка
-                        ctx.beginPath();
-                        ctx.arc(eye.x - 7, eye.y, 2.5, 0, Math.PI * 2);
-                        ctx.arc(eye.x + 7, eye.y, 2.5, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.restore();
-                    }
-                }
-
-                // --- Г) СИНХРОНИЗАЦИЯ ЧАСОВ 12 AM -> 6 AM ПО ХОДУ ТРЕКА ---
-                const progressSlider = document.getElementById('progress-slider');
-                if (progressSlider && clockEl) {
-                    const pct = Number(progressSlider.value || 0) / 1000;
-                    let hour = 12;
-                    if (pct < 0.16) hour = '12 AM';
-                    else if (pct < 0.33) hour = '1 AM';
-                    else if (pct < 0.50) hour = '2 AM';
-                    else if (pct < 0.67) hour = '3 AM';
-                    else if (pct < 0.83) hour = '4 AM';
-                    else if (pct < 0.98) hour = '5 AM';
-                    else hour = '6 AM 🔔';
-
-                    clockEl.textContent = hour;
-                    if (hour === '6 AM 🔔') {
-                        clockEl.style.color = '#ffff00';
-                        clockEl.style.textShadow = '0 0 15px #ffff00';
-                    } else {
-                        clockEl.style.color = '#25d366';
-                        clockEl.style.textShadow = '0 0 6px #25d366';
-                    }
-
-                    // Расход батареи от 99% до 5%
-                    const remainingPower = Math.max(1, Math.round(99 - pct * 94));
-                    if (powerEl) {
-                        powerEl.textContent = `${remainingPower}%`;
-                        powerEl.style.color = remainingPower < 20 ? '#ff1a1a' : (remainingPower < 50 ? '#e67e22' : '#25d366');
-                    }
-                }
-
-                animId = requestAnimationFrame(loop);
-            };
-            loop();
-
-            // Очистка при смене темы или GFX: OFF
-            this.cleanupFn = () => {
-                cancelAnimationFrame(animId);
-                window.removeEventListener('resize', resize);
-                window.removeEventListener('mousemove', onMouseMove);
-                canvas.remove();
-                if (hud.parentNode) hud.remove();
-            };
-        }
-
-        this.cleanupFn = () => {
-            cancelAnimationFrame(animId);
-            window.removeEventListener('resize', resize);
-            canvas.remove();
         };
     }
 }

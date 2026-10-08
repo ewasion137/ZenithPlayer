@@ -815,38 +815,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeLink = document.getElementById('theme-link');
 
     const themes = [
-        'ultra.css',
+        'main.css',
         'cosmic.css',
         'frutigeraero.css',
         'terminal.css',
         'winamp.css',
         'macglass.css',
-        'main.css',
         'kocmocunleashed.css',
         'vaporwave.css',
         'neumorphism.css',
         'skeumorph-cassette.css',
         'paper-dark.css',
         'zen.css',
-        'aqua-osx.css',
-        'amoled-pure.css',
         'y2k-futurism.css',
-        'hell.css',
-        'persona5.css',
-        'vintage.css',
         'gameboy.css',
-        'nerv.css',
-        'thermal.css',
+        'kinetic.css',
         'dsg.css',
         'hyprland.css',
         'winxp.css',
         'dreamcore.css',
         'fogcore.css',
-        'claymorphism.css',
-        'botanical.css',
         'lofi.css',
-        'bioluminescence.css',
-        'night-shift.css'
     ];
 
     function applyTheme(themeName) {

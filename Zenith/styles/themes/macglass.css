@@ -1,372 +1,197 @@
-/* ==========================================================================
-   THEME: MAC GLASS (MACOS TAHOE / VISIONOS DARK LIQUID VIBRANCY)
-   ========================================================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg-main: #07070a;
-    --panel-bg: rgba(28, 28, 35, 0.45);
-    --surface: rgba(255, 255, 255, 0.07);
-    --surface-hover: rgba(255, 255, 255, 0.12);
+    --bg-main: #0a0b10;
+    --panel-bg: rgba(24, 25, 34, 0.5);
+    --surface: rgba(255, 255, 255, 0.08);
     --accent: #0a84ff;
     --accent-secondary: #bf5af2;
-    --accent-gradient: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 50%, #bf5af2 100%);
+    --accent-gradient: linear-gradient(135deg, #0a84ff 0%, #bf5af2 100%);
     --text-main: rgba(255, 255, 255, 0.95);
-    --text-dim: rgba(255, 255, 255, 0.55);
+    --text-dim: rgba(255, 255, 255, 0.5);
     --border-light: rgba(255, 255, 255, 0.12);
     --border-focus: #0a84ff;
-    
-    /* Зеркальные стеклянные грани и мягкие тени Apple */
-    --liquid-glass-border: 1px solid rgba(255, 255, 255, 0.14);
-    --liquid-glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
-    --mac-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.25);
-    --transition: 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    --transition: 0.15s ease;
 }
 
-/* === ФОН: АБСТРАКТНЫЙ ШЕЛКОВЫЙ МЕШ-ГРАДИЕНТ TAHOE === */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
     background-color: var(--bg-main);
     background-image: 
-        radial-gradient(circle at 15% 15%, rgba(10, 132, 255, 0.22) 0%, transparent 50%),
-        radial-gradient(circle at 85% 20%, rgba(191, 90, 242, 0.18) 0%, transparent 45%),
-        radial-gradient(circle at 50% 85%, rgba(94, 92, 230, 0.2) 0%, transparent 60%);
+        radial-gradient(circle at 10% 10%, rgba(10, 132, 255, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(191, 90, 242, 0.15) 0%, transparent 40%);
+    color: var(--text-main);
 }
 
 #spectrogram-canvas {
-    opacity: 0.15;
-    filter: hue-rotate(195deg) saturate(150%) blur(1px);
+    opacity: 0.12;
 }
 
-/* === TITLE BAR: КРИСТАЛЬНЫЙ ХЕДЕР + КНОПКИ СВЕТОФОРА (TRAFFIC LIGHTS) === */
 .title-bar {
-    height: 38px;
-    background: rgba(18, 18, 24, 0.55);
-    backdrop-filter: blur(50px) saturate(210%);
-    -webkit-backdrop-filter: blur(50px) saturate(210%);
-    border-bottom: var(--liquid-glass-border);
+    height: 36px;
+    background: rgba(16, 17, 24, 0.65);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border-light);
     padding: 0 12px;
 }
 
 .title-text {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.2px;
-    color: var(--text-main);
-    opacity: 0.85;
+    letter-spacing: 0.4px;
+    color: var(--text-dim);
 }
 
 .window-controls {
-    display: flex;
+    gap: 7px;
     align-items: center;
-    gap: 8px;
 }
 
-/* Настоящие круглые кнопки macOS Traffic Lights */
 .win-btn {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    font-size: 0; /* прячем текстовые символы */
-    padding: 0;
-    transition: filter 0.15s ease, transform 0.15s ease;
-    border: 0.5px solid rgba(0, 0, 0, 0.25);
+    font-size: 0;
+    border: none;
+    transition: filter var(--transition);
 }
 
-.window-controls .win-btn:nth-child(1) { background: #febc2e; } /* Свернуть */
-.window-controls .win-btn:nth-child(2) { background: #28c840; } /* Развернуть */
-.window-controls .win-close { background: #ff5f56 !important; } /* Закрыть */
+.window-controls .win-btn:nth-child(1) { background: #febc2e; }
+.window-controls .win-btn:nth-child(2) { background: #28c840; }
+.window-controls .win-close { background: #ff5f56 !important; }
 
 .win-btn:hover {
-    transform: scale(1.1);
-    filter: brightness(1.15);
+    filter: brightness(1.2);
 }
 
-/* === NOW PLAYING: ПАРЯЩИЙ ОСТРОВ APPLE MUSIC === */
-.now-playing-container {
+.now-playing-container,
+#top-controls,
+.eq-container-wrapper,
+.modal-content {
     background: var(--panel-bg);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: var(--liquid-glass-border);
-    border-radius: 22px;
-    box-shadow: var(--mac-shadow), var(--liquid-glass-specular);
-    padding: 20px 24px;
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
-/* Обложка альбома: сквиркл со стеклянной аурой */
 .cover-wrapper {
-    width: 88px;
-    height: 88px;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.5);
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 #current-track-artwork {
-    border-radius: 17px;
-}
-
-.artwork-glow {
-    filter: blur(55px);
-    opacity: 0.35;
+    border-radius: 13px;
 }
 
 .track-info h1 {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    color: #ffffff;
-}
-
-.track-info p {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-dim);
-    margin-top: 3px;
-}
-
-/* === УПРАВЛЕНИЕ: ЖИДКОЕ СТЕКЛО И КНОПКА PLAY В СТИЛЕ APPLE === */
-#top-controls {
-    background: var(--panel-bg);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: var(--liquid-glass-border);
-    border-radius: 20px;
-    box-shadow: var(--mac-shadow), var(--liquid-glass-specular);
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
 }
 
 #prev-btn, #next-btn {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     background: rgba(255, 255, 255, 0.08);
-    border: var(--liquid-glass-border);
+    border: 1px solid var(--border-light);
     border-radius: 50%;
-    backdrop-filter: blur(20px);
 }
 
 #prev-btn:hover, #next-btn:hover {
     background: rgba(255, 255, 255, 0.16);
-    transform: scale(1.04);
 }
 
-/* Кнопка воспроизведения: Apple Accent Pill */
 #play-pause-btn {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     background: #ffffff;
     border-radius: 50%;
-    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25), 0 2px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.25);
 }
 
 #play-pause-btn::before {
     background: #000000;
 }
 
-#play-pause-btn:hover {
-    transform: scale(1.05);
-    background: #f5f5f7;
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.35);
-}
-
-.control-group label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-dim);
-    letter-spacing: 0.3px;
-}
-
-/* Слайдеры в стиле iOS / macOS */
 .control-group input[type="range"] {
-    background: rgba(255, 255, 255, 0.12);
-    height: 5px;
-    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.1);
+    height: 4px;
+    border-radius: 99px;
 }
 
 .control-group input[type="range"]::-webkit-slider-thumb {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
+    width: 13px;
+    height: 13px;
     background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .control-input, .eq-band input[type="number"] {
-    background: rgba(255, 255, 255, 0.07);
-    border: var(--liquid-glass-border);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-light);
     color: #ffffff;
-    border-radius: 6px;
-    font-weight: 500;
+    border-radius: 5px;
 }
 
-/* === ВОЛНОВАЯ ФОРМА: ФОКУСИРОВАННЫЙ КАНАЛ ЗВУКА === */
 .waveform-container {
     background: rgba(0, 0, 0, 0.35);
-    border: var(--liquid-glass-border);
-    border-radius: 12px;
-    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
 }
 
-#time-display {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-dim);
-    letter-spacing: 0.2px;
-}
-
-/* === ЭКВАЛАЙЗЕР: СТУДИЙНАЯ ПАНЕЛЬ CUPERTINO === */
-.eq-container-wrapper {
-    background: var(--panel-bg);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: var(--liquid-glass-border);
-    border-radius: 20px;
-    box-shadow: var(--mac-shadow), var(--liquid-glass-specular);
-}
-
-.eq-header-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-}
-
-.eq-band input[type="range"] {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 9999px;
-    border: var(--liquid-glass-border);
-}
-
-/* === RESIZER: ТОНКАЯ РАЗДЕЛИТЕЛЬНАЯ ЛИНИЯ === */
 .resizer-bar {
     width: 2px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--border-light);
 }
 
 .resizer-bar:hover, .resizer-bar.resizing {
     background: var(--accent);
-    box-shadow: 0 0 12px var(--accent);
 }
 
-/* === САЙДБАР: БОКОВОЕ МЕНЮ MACOS С ЭФФЕКТОМ САЙДБАР-ВИБРАНСИ === */
 .explorer-sidebar {
-    background: rgba(18, 18, 24, 0.5);
-    backdrop-filter: blur(45px) saturate(210%);
-    -webkit-backdrop-filter: blur(45px) saturate(210%);
-    border-left: var(--liquid-glass-border);
+    background: rgba(16, 17, 24, 0.6);
+    backdrop-filter: blur(24px);
+    border-left: 1px solid var(--border-light);
 }
 
 .explorer-header {
     background: transparent;
-    border-bottom: var(--liquid-glass-border);
-}
-
-.explorer-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-}
-
-.explorer-header button {
-    background: rgba(255, 255, 255, 0.08);
-    border: var(--liquid-glass-border);
-    border-radius: 8px;
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 500;
-}
-
-.explorer-header button:hover {
-    background: var(--accent);
-    border-color: var(--accent);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .folder-group h3 {
-    background: rgba(255, 255, 255, 0.05);
-    border: var(--liquid-glass-border);
-    border-radius: 10px;
-    font-weight: 600;
-    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
 }
 
 .folder-group.open h3 {
     color: var(--accent);
-    background: rgba(10, 132, 255, 0.12);
-    border-color: rgba(10, 132, 255, 0.3);
-}
-
-.track-item {
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.track-item:hover {
-    background: rgba(255, 255, 255, 0.07);
-    color: #ffffff;
+    background: rgba(10, 132, 255, 0.15);
 }
 
 .track-item.playing {
-    background: rgba(10, 132, 255, 0.22);
-    border-left: none;
-    color: #ffffff;
-    font-weight: 600;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    background: rgba(10, 132, 255, 0.25) !important;
+    border-left: 2px solid var(--accent) !important;
+    color: #ffffff !important;
 }
 
-/* === STATUS BAR: ПАРЯЩИЙ ДОК ТЕЛЕМЕТРИИ === */
 .status-bar {
-    height: 32px;
-    background: rgba(18, 18, 24, 0.6);
-    backdrop-filter: blur(40px) saturate(200%);
-    border-top: var(--liquid-glass-border);
-}
-
-.status-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    border-radius: 6px;
+    height: 30px;
+    background: rgba(16, 17, 24, 0.7);
+    backdrop-filter: blur(24px);
+    border-top: 1px solid var(--border-light);
 }
 
 .status-search input {
     background: rgba(0, 0, 0, 0.3);
-    border: var(--liquid-glass-border);
-    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
     color: #ffffff;
-}
-
-.status-search input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25);
-}
-
-/* === МОДАЛЬНОЕ ОКНО: CUPERTINO SHEET DIALOG === */
-.modal-content {
-    background: rgba(28, 28, 36, 0.75);
-    backdrop-filter: blur(50px) saturate(220%);
-    -webkit-backdrop-filter: blur(50px) saturate(220%);
-    border: var(--liquid-glass-border);
-    border-radius: 20px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), var(--liquid-glass-specular);
-}
-
-.modal-header h3 {
-    font-weight: 700;
-    letter-spacing: -0.2px;
-}
-
-.modal-body input {
-    background: rgba(0, 0, 0, 0.35);
-    border: var(--liquid-glass-border);
-    border-radius: 8px;
-}
-
-.modal-actions button {
-    border-radius: 8px;
-    font-weight: 600;
 }
