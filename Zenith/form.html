@@ -1,172 +1,323 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Zenith Player</title>
+        <link rel="stylesheet" href="styles/main.css" />
+        <link id="theme-link" rel="stylesheet" href="" />
+        <style id="theme-perf-guard">
+            #spectrogram-canvas,
+            #waveform-canvas {
+                filter: none !important;
+            }
 
-<head>
-    <meta charset="UTF-8">
-    <title>Zenith Player</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link id="theme-link" rel="stylesheet" href="">
-</head>
+            .title-bar,
+            .now-playing-container,
+            .now-playing-container::after,
+            #top-controls,
+            #play-pause-btn,
+            .cover-wrapper,
+            body::before {
+                animation: none !important;
+            }
 
-<body>
-    <!-- 1. TITLE BAR -->
-    <div class="title-bar">
-        <div class="title-bar-drag">
-            <img src="icon.png" class="title-icon" alt="">
-            <span class="title-text">ZENITH PLAYER</span>
-        </div>
-        <div class="window-controls">
-            <button id="win-min" class="win-btn" title="Minimize">&minus;</button>
-            <button id="win-max" class="win-btn" title="Maximize">&#9634;</button>
-            <button id="win-close" class="win-btn win-close" title="Close">&times;</button>
-        </div>
-    </div>
+            .title-bar,
+            .now-playing-container,
+            #top-controls,
+            .eq-container-wrapper,
+            .explorer-sidebar,
+            .status-bar,
+            .status-left,
+            .status-center,
+            .status-right,
+            .modal-overlay,
+            .modal-content {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
 
-    <!-- 2. MAIN WORKSPACE -->
-    <div class="app-workspace">
-        <canvas id="spectrogram-canvas"></canvas>
+            body:not(.is-playing) *,
+            body:not(.is-playing) *::before,
+            body:not(.is-playing) *::after {
+                animation-play-state: paused !important;
+            }
 
-        <!-- LEFT: MAIN PLAYER STAGE -->
-        <div class="player-stage">
-            <!-- NOW PLAYING HERO (SPOTIFY STYLE) -->
-            <div class="now-playing-container">
-                <div class="artwork-glow"></div>
-                <div class="now-playing-content">
-                    <div class="cover-wrapper">
-                        <img id="current-track-artwork" src="icon.png" alt="Cover">
-                    </div>
-                    <div class="track-info">
-                        <h1 id="current-track-name">Zenith Player</h1>
-                        <p id="current-track-folder">Select a track or paste a link</p>
-                    </div>
-                </div>
+            .cover-wrapper::before,
+            .cover-wrapper::after {
+                will-change: transform;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- 1. TITLE BAR -->
+        <div class="title-bar">
+            <div class="title-bar-drag">
+                <img src="icon.png" class="title-icon" alt="" />
+                <span class="title-text">ZENITH PLAYER</span>
             </div>
+            <div class="window-controls">
+                <button id="win-min" class="win-btn" title="Minimize">
+                    &minus;
+                </button>
+                <button id="win-max" class="win-btn" title="Maximize">
+                    &#9634;
+                </button>
+                <button id="win-close" class="win-btn win-close" title="Close">
+                    &times;
+                </button>
+            </div>
+        </div>
 
-            <!-- CONTROLS & TIMELINE -->
-            <div id="top-controls">
-                <div class="main-controls">
-                    <button id="prev-btn" title="Previous Track"></button>
-                    <button id="play-pause-btn" title="Play/Pause (Space)"></button>
-                    <button id="next-btn" title="Next Track"></button>
-                </div>
+        <!-- 2. MAIN WORKSPACE -->
+        <div class="app-workspace">
+            <canvas id="spectrogram-canvas"></canvas>
 
-                <div class="controls-column">
-                    <div class="sliders-row">
-                        <div class="control-group">
-                            <label>VOL</label>
-                            <input type="range" id="track-volume-slider" min="0" max="200" value="100" step="1">
-                            <input type="number" id="track-volume-input" min="0" max="200" value="100" class="control-input">
-                            <span id="track-volume-value">100%</span>
+            <!-- LEFT: MAIN PLAYER STAGE -->
+            <div class="player-stage">
+                <!-- NOW PLAYING HERO (SPOTIFY STYLE) -->
+                <div class="now-playing-container">
+                    <div class="artwork-glow"></div>
+                    <div class="now-playing-content">
+                        <div class="cover-wrapper">
+                            <img
+                                id="current-track-artwork"
+                                src="icon.png"
+                                alt="Cover"
+                            />
                         </div>
-                        <div class="control-group">
-                            <label>SPEED</label>
-                            <input type="range" id="speed-slider" min="50" max="200" value="100" step="1">
-                            <input type="number" id="speed-input" min="50" max="200" value="100" class="control-input">
-                            <span id="speed-value">100%</span>
-                        </div>
-                    </div>
-
-                    <div id="progress-view">
-                        <div class="waveform-container">
-                            <canvas id="waveform-canvas"></canvas>
-                            <input type="range" id="progress-slider" min="0" max="1000" value="0">
-                        </div>
-                        <div id="time-display">
-                            <span>00:00</span>
-                            <span>00:00</span>
+                        <div class="track-info">
+                            <h1 id="current-track-name">Zenith Player</h1>
+                            <p id="current-track-folder">
+                                Select a track or paste a link
+                            </p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- EQUALIZER -->
-            <div class="eq-container-wrapper">
-                <div class="eq-header-label">EQUALIZER (DSP)</div>
-                <div class="eq-bands"></div>
-            </div>
-        </div>
+                <!-- CONTROLS & TIMELINE -->
+                <div id="top-controls">
+                    <div class="main-controls">
+                        <button id="prev-btn" title="Previous Track"></button>
+                        <button
+                            id="play-pause-btn"
+                            title="Play/Pause (Space)"
+                        ></button>
+                        <button id="next-btn" title="Next Track"></button>
+                    </div>
 
-        <!-- RESIZER -->
-        <div id="sidebar-resizer" class="resizer-bar" title="Drag to resize"></div>
+                    <div class="controls-column">
+                        <div class="sliders-row">
+                            <div class="control-group">
+                                <label>VOL</label>
+                                <input
+                                    type="range"
+                                    id="track-volume-slider"
+                                    min="0"
+                                    max="200"
+                                    value="100"
+                                    step="1"
+                                />
+                                <input
+                                    type="number"
+                                    id="track-volume-input"
+                                    min="0"
+                                    max="200"
+                                    value="100"
+                                    class="control-input"
+                                />
+                                <span id="track-volume-value">100%</span>
+                            </div>
+                            <div class="control-group">
+                                <label>SPEED</label>
+                                <input
+                                    type="range"
+                                    id="speed-slider"
+                                    min="50"
+                                    max="200"
+                                    value="100"
+                                    step="1"
+                                />
+                                <input
+                                    type="number"
+                                    id="speed-input"
+                                    min="50"
+                                    max="200"
+                                    value="100"
+                                    class="control-input"
+                                />
+                                <span id="speed-value">100%</span>
+                            </div>
+                        </div>
 
-        <!-- RIGHT: EXPLORER SIDEBAR -->
-        <div class="explorer-sidebar" id="explorer-sidebar">
-            <div class="explorer-header">
-                <span class="explorer-title">EXPLORER</span>
-                <div class="explorer-actions">
-                    <button id="add-url-btn" title="Add YouTube / Spotify URL">🔗 + URL</button>
-                    <button id="select-folder-btn" title="Open Folder">📂 Open</button>
+                        <div id="progress-view">
+                            <div class="waveform-container">
+                                <canvas id="waveform-canvas"></canvas>
+                                <input
+                                    type="range"
+                                    id="progress-slider"
+                                    min="0"
+                                    max="1000"
+                                    value="0"
+                                />
+                            </div>
+                            <div id="time-display">
+                                <span>00:00</span>
+                                <span>00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EQUALIZER -->
+                <div class="eq-container-wrapper">
+                    <div class="eq-header-label">EQUALIZER (DSP)</div>
+                    <div class="eq-bands"></div>
                 </div>
             </div>
-            <div class="track-list-container">
-                <div id="web-tracks-section"></div>
-                <div id="local-tracks-section"></div>
-            </div>
-        </div>
-    </div>
 
-    <!-- 3. BOTTOM STATUS BAR -->
-    <div class="status-bar">
-        <div class="status-left">
-            <button id="discord-rpc-btn" class="status-btn" title="Discord RPC">🎮 <span id="rpc-quick-status">RPC</span></button>
-            <button id="optimize-btn" class="status-btn" title="Toggle Visuals">GFX: ON</button>
-            <button id="save-settings-btn" class="status-btn" title="Save Settings">💾 Save</button>
-            <button id="reset-settings-btn" class="status-btn" title="Reset Settings">Reset</button>
-        </div>
+            <!-- RESIZER -->
+            <div
+                id="sidebar-resizer"
+                class="resizer-bar"
+                title="Drag to resize"
+            ></div>
 
-        <div class="status-center">
-            <div class="status-search">
-                <input type="text" id="search-input" placeholder="🔍 Search or paste URL...">
-            </div>
-        </div>
-
-        <div class="status-right">
-            <span id="audio-format-tag" class="status-tag">44.1kHz • 24bit</span>
-            <button id="theme-switcher" class="status-btn" title="Change Theme">🎨 Theme</button>
-        </div>
-    </div>
-
-    <!-- 4. URL STREAM MODAL -->
-    <div id="url-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Play from YouTube / Spotify</h3>
-                <button id="close-url-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <label for="web-url-input">Track URL or Search Query:</label>
-                <input type="text" id="web-url-input" placeholder="https://music.youtube.com/... or song name">
-                <div id="url-status-text" class="rpc-status-container"></div>
-                <div class="modal-actions">
-                    <button id="url-submit-btn">Load & Play</button>
+            <!-- RIGHT: EXPLORER SIDEBAR -->
+            <div class="explorer-sidebar" id="explorer-sidebar">
+                <div class="explorer-header">
+                    <span class="explorer-title">EXPLORER</span>
+                    <div class="explorer-actions">
+                        <button
+                            id="add-url-btn"
+                            title="Add YouTube / Spotify URL"
+                        >
+                            🔗 + URL
+                        </button>
+                        <button id="select-folder-btn" title="Open Folder">
+                            📂 Open
+                        </button>
+                    </div>
+                </div>
+                <div class="track-list-container">
+                    <div id="web-tracks-section"></div>
+                    <div id="local-tracks-section"></div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- 5. DISCORD RPC MODAL -->
-    <div id="rpc-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Discord Rich Presence</h3>
-                <button id="close-rpc-modal">&times;</button>
+        <!-- 3. BOTTOM STATUS BAR -->
+        <div class="status-bar">
+            <div class="status-left">
+                <button
+                    id="discord-rpc-btn"
+                    class="status-btn"
+                    title="Discord RPC"
+                >
+                    🎮 <span id="rpc-quick-status">RPC</span>
+                </button>
+                <button
+                    id="optimize-btn"
+                    class="status-btn"
+                    title="Toggle Visuals"
+                >
+                    GFX: ON
+                </button>
+                <button
+                    id="save-settings-btn"
+                    class="status-btn"
+                    title="Save Settings"
+                >
+                    💾 Save
+                </button>
+                <button
+                    id="reset-settings-btn"
+                    class="status-btn"
+                    title="Reset Settings"
+                >
+                    Reset
+                </button>
             </div>
-            <div class="modal-body">
-                <label for="rpc-client-id">Application Client ID:</label>
-                <input type="text" id="rpc-client-id" placeholder="Paste Discord Client ID...">
-                <div class="rpc-status-container">
-                    <span>Status: </span>
-                    <span id="rpc-status-text" class="status-disconnected">Disconnected</span>
+
+            <div class="status-center">
+                <div class="status-search">
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="🔍 Search or paste URL..."
+                    />
                 </div>
-                <div class="modal-actions">
-                    <button id="rpc-connect-btn">Connect</button>
-                    <button id="rpc-disconnect-btn">Disconnect</button>
+            </div>
+
+            <div class="status-right">
+                <span id="audio-format-tag" class="status-tag"
+                    >44.1kHz • 24bit</span
+                >
+                <button
+                    id="theme-switcher"
+                    class="status-btn"
+                    title="Change Theme"
+                >
+                    🎨 Theme
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. URL STREAM MODAL -->
+        <div id="url-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Play from YouTube / Spotify</h3>
+                    <button id="close-url-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <label for="web-url-input"
+                        >Track URL or Search Query:</label
+                    >
+                    <input
+                        type="text"
+                        id="web-url-input"
+                        placeholder="https://music.youtube.com/... or song name"
+                    />
+                    <div
+                        id="url-status-text"
+                        class="rpc-status-container"
+                    ></div>
+                    <div class="modal-actions">
+                        <button id="url-submit-btn">Load & Play</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script src="theme-fx.js"></script>
-    <script src="renderer.js"></script>
-</body>
 
+        <!-- 5. DISCORD RPC MODAL -->
+        <div id="rpc-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Discord Rich Presence</h3>
+                    <button id="close-rpc-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <label for="rpc-client-id">Application Client ID:</label>
+                    <input
+                        type="text"
+                        id="rpc-client-id"
+                        placeholder="Paste Discord Client ID..."
+                    />
+                    <div class="rpc-status-container">
+                        <span>Status: </span>
+                        <span id="rpc-status-text" class="status-disconnected"
+                            >Disconnected</span
+                        >
+                    </div>
+                    <div class="modal-actions">
+                        <button id="rpc-connect-btn">Connect</button>
+                        <button id="rpc-disconnect-btn">Disconnect</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="theme-fx.js"></script>
+        <script src="renderer.js"></script>
+    </body>
 </html>

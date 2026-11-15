@@ -6,31 +6,40 @@ class ThemeFXEngine {
         this.audioData = {
             analyser: null,
             dataArray: null,
-            isPlaying: false
+            isPlaying: false,
         };
         this.container = null;
         this.init();
     }
 
     init() {
-        this.container = document.createElement('div');
-        this.container.id = 'theme-fx-layer';
-        this.container.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:90;overflow:hidden;';
+        this.container = document.createElement("div");
+        this.container.id = "theme-fx-layer";
+        this.container.style.cssText =
+            "position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:90;overflow:hidden;";
         document.body.appendChild(this.container);
 
-        const themeLink = document.getElementById('theme-link');
+        const themeLink = document.getElementById("theme-link");
         if (themeLink) {
-            const themeObserver = new MutationObserver(() => this.detectTheme());
-            themeObserver.observe(themeLink, { attributes: true, attributeFilter: ['href'] });
+            const themeObserver = new MutationObserver(() =>
+                this.detectTheme(),
+            );
+            themeObserver.observe(themeLink, {
+                attributes: true,
+                attributeFilter: ["href"],
+            });
         }
 
         const gfxObserver = new MutationObserver(() => {
-            const isLowGfx = document.body.classList.contains('low-gfx');
+            const isLowGfx = document.body.classList.contains("low-gfx");
             this.setEnabled(!isLowGfx);
         });
-        gfxObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        gfxObserver.observe(document.body, {
+            attributes: true,
+            attributeFilter: ["class"],
+        });
 
-        document.addEventListener('visibilitychange', () => {
+        document.addEventListener("visibilitychange", () => {
             if (document.hidden) {
                 this.pauseLoops();
             } else if (this.enabled) {
@@ -38,9 +47,9 @@ class ThemeFXEngine {
             }
         });
 
-        if (document.body.classList.contains('low-gfx')) {
+        if (document.body.classList.contains("low-gfx")) {
             this.enabled = false;
-            this.container.style.display = 'none';
+            this.container.style.display = "none";
         }
 
         setTimeout(() => this.detectTheme(), 100);
@@ -52,10 +61,10 @@ class ThemeFXEngine {
 
         if (!this.enabled) {
             this.pauseLoops();
-            this.container.style.display = 'none';
-            this.container.innerHTML = '';
+            this.container.style.display = "none";
+            this.container.innerHTML = "";
         } else {
-            this.container.style.display = 'block';
+            this.container.style.display = "block";
             this.resumeLoops();
         }
     }
@@ -89,19 +98,24 @@ class ThemeFXEngine {
     }
 
     getBassEnergy() {
-        if (!this.enabled || !this.audioData.analyser || !this.audioData.dataArray) return 0;
+        if (
+            !this.enabled ||
+            !this.audioData.analyser ||
+            !this.audioData.dataArray
+        )
+            return 0;
         this.audioData.analyser.getByteFrequencyData(this.audioData.dataArray);
         let sum = 0;
         for (let i = 0; i < 8; i++) sum += this.audioData.dataArray[i];
-        return (sum / 8) / 255;
+        return sum / 8 / 255;
     }
 
     detectTheme() {
-        const themeLink = document.getElementById('theme-link');
-        let themeName = 'main.css';
+        const themeLink = document.getElementById("theme-link");
+        let themeName = "main.css";
         if (themeLink && themeLink.href) {
-            const parts = themeLink.href.split('/');
-            themeName = parts[parts.length - 1] || 'main.css';
+            const parts = themeLink.href.split("/");
+            themeName = parts[parts.length - 1] || "main.css";
         }
         this.applyThemeFX(themeName);
     }
@@ -111,24 +125,24 @@ class ThemeFXEngine {
         this.currentTheme = themeName;
 
         this.pauseLoops();
-        this.container.innerHTML = '';
+        this.container.innerHTML = "";
 
         if (!this.enabled) return;
 
         switch (themeName) {
-            case 'frutigeraero.css':
+            case "frutigeraero.css":
                 this.initFrutigerAero();
                 break;
-            case 'y2k-futurism.css':
+            case "y2k-futurism.css":
                 this.initY2K();
                 break;
-            case 'dreamcore.css':
+            case "dreamcore.css":
                 this.initDreamcore();
                 break;
-            case 'lofi.css':
+            case "lofi.css":
                 this.initLofi();
                 break;
-            case 'kinetic.css':
+            case "kinetic.css":
                 this.initKinetic();
                 break;
             default:
@@ -137,15 +151,36 @@ class ThemeFXEngine {
     }
 
     initFrutigerAero() {
-        const canvas = document.createElement('canvas');
-        canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:auto;cursor:default;';
+        const canvas = document.createElement("canvas");
+        canvas.style.cssText =
+            "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;";
         this.container.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext("2d");
 
-        let w = canvas.width = window.innerWidth;
-        let h = canvas.height = window.innerHeight;
-        const resize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
-        window.addEventListener('resize', resize);
+        // Pre-bake bubble sprite once to avoid per-frame gradient allocation
+        const sprite = document.createElement("canvas");
+        sprite.width = 64;
+        sprite.height = 64;
+        const sCtx = sprite.getContext("2d");
+        const grad = sCtx.createRadialGradient(22, 22, 3, 32, 32, 30);
+        grad.addColorStop(0, "rgba(255, 255, 255, 0.65)");
+        grad.addColorStop(0.5, "rgba(0, 210, 255, 0.2)");
+        grad.addColorStop(1, "rgba(56, 239, 125, 0.3)");
+        sCtx.beginPath();
+        sCtx.arc(32, 32, 30, 0, Math.PI * 2);
+        sCtx.fillStyle = grad;
+        sCtx.fill();
+        sCtx.lineWidth = 1.5;
+        sCtx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+        sCtx.stroke();
+
+        let w = (canvas.width = window.innerWidth);
+        let h = (canvas.height = window.innerHeight);
+        const resize = () => {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        };
+        window.addEventListener("resize", resize);
 
         const bubbles = [];
         for (let i = 0; i < 16; i++) {
@@ -155,19 +190,26 @@ class ThemeFXEngine {
                 r: 8 + Math.random() * 16,
                 vy: 0.7 + Math.random() * 1.2,
                 wobble: Math.random() * Math.PI * 2,
-                wobbleSpeed: 0.02 + Math.random() * 0.02
+                wobbleSpeed: 0.02 + Math.random() * 0.02,
             });
         }
 
-        let mouse = { x: -1000, y: -1000 };
-        const onMouseMove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
-        window.addEventListener('mousemove', onMouseMove);
+        let animId = null;
+        let lastTime = 0;
+        const loop = (now) => {
+            if (!this.enabled) {
+                animId = null;
+                return;
+            }
+            animId = requestAnimationFrame(loop);
+            if (document.hidden) return;
 
-        let animId;
-        const loop = () => {
-            if (!this.enabled) return;
+            const interval = Math.max(window.__zenithFrameInterval || 19, 32);
+            if (now - lastTime < interval) return;
+            lastTime = now;
+
             ctx.clearRect(0, 0, w, h);
-            const bass = this.getBassEnergy();
+            const bass = this.audioData.isPlaying ? this.getBassEnergy() : 0;
 
             for (const b of bubbles) {
                 b.y -= b.vy * (1 + bass * 1.5);
@@ -179,74 +221,93 @@ class ThemeFXEngine {
                     b.x = Math.random() * w;
                 }
 
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-
-                const grad = ctx.createRadialGradient(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.1, b.x, b.y, b.r);
-                grad.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
-                grad.addColorStop(0.5, 'rgba(0, 210, 255, 0.2)');
-                grad.addColorStop(1, 'rgba(56, 239, 125, 0.3)');
-                ctx.fillStyle = grad;
-                ctx.fill();
-
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.stroke();
-                ctx.restore();
+                const size = b.r * 2;
+                ctx.drawImage(sprite, b.x - b.r, b.y - b.r, size, size);
             }
-            animId = requestAnimationFrame(loop);
         };
-        loop();
+        animId = requestAnimationFrame(loop);
 
         this.cleanupFn = () => {
-            cancelAnimationFrame(animId);
-            window.removeEventListener('resize', resize);
-            window.removeEventListener('mousemove', onMouseMove);
+            if (animId) cancelAnimationFrame(animId);
+            animId = null;
+            window.removeEventListener("resize", resize);
             canvas.remove();
         };
     }
 
     initY2K() {
-        const cover = document.querySelector('.cover-wrapper');
+        const cover = document.querySelector(".cover-wrapper");
         if (!cover) return;
 
-        let animId;
+        let animId = null;
         let angle = 0;
-        const loop = () => {
-            if (!this.enabled) return;
-            if (this.audioData.isPlaying) {
-                const bass = this.getBassEnergy();
-                angle = (angle + 1.2 + bass * 3) % 360;
-                cover.style.transform = `rotate(${angle}deg)`;
+        let lastTime = 0;
+
+        const loop = (now) => {
+            if (!this.enabled || !this.audioData.isPlaying) {
+                animId = null;
+                return;
             }
             animId = requestAnimationFrame(loop);
+            if (document.hidden) return;
+
+            const interval = window.__zenithFrameInterval || 19;
+            if (now - lastTime < interval) return;
+            lastTime = now;
+
+            const bass = this.getBassEnergy();
+            angle = (angle + 1.2 + bass * 3) % 360;
+            cover.style.transform = `rotate(${angle.toFixed(2)}deg)`;
         };
-        loop();
+
+        this.onPlaybackChange = (playing) => {
+            if (playing && !animId && this.enabled) {
+                lastTime = 0;
+                animId = requestAnimationFrame(loop);
+            }
+        };
+
+        if (this.audioData.isPlaying) {
+            animId = requestAnimationFrame(loop);
+        }
 
         this.cleanupFn = () => {
-            cancelAnimationFrame(animId);
-            if (cover) cover.style.transform = 'none';
+            if (animId) cancelAnimationFrame(animId);
+            animId = null;
+            if (cover) cover.style.transform = "none";
         };
     }
 
-    // Kinetic Centered Monochrome Engine
     initKinetic() {
-        const coverWrapper = document.querySelector('.cover-wrapper');
-        const island = document.querySelector('.now-playing-container');
-        const playBtn = document.getElementById('play-pause-btn');
+        const coverWrapper = document.querySelector(".cover-wrapper");
+        const playBtn = document.getElementById("play-pause-btn");
 
-        const canvas = document.createElement('canvas');
-        canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:95;';
+        const canvas = document.createElement("canvas");
+        canvas.style.cssText =
+            "position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:95;";
         this.container.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext("2d");
 
-        let w = canvas.width = window.innerWidth;
-        let h = canvas.height = window.innerHeight;
-        const resize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
-        window.addEventListener('resize', resize);
+        let w = (canvas.width = window.innerWidth);
+        let h = (canvas.height = window.innerHeight);
+        const resize = () => {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        };
+        window.addEventListener("resize", resize);
 
         const ripples = [];
+        let currentScale = 1;
+        let animId = null;
+        let lastTime = 0;
+
+        const startLoop = () => {
+            if (!animId && this.enabled) {
+                lastTime = 0;
+                animId = requestAnimationFrame(loop);
+            }
+        };
+
         const onPointerDown = (e) => {
             if (!this.enabled) return;
             ripples.push({
@@ -254,31 +315,44 @@ class ThemeFXEngine {
                 y: e.clientY,
                 r: 4,
                 maxR: 90,
-                alpha: 0.25
+                alpha: 0.25,
             });
+            startLoop();
         };
-        window.addEventListener('pointerdown', onPointerDown);
+        window.addEventListener("pointerdown", onPointerDown);
 
-        let currentScale = 1;
-        let animId;
+        const loop = (now) => {
+            if (!this.enabled) {
+                animId = null;
+                return;
+            }
+            if (
+                !this.audioData.isPlaying &&
+                ripples.length === 0 &&
+                Math.abs(currentScale - 1) < 0.001
+            ) {
+                ctx.clearRect(0, 0, w, h);
+                if (coverWrapper) coverWrapper.style.transform = "scale(1)";
+                if (playBtn) playBtn.style.transform = "scale(1)";
+                animId = null;
+                return;
+            }
 
-        const loop = () => {
-            if (!this.enabled) return;
+            animId = requestAnimationFrame(loop);
+            if (document.hidden) return;
+
+            const interval = window.__zenithFrameInterval || 19;
+            if (now - lastTime < interval) return;
+            lastTime = now;
+
             ctx.clearRect(0, 0, w, h);
 
-            const bass = this.getBassEnergy();
+            const bass = this.audioData.isPlaying ? this.getBassEnergy() : 0;
             const targetScale = this.audioData.isPlaying ? 1 + bass * 0.045 : 1;
             currentScale += (targetScale - currentScale) * 0.14;
 
             if (coverWrapper) {
                 coverWrapper.style.transform = `scale(${currentScale.toFixed(4)})`;
-            }
-
-            if (island && this.audioData.isPlaying) {
-                const islandScale = 1 + (currentScale - 1) * 0.25;
-                island.style.transform = `scale(${islandScale.toFixed(4)})`;
-            } else if (island) {
-                island.style.transform = 'scale(1)';
             }
 
             if (playBtn && this.audioData.isPlaying) {
@@ -299,58 +373,64 @@ class ThemeFXEngine {
 
                 if (r.alpha < 0.005) ripples.splice(i, 1);
             }
-
-            animId = requestAnimationFrame(loop);
         };
-        loop();
+
+        this.onPlaybackChange = (playing) => {
+            if (playing) startLoop();
+        };
+
+        if (this.audioData.isPlaying) startLoop();
 
         this.cleanupFn = () => {
-            cancelAnimationFrame(animId);
-            window.removeEventListener('resize', resize);
-            window.removeEventListener('pointerdown', onPointerDown);
+            if (animId) cancelAnimationFrame(animId);
+            animId = null;
+            window.removeEventListener("resize", resize);
+            window.removeEventListener("pointerdown", onPointerDown);
             canvas.remove();
-            if (coverWrapper) coverWrapper.style.transform = 'none';
-            if (island) island.style.transform = 'none';
-            if (playBtn) playBtn.style.transform = 'none';
+            if (coverWrapper) coverWrapper.style.transform = "none";
+            if (playBtn) playBtn.style.transform = "none";
         };
     }
 
     initDreamcore() {
-        const eyeWrapper = document.createElement('div');
-        eyeWrapper.style.cssText = 'position:fixed;top:10px;right:24px;width:30px;height:30px;pointer-events:none;z-index:100;';
+        const eyeWrapper = document.createElement("div");
+        eyeWrapper.style.cssText =
+            "position:fixed;top:10px;right:24px;width:30px;height:30px;pointer-events:none;z-index:100;";
 
-        const eye = document.createElement('div');
-        eye.style.cssText = 'width:24px;height:24px;border-radius:50%;background:#ffffff;border:1.5px solid #ffd1dc;box-shadow:0 0 8px #ffd1dc;position:relative;overflow:hidden;';
+        const eye = document.createElement("div");
+        eye.style.cssText =
+            "width:24px;height:24px;border-radius:50%;background:#ffffff;border:1.5px solid #ffd1dc;box-shadow:0 0 8px #ffd1dc;position:relative;overflow:hidden;";
 
-        const pupil = document.createElement('div');
-        pupil.style.cssText = 'width:8px;height:8px;border-radius:50%;background:#140e1c;position:absolute;top:7px;left:7px;';
+        const pupil = document.createElement("div");
+        pupil.style.cssText =
+            "width:8px;height:8px;border-radius:50%;background:#140e1c;position:absolute;top:7px;left:7px;";
 
         eye.appendChild(pupil);
         eyeWrapper.appendChild(eye);
         this.container.appendChild(eyeWrapper);
 
         const onMouseMove = (e) => {
-            if (!this.enabled) return;
+            if (!this.enabled || document.hidden) return;
             const rect = eye.getBoundingClientRect();
             const ex = rect.left + rect.width / 2;
             const ey = rect.top + rect.height / 2;
             const angle = Math.atan2(e.clientY - ey, e.clientX - ex);
             pupil.style.transform = `translate(${Math.cos(angle) * 4}px, ${Math.sin(angle) * 4}px)`;
         };
-        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener("mousemove", onMouseMove);
 
         this.cleanupFn = () => {
-            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener("mousemove", onMouseMove);
             eyeWrapper.remove();
         };
     }
 
     initLofi() {
-        const cover = document.querySelector('.cover-wrapper');
+        const cover = document.querySelector(".cover-wrapper");
         if (!cover) return;
 
-        const tonearm = document.createElement('div');
-        tonearm.id = 'lofi-tonearm';
+        const tonearm = document.createElement("div");
+        tonearm.id = "lofi-tonearm";
         tonearm.style.cssText = `
             position: absolute; top: -4px; right: -6px; width: 36px; height: 64px;
             pointer-events: none; z-index: 25; transform-origin: 28px 6px;
@@ -364,11 +444,13 @@ class ThemeFXEngine {
                 <rect x="6" y="56" width="7" height="5" rx="1" fill="#451a03" stroke="#ffaa40"/>
             </svg>
         `;
-        cover.style.position = 'relative';
+        cover.style.position = "relative";
         cover.appendChild(tonearm);
 
         const setArmState = (playing) => {
-            tonearm.style.transform = playing ? 'rotate(4deg)' : 'rotate(-35deg)';
+            tonearm.style.transform = playing
+                ? "rotate(4deg)"
+                : "rotate(-35deg)";
         };
         setArmState(this.audioData.isPlaying);
         this.onPlaybackChange = setArmState;
