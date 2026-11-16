@@ -31,8 +31,28 @@ document.addEventListener("DOMContentLoaded", () => {
         return filter;
     });
 
+    const inputBus = audioContext.createGain();
+    const distPreGain = audioContext.createGain();
+    const distortionNode = audioContext.createWaveShaper();
+    const distortionGain = audioContext.createGain();
+
+    function makeHardClipCurve() {
+        const samples = 4096;
+        const curve = new Float32Array(samples);
+        const ceiling = 0.85;
+        for (let i = 0; i < samples; i++) {
+            const x = (i * 2) / samples - 1;
+            curve[i] = Math.max(-ceiling, Math.min(ceiling, x * 1.5));
+        }
+        return curve;
+    }
+
     eqFilters
-        .reduce((prev, curr) => (prev.connect(curr), curr), masterGain)
+        .reduce((prev, curr) => (prev.connect(curr), curr), inputBus)
+        .connect(distPreGain)
+        .connect(distortionNode)
+        .connect(distortionGain)
+        .connect(masterGain)
         .connect(analyser)
         .connect(audioContext.destination);
 
@@ -118,6 +138,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const trackVolumeInput = document.getElementById("track-volume-input");
     const speedInput = document.getElementById("speed-input");
     const speedValue = document.getElementById("speed-value");
+    const distortionSlider = document.getElementById("distortion-slider");
+    const distortionInput = document.getElementById("distortion-input");
+    const distortionValue = document.getElementById("distortion-value");
     const progressSlider = document.getElementById("progress-slider");
     const timeDisplay = document.getElementById("time-display");
     const searchInput = document.getElementById("search-input");
@@ -297,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentSource = audioContext.createBufferSource();
         currentSource.buffer = currentTrackBuffer;
         currentSource.playbackRate.value = Number(speedSlider.value) / 100;
-        currentSource.connect(masterGain);
+        currentSource.connect(inputBus);
 
         let naturalEnd = true;
         currentSource.stop = ((stop) =>
@@ -453,7 +476,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!currentSource) return;
         const oldSource = currentSource;
         const oldGain = audioContext.createGain();
-        oldGain.connect(masterGain);
+        oldGain.connect(inputBus);
         oldSource.disconnect();
         oldSource.connect(oldGain);
         const fadeTime = 1.0;
@@ -555,6 +578,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 settings: {
                     volume: Number(trackVolumeSlider.value),
                     speed: Number(speedSlider.value),
+                    distortion: Number(distortionSlider.value),
                     eq: eqValues,
                 },
             });
@@ -580,7 +604,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function applySettings(settings) {
         isApplyingSettings = true;
-        const defaults = { volume: 100, speed: 100, eq: [0, 0, 0, 0, 0, 0, 0] };
+        const defaults = {
+            volume: 100,
+            speed: 100,
+            distortion: 0,
+            eq: [0, 0, 0, 0, 0, 0, 0],
+        };
         const final = { ...defaults, ...settings };
 
         trackVolumeSlider.value = final.volume;
@@ -607,6 +636,10 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
             isApplyingSettings = false;
         }, 50);
+        applyDistortionDSP(final.distortion);
+        distortionSlider.value = final.distortion;
+        distortionInput.value = final.distortion;
+        distortionValue.textContent = `${final.distortion}%`;
     }
 
     searchInput.addEventListener("keydown", (e) => {
@@ -1125,7 +1158,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     speedSlider.addEventListener("input", (e) => updateSpeed(e.target.value));
     speedInput.addEventListener("change", (e) => updateSpeed(e.target.value));
+    let cachedClipCurve = null;
 
+    function applyDistortionDSP(val) {
+        if (val <= 0) {
+            distPreGain.gain.setValueAtTime(1, audioContext.currentTime);
+            distortionNode.curve = null;
+            distortionNode.oversample = "none";
+            distortionGain.gain.setValueAtTime(1, audioContext.currentTime);
+        } else {
+            if (!cachedClipCurve) cachedClipCurve = makeHardClipCurve();
+            const drive = 1 + Math.pow(val / 100, 1.3) * 24;
+            const comp = 1 / (1 + Math.pow(val / 100, 0.8) * 1.1);
+            distPreGain.gain.setValueAtTime(drive, audioContext.currentTime);
+            distortionNode.curve = cachedClipCurve;
+            distortionNode.oversample = "2x";
+            distortionGain.gain.setValueAtTime(comp, audioContext.currentTime);
+        }
+    }
+
+    function updateDistortion(value) {
+        const val = Math.min(100, Math.max(0, Number(value)));
+        applyDistortionDSP(val);
+        distortionValue.textContent = `${val}%`;
+        distortionSlider.value = val;
+        distortionInput.value = val;
+        onSettingsChange();
+    }
+    distortionSlider.addEventListener("input", (e) =>
+        updateDistortion(e.target.value),
+    );
+    distortionInput.addEventListener("change", (e) =>
+        updateDistortion(e.target.value),
+    );
     // Discord RPC Modal
     const rpcModal = document.getElementById("rpc-modal");
     const rpcBtn = document.getElementById("discord-rpc-btn");

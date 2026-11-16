@@ -305,8 +305,12 @@ body {
 }
 
 .sliders-row {
-    display: flex;
-    gap: 20px;
+  flex-wrap: wrap !important;
+  gap: 10px 16px !important;
+}
+
+.control-group input[type="range"] {
+  min-width: 65px;
 }
 
 .control-group {
