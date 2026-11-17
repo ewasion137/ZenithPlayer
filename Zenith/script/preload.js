@@ -40,7 +40,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.invoke("discord-rpc:init", clientId),
     updateDiscordRPC: (data) => ipcRenderer.send("discord-rpc:update", data),
     clearDiscordRPC: () => ipcRenderer.send("discord-rpc:clear"),
-
+    getAudioStreamPort: () => ipcRenderer.invoke("get-audio-stream-port"),
     // window controls
     minimize: (type) => ipcRenderer.send("window-minimize", type),
     maximize: () => ipcRenderer.send("window-maximize"),

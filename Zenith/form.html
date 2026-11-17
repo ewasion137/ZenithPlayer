@@ -50,13 +50,15 @@
     </head>
 
     <body>
-        <!-- 1. TITLE BAR -->
         <div class="title-bar">
             <div class="title-bar-drag">
                 <img src="icon.png" class="title-icon" alt="" />
                 <span class="title-text">ZENITH PLAYER</span>
             </div>
             <div class="window-controls">
+                <button id="mini-mode-btn" class="win-btn" title="Mini Player">
+                    &#9698;
+                </button>
                 <button id="win-min" class="win-btn" title="Minimize">
                     &minus;
                 </button>
@@ -69,13 +71,14 @@
             </div>
         </div>
 
-        <!-- 2. MAIN WORKSPACE -->
         <div class="app-workspace">
             <canvas id="spectrogram-canvas"></canvas>
 
-            <!-- LEFT: MAIN PLAYER STAGE -->
+            <div id="drop-overlay" class="drop-overlay hidden">
+                <div class="drop-box">Drop audio files or folders here</div>
+            </div>
+
             <div class="player-stage">
-                <!-- NOW PLAYING HERO (SPOTIFY STYLE) -->
                 <div class="now-playing-container">
                     <div class="artwork-glow"></div>
                     <div class="now-playing-content">
@@ -89,27 +92,45 @@
                         <div class="track-info">
                             <h1 id="current-track-name">Zenith Player</h1>
                             <p id="current-track-folder">
-                                Select a track or paste a link
+                                Select a track, drop a folder or paste a link
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- CONTROLS & TIMELINE -->
                 <div id="top-controls">
                     <div class="main-controls">
+                        <button
+                            id="shuffle-btn"
+                            class="ctrl-mini-btn"
+                            title="Shuffle"
+                        >
+                            &#8644;
+                        </button>
                         <button id="prev-btn" title="Previous Track"></button>
                         <button
                             id="play-pause-btn"
                             title="Play/Pause (Space)"
                         ></button>
                         <button id="next-btn" title="Next Track"></button>
+                        <button
+                            id="repeat-btn"
+                            class="ctrl-mini-btn"
+                            title="Repeat: Off"
+                        >
+                            &#8635;
+                        </button>
                     </div>
 
                     <div class="controls-column">
                         <div class="sliders-row">
                             <div class="control-group">
-                                <label>VOL</label>
+                                <label
+                                    id="vol-mute-btn"
+                                    class="clickable-label"
+                                    title="Click to Mute"
+                                    >VOL</label
+                                >
                                 <input
                                     type="range"
                                     id="track-volume-slider"
@@ -117,6 +138,7 @@
                                     max="200"
                                     value="100"
                                     step="1"
+                                    title="Double-click to reset"
                                 />
                                 <input
                                     type="number"
@@ -126,10 +148,9 @@
                                     value="100"
                                     class="control-input"
                                 />
-                                <span id="track-volume-value">100%</span>
                             </div>
                             <div class="control-group">
-                                <label>SPEED</label>
+                                <label title="Playback Speed">SPEED</label>
                                 <input
                                     type="range"
                                     id="speed-slider"
@@ -137,6 +158,7 @@
                                     max="200"
                                     value="100"
                                     step="1"
+                                    title="Double-click to reset"
                                 />
                                 <input
                                     type="number"
@@ -146,10 +168,9 @@
                                     value="100"
                                     class="control-input"
                                 />
-                                <span id="speed-value">100%</span>
                             </div>
                             <div class="control-group">
-                                <label>DIST</label>
+                                <label title="Hard Clipping">DIST</label>
                                 <input
                                     type="range"
                                     id="distortion-slider"
@@ -157,6 +178,7 @@
                                     max="100"
                                     value="0"
                                     step="1"
+                                    title="Double-click to reset"
                                 />
                                 <input
                                     type="number"
@@ -166,7 +188,6 @@
                                     value="0"
                                     class="control-input"
                                 />
-                                <span id="distortion-value">0%</span>
                             </div>
                         </div>
 
@@ -183,39 +204,79 @@
                             </div>
                             <div id="time-display">
                                 <span>00:00</span>
+                                <button
+                                    id="vis-mode-btn"
+                                    class="vis-mode-btn"
+                                    title="Switch Visualizer Mode"
+                                >
+                                    WAVE
+                                </button>
                                 <span>00:00</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- EQUALIZER -->
-                <div class="eq-container-wrapper">
-                    <div class="eq-header-label">EQUALIZER (DSP)</div>
+                <div class="eq-container-wrapper" id="eq-wrapper">
+                    <div class="eq-header-bar">
+                        <div class="eq-header-label">EQUALIZER (DSP)</div>
+                        <div class="eq-controls-row">
+                            <select
+                                id="eq-preset-select"
+                                class="eq-select"
+                                title="EQ Presets"
+                            >
+                                <option value="custom">Custom</option>
+                                <option value="flat">Flat</option>
+                                <option value="bass">Bass Boost</option>
+                                <option value="phonk">Phonk</option>
+                                <option value="vocal">Vocal</option>
+                                <option value="treble">Crisp</option>
+                            </select>
+                            <button
+                                id="eq-bypass-btn"
+                                class="eq-mini-btn active"
+                                title="Toggle EQ"
+                            >
+                                ON
+                            </button>
+                            <button
+                                id="eq-collapse-btn"
+                                class="eq-mini-btn"
+                                title="Collapse EQ"
+                            >
+                                &#9662;
+                            </button>
+                        </div>
+                    </div>
                     <div class="eq-bands"></div>
                 </div>
             </div>
 
-            <!-- RESIZER -->
             <div
                 id="sidebar-resizer"
                 class="resizer-bar"
                 title="Drag to resize"
             ></div>
 
-            <!-- RIGHT: EXPLORER SIDEBAR -->
             <div class="explorer-sidebar" id="explorer-sidebar">
                 <div class="explorer-header">
                     <span class="explorer-title">EXPLORER</span>
                     <div class="explorer-actions">
                         <button
+                            id="jump-playing-btn"
+                            title="Scroll to Playing Track"
+                        >
+                            &#9678;
+                        </button>
+                        <button
                             id="add-url-btn"
                             title="Add YouTube / Spotify URL"
                         >
-                            🔗 + URL
+                            + URL
                         </button>
                         <button id="select-folder-btn" title="Open Folder">
-                            📂 Open
+                            Open
                         </button>
                     </div>
                 </div>
@@ -226,34 +287,36 @@
             </div>
         </div>
 
-        <!-- 3. BOTTOM STATUS BAR -->
         <div class="status-bar">
             <div class="status-left">
+                <button id="settings-btn" class="status-btn" title="Settings">
+                    &#9881; Settings
+                </button>
                 <button
                     id="discord-rpc-btn"
                     class="status-btn"
                     title="Discord RPC"
                 >
-                    🎮 <span id="rpc-quick-status">RPC</span>
+                    <span id="rpc-quick-status">RPC</span>
                 </button>
                 <button
                     id="optimize-btn"
                     class="status-btn"
-                    title="Toggle Visuals"
+                    title="Toggle Low-GFX"
                 >
                     GFX: ON
                 </button>
                 <button
                     id="save-settings-btn"
                     class="status-btn"
-                    title="Save Settings"
+                    title="Save Track DSP"
                 >
-                    💾 Save
+                    Save
                 </button>
                 <button
                     id="reset-settings-btn"
                     class="status-btn"
-                    title="Reset Settings"
+                    title="Reset Track DSP"
                 >
                     Reset
                 </button>
@@ -264,31 +327,198 @@
                     <input
                         type="text"
                         id="search-input"
-                        placeholder="🔍 Search or paste URL..."
+                        placeholder="Search or paste URL..."
                     />
                 </div>
             </div>
 
             <div class="status-right">
-                <span id="audio-format-tag" class="status-tag"
-                    >44.1kHz • 24bit</span
-                >
+                <span id="audio-format-tag" class="status-tag">READY</span>
                 <button
                     id="theme-switcher"
                     class="status-btn"
-                    title="Change Theme"
+                    title="Themes (Right-click to cycle)"
                 >
-                    🎨 Theme
+                    Theme
                 </button>
             </div>
         </div>
 
-        <!-- 4. URL STREAM MODAL -->
+        <div id="settings-modal" class="modal-overlay hidden">
+            <div class="modal-content settings-modal-content">
+                <div class="modal-header">
+                    <h3>ZENITH SETTINGS</h3>
+                    <button id="close-settings-modal" class="modal-close-btn">
+                        &times;
+                    </button>
+                </div>
+
+                <div class="settings-tabs">
+                    <button
+                        class="settings-tab active"
+                        data-tab="tab-components"
+                    >
+                        Components
+                    </button>
+                    <button class="settings-tab" data-tab="tab-performance">
+                        FPS &amp; GPU
+                    </button>
+                    <button class="settings-tab" data-tab="tab-audio">
+                        Audio &amp; DSP
+                    </button>
+                    <button class="settings-tab" data-tab="tab-themes">
+                        Themes
+                    </button>
+                </div>
+
+                <div class="settings-body">
+                    <div id="tab-components" class="settings-panel active">
+                        <label class="setting-row">
+                            <span>Equalizer Panel</span>
+                            <input type="checkbox" id="set-show-eq" checked />
+                        </label>
+                        <label class="setting-row">
+                            <span>Waveform / Progress Bar</span>
+                            <input type="checkbox" id="set-show-wave" checked />
+                        </label>
+                        <label class="setting-row">
+                            <span>Background Spectrogram</span>
+                            <input type="checkbox" id="set-show-spec" checked />
+                        </label>
+                        <label class="setting-row">
+                            <span>Artwork Ambient Glow</span>
+                            <input type="checkbox" id="set-show-glow" checked />
+                        </label>
+                        <label class="setting-row">
+                            <span>Theme JS Effects (Bubbles, Tonearm, Eye)</span>
+                            <input type="checkbox" id="set-show-fx" checked />
+                        </label>
+                        <label class="setting-row">
+                            <span>Explorer Sidebar</span>
+                            <input
+                                type="checkbox"
+                                id="set-show-sidebar"
+                                checked
+                            />
+                        </label>
+                        <label class="setting-row">
+                            <span>Always On Top in Mini-Mode</span>
+                            <input
+                                type="checkbox"
+                                id="set-mini-ontop"
+                                checked
+                            />
+                        </label>
+                    </div>
+
+                    <div id="tab-performance" class="settings-panel">
+                        <div class="setting-row">
+                            <div>
+                                <div>FPS Limit</div>
+                                <small
+                                    id="detected-hz-badge"
+                                    class="setting-hint"
+                                    >Monitor: detecting...</small
+                                >
+                            </div>
+                            <select id="set-fps-mode" class="setting-select">
+                                <option value="auto">Auto (Monitor / N)</option>
+                                <option value="60">60 FPS</option>
+                                <option value="48">48 FPS</option>
+                                <option value="30">30 FPS</option>
+                                <option value="15">15 FPS (Eco)</option>
+                                <option value="native">Native (Uncapped)</option>
+                            </select>
+                        </div>
+                        <div class="setting-row">
+                            <span>Spectrogram Resolution</span>
+                            <select id="set-spec-scale" class="setting-select">
+                                <option value="0.25">0.25x (Fast)</option>
+                                <option value="0.5" selected>
+                                    0.5x (Balanced)
+                                </option>
+                                <option value="1">1.0x (Sharp)</option>
+                            </select>
+                        </div>
+                        <label class="setting-row">
+                            <span>Freeze Render When Unfocused</span>
+                            <input type="checkbox" id="set-pause-blur" />
+                        </label>
+                        <label class="setting-row">
+                            <span>Low-GFX Mode (Zero Shadows &amp; Blur)</span>
+                            <input type="checkbox" id="set-low-gfx" />
+                        </label>
+                        <label class="setting-row">
+                            <span>Theme Perf Guard (Block Heavy CSS)</span>
+                            <input
+                                type="checkbox"
+                                id="set-perf-guard"
+                                checked
+                            />
+                        </label>
+                    </div>
+
+                    <div id="tab-audio" class="settings-panel">
+                        <div class="setting-row">
+                            <div>
+                                <div>Playback Engine</div>
+                                <small class="setting-hint"
+                                    >Stream uses 10x less RAM on long
+                                    mixes</small
+                                >
+                            </div>
+                            <select id="set-audio-mode" class="setting-select">
+                                <option value="stream">
+                                    Stream (Low RAM)
+                                </option>
+                                <option value="buffer">
+                                    Full Buffer (Peaks)
+                                </option>
+                            </select>
+                        </div>
+                        <label class="setting-row">
+                            <div>
+                                <div>Preserve Pitch on Speed Change</div>
+                                <small class="setting-hint"
+                                    >Off = vinyl pitch shift</small
+                                >
+                            </div>
+                            <input type="checkbox" id="set-preserve-pitch" />
+                        </label>
+                        <label class="setting-row">
+                            <div>
+                                <div>Global DSP Across Tracks</div>
+                                <small class="setting-hint"
+                                    >Keep Speed, Dist &amp; EQ when
+                                    switching</small
+                                >
+                            </div>
+                            <input type="checkbox" id="set-global-dsp" />
+                        </label>
+                        <div class="setting-row">
+                            <span>Track Switch Fade Out</span>
+                            <select id="set-fade-ms" class="setting-select">
+                                <option value="0">0 ms (Instant)</option>
+                                <option value="300">300 ms</option>
+                                <option value="1000" selected>1000 ms</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="tab-themes" class="settings-panel">
+                        <div id="theme-grid" class="theme-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="url-modal" class="modal-overlay hidden">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Play from YouTube / Spotify</h3>
-                    <button id="close-url-modal">&times;</button>
+                    <button id="close-url-modal" class="modal-close-btn">
+                        &times;
+                    </button>
                 </div>
                 <div class="modal-body">
                     <label for="web-url-input"
@@ -304,18 +534,19 @@
                         class="rpc-status-container"
                     ></div>
                     <div class="modal-actions">
-                        <button id="url-submit-btn">Load & Play</button>
+                        <button id="url-submit-btn">Load &amp; Play</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 5. DISCORD RPC MODAL -->
         <div id="rpc-modal" class="modal-overlay hidden">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Discord Rich Presence</h3>
-                    <button id="close-rpc-modal">&times;</button>
+                    <button id="close-rpc-modal" class="modal-close-btn">
+                        &times;
+                    </button>
                 </div>
                 <div class="modal-body">
                     <label for="rpc-client-id">Application Client ID:</label>
@@ -337,6 +568,7 @@
                 </div>
             </div>
         </div>
+
         <script src="theme-fx.js"></script>
         <script src="renderer.js"></script>
     </body>

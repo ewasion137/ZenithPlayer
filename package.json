@@ -40,11 +40,14 @@
     }
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
     "discord-rpc": "^4.0.1",
-    "music-metadata": "^7.14.0", 
+    "music-metadata": "^7.14.0",
     "yt-dlp-wrap": "^2.3.12"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "electron": "^39.8.10",
     "electron-builder": "^26.0.12"
   }

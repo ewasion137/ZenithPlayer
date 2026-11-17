@@ -20,6 +20,7 @@ const {
 const path = require("path");
 const fs = require("fs");
 const { pathToFileURL } = require("url");
+const http = require("http");
 const musicMetadata = require("music-metadata");
 const DiscordRPC = require("discord-rpc");
 
@@ -70,6 +71,101 @@ app.commandLine.appendSwitch("disable-component-update");
 app.commandLine.appendSwitch("disable-domain-reliability");
 app.commandLine.appendSwitch("disable-sync");
 
+let audioServerPort = 0;
+let audioServerReady = null;
+
+function startAudioStreamServer() {
+    const mimeMap = {
+        ".mp3": "audio/mpeg",
+        ".wav": "audio/wav",
+        ".ogg": "audio/ogg",
+        ".flac": "audio/flac",
+    };
+
+    audioServerReady = new Promise((resolve) => {
+        const server = http.createServer((req, res) => {
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+            res.setHeader("Access-Control-Allow-Headers", "Range");
+            if (req.method === "OPTIONS") {
+                res.writeHead(204);
+                return res.end();
+            }
+            try {
+                const u = new URL(req.url, "http://127.0.0.1");
+                const filePath = u.searchParams.get("path");
+                if (!filePath || !fs.existsSync(filePath)) {
+                    res.writeHead(404);
+                    return res.end();
+                }
+
+                const stat = fs.statSync(filePath);
+                const ext = path.extname(filePath).toLowerCase();
+                const contentType = mimeMap[ext] || "application/octet-stream";
+                const range = req.headers.range;
+
+                if (range && stat.size > 0) {
+                    const parts = range.replace(/bytes=/, "").split("-");
+                    const start = parts[0] ? parseInt(parts[0], 10) : 0;
+                    const end = parts[1]
+                        ? Math.min(parseInt(parts[1], 10), stat.size - 1)
+                        : stat.size - 1;
+
+                    if (
+                        isNaN(start) ||
+                        isNaN(end) ||
+                        start >= stat.size ||
+                        start > end
+                    ) {
+                        res.writeHead(416, {
+                            "Content-Range": `bytes */${stat.size}`,
+                        });
+                        return res.end();
+                    }
+
+                    res.writeHead(206, {
+                        "Content-Range": `bytes ${start}-${end}/${stat.size}`,
+                        "Accept-Ranges": "bytes",
+                        "Content-Length": end - start + 1,
+                        "Content-Type": contentType,
+                    });
+                    if (req.method === "HEAD") return res.end();
+
+                    const stream = fs.createReadStream(filePath, {
+                        start,
+                        end,
+                    });
+                    stream.on("error", () => res.destroy());
+                    res.on("close", () => stream.destroy());
+                    stream.pipe(res);
+                } else {
+                    res.writeHead(200, {
+                        "Content-Length": stat.size,
+                        "Accept-Ranges": "bytes",
+                        "Content-Type": contentType,
+                    });
+                    if (req.method === "HEAD") return res.end();
+
+                    const stream = fs.createReadStream(filePath);
+                    stream.on("error", () => res.destroy());
+                    res.on("close", () => stream.destroy());
+                    stream.pipe(res);
+                }
+            } catch (e) {
+                res.writeHead(500);
+                res.end();
+            }
+        });
+
+        server.listen(0, "127.0.0.1", () => {
+            audioServerPort = server.address().port;
+            resolve(audioServerPort);
+        });
+    });
+}
+
+ipcMain.handle("get-audio-stream-port", () => audioServerReady);
+
 app.whenReady().then(() => {
     protocol.handle("media", (req) => {
         const parsed = new URL(req.url);
@@ -81,6 +177,7 @@ app.whenReady().then(() => {
             headers: req.headers,
         });
     });
+    startAudioStreamServer();
     loadSettings();
     createWindow();
 
