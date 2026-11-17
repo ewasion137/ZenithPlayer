@@ -1,9 +1,14 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, webUtils } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
     // files & folders
     selectFolder: (scanSubfolders) =>
         ipcRenderer.invoke("dialog:openFolder", scanSubfolders),
+    scanDroppedPaths: (paths) => ipcRenderer.invoke("files:scan-paths", paths),
+    getPathForFile: (file) =>
+        webUtils && webUtils.getPathForFile
+            ? webUtils.getPathForFile(file)
+            : file.path,
     onReceiveTracks: (callback) =>
         ipcRenderer.on("update-track-list", (event, tracks) =>
             callback(tracks),
@@ -18,7 +23,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getTrackMetadata: (trackPath) =>
         ipcRenderer.invoke("get-track-metadata", trackPath),
 
-    // web stream integration (YouTube / Spotify)
+    // web stream integration
     resolveWebTrack: (url) => ipcRenderer.invoke("stream:resolve-url", url),
     getStreamBuffer: (streamUrl) =>
         ipcRenderer.invoke("stream:get-buffer", streamUrl),
@@ -40,4 +45,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     minimize: (type) => ipcRenderer.send("window-minimize", type),
     maximize: () => ipcRenderer.send("window-maximize"),
     close: () => ipcRenderer.send("window-close"),
+    setMiniMode: (enabled, alwaysOnTop = true) =>
+        ipcRenderer.send("window-mini-mode", { enabled, alwaysOnTop }),
 });

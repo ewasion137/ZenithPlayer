@@ -19,6 +19,7 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const { pathToFileURL } = require("url");
 const musicMetadata = require("music-metadata");
 const DiscordRPC = require("discord-rpc");
 
@@ -64,9 +65,6 @@ const createWindow = () => {
 };
 
 app.commandLine.appendSwitch("disable-background-networking");
-app.commandLine.appendSwitch("disable-background-timer-throttling");
-app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
-app.commandLine.appendSwitch("disable-renderer-backgrounding");
 app.commandLine.appendSwitch("disable-breakpad"); // отключает сборщик крэшей
 app.commandLine.appendSwitch("disable-component-update");
 app.commandLine.appendSwitch("disable-domain-reliability");
@@ -74,8 +72,14 @@ app.commandLine.appendSwitch("disable-sync");
 
 app.whenReady().then(() => {
     protocol.handle("media", (req) => {
-        const filePath = decodeURIComponent(req.url.slice("media://".length));
-        return net.fetch(`file://${filePath}`);
+        const parsed = new URL(req.url);
+        const filePath =
+            parsed.searchParams.get("path") ||
+            decodeURIComponent(req.url.slice("media://".length));
+        return net.fetch(pathToFileURL(filePath).href, {
+            method: req.method,
+            headers: req.headers,
+        });
     });
     loadSettings();
     createWindow();
@@ -536,6 +540,55 @@ ipcMain.on("window-maximize", () => {
         mainWindow.unmaximize();
     } else {
         mainWindow.maximize();
+    }
+});
+
+let savedBoundsBeforeMini = null;
+
+ipcMain.on("window-mini-mode", (event, { enabled, alwaysOnTop }) => {
+    if (!mainWindow) return;
+    if (enabled) {
+        if (mainWindow.isMaximized()) mainWindow.unmaximize();
+        savedBoundsBeforeMini = mainWindow.getBounds();
+        mainWindow.setMinimumSize(360, 140);
+        mainWindow.setSize(420, 175);
+        mainWindow.setAlwaysOnTop(!!alwaysOnTop);
+    } else {
+        mainWindow.setAlwaysOnTop(false);
+        mainWindow.setMinimumSize(700, 500);
+        if (savedBoundsBeforeMini) {
+            mainWindow.setBounds(savedBoundsBeforeMini);
+            savedBoundsBeforeMini = null;
+        } else {
+            mainWindow.setSize(1100, 750);
+        }
+    }
+});
+
+ipcMain.handle("files:scan-paths", async (event, paths) => {
+    if (!Array.isArray(paths) || paths.length === 0) return;
+    const map = new Map();
+    for (const p of paths) {
+        try {
+            const stat = await fs.promises.stat(p);
+            if (stat.isDirectory()) {
+                await findAudioFilesRecursive(p, true, map);
+            } else if (
+                stat.isFile() &&
+                AUDIO_EXTENSIONS.includes(path.extname(p).toLowerCase())
+            ) {
+                const dir = path.dirname(p);
+                if (!map.has(dir)) map.set(dir, []);
+                map.get(dir).push({
+                    name: path.basename(p, path.extname(p)),
+                    path: p,
+                });
+            }
+        } catch (e) {}
+    }
+    const result = Array.from(map, ([folder, tracks]) => ({ folder, tracks }));
+    if (mainWindow && result.length > 0) {
+        mainWindow.webContents.send("update-track-list", result);
     }
 });
 
