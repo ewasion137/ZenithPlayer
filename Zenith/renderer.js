@@ -1,5 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
     const audioContext = new AudioContext({ latencyHint: "playback" });
+    const isAndroid = !!window.__ZENITH_ANDROID__;
+    const ZenithAudio = window.__ZENITH_PLUGIN__ || null;
+    let androidCurrentTime = 0;
+    let androidDuration = 0;
+    let androidQueueLoaded = false;
+    let isPollingAndroid = false;
     const masterGain = audioContext.createGain();
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
@@ -332,6 +338,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const gain = prefs.eqEnabled ? eqSavedValues[i] : 0;
             filter.gain.setValueAtTime(gain, audioContext.currentTime);
         });
+        if (isAndroid && ZenithAudio) {
+            ZenithAudio.setDsp({
+                eqEnabled: prefs.eqEnabled,
+                eq: eqSavedValues,
+            });
+        }
     }
 
     eqFilters.forEach((filter, i) => {
@@ -416,10 +428,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Track Helpers ---
     function hasActiveTrack() {
+        if (isAndroid) return !!currentTrackPath;
         return isStreamActive ? !!currentStreamUrl : !!currentTrackBuffer;
     }
 
     function getTrackDuration() {
+        if (isAndroid) return androidDuration;
         if (isStreamActive) {
             return Number.isFinite(streamAudioEl.duration)
                 ? streamAudioEl.duration
@@ -429,6 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getCurrentTime() {
+        if (isAndroid) return androidCurrentTime;
         if (isStreamActive) {
             return streamAudioEl.currentTime || 0;
         }
@@ -496,6 +511,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateDiscordPlaying(offsetSeconds) {
         const dur = getTrackDuration();
         const rate = Number(speedSlider.value) / 100;
+        if (isAndroid && ZenithAudio) {
+            if (offsetSeconds > 0)
+                ZenithAudio.seekTo({ seconds: offsetSeconds });
+            ZenithAudio.play();
+            isPlaying = true;
+            if (window.ThemeFX) window.ThemeFX.setPlayingState(true);
+            updateUIState();
+            startRenderLoop();
+            return;
+        }
         const remainingSec =
             dur > offsetSeconds ? (dur - offsetSeconds) / rate : 0;
         const now = Date.now();
@@ -596,6 +621,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function stopSource() {
+        if (isAndroid && ZenithAudio) {
+            ZenithAudio.pause();
+        }
         if (isStreamActive) {
             streamAudioEl.pause();
         }
@@ -702,6 +730,33 @@ document.addEventListener("DOMContentLoaded", () => {
             const savedSettings =
                 await window.electronAPI.getTrackSettings(trackPath);
             applySettings(savedSettings);
+        }
+
+        if (isAndroid && ZenithAudio) {
+            const queue = window.electronAPI.getFlatQueue
+                ? window.electronAPI.getFlatQueue()
+                : [];
+            const idx = queue.findIndex((t) => t.path === trackPath);
+            androidCurrentTime = 0;
+            androidDuration = meta.duration || 0;
+            waveformPeaks = generatePseudoPeaks(trackPath);
+            lastWaveProgressX = -1;
+            updateFormatTag(44100, 2, meta.ext || "NATIVE");
+            if (!androidQueueLoaded && queue.length > 0) {
+                androidQueueLoaded = true;
+                await ZenithAudio.setQueue({
+                    tracks: queue,
+                    startIndex: Math.max(0, idx),
+                    playWhenReady: true,
+                });
+            } else if (idx > -1) {
+                await ZenithAudio.jumpToIndex({ index: idx });
+            }
+            isPlaying = true;
+            updateUIState();
+            renderWaveform(true);
+            startRenderLoop();
+            return;
         }
 
         if (prefs.audioMode === "stream") {
@@ -855,6 +910,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function playNextTrack() {
+        if (isAndroid && ZenithAudio) {
+            ZenithAudio.next();
+            return;
+        }
         const tracks = getVisibleTracks();
         if (tracks.length === 0) return;
 
@@ -886,6 +945,10 @@ document.addEventListener("DOMContentLoaded", () => {
             play(0);
             return;
         }
+        if (isAndroid && ZenithAudio) {
+            ZenithAudio.prev();
+            return;
+        }
         const tracks = getVisibleTracks();
         if (tracks.length === 0) return;
         const currentIndex = tracks.findIndex(
@@ -902,6 +965,8 @@ document.addEventListener("DOMContentLoaded", () => {
         shuffleEnabled = !shuffleEnabled;
         shuffleBtn.classList.toggle("active", shuffleEnabled);
         shuffleBtn.title = shuffleEnabled ? "Shuffle: ON" : "Shuffle: OFF";
+        if (isAndroid && ZenithAudio)
+            ZenithAudio.setShuffle({ enabled: shuffleEnabled });
     });
 
     repeatBtn.addEventListener("click", () => {
@@ -920,6 +985,16 @@ document.addEventListener("DOMContentLoaded", () => {
             repeatBtn.classList.remove("active");
             repeatBtn.textContent = "↻";
             repeatBtn.title = "Repeat: Off";
+        }
+        if (isAndroid && ZenithAudio) {
+            ZenithAudio.setDsp({
+                volume: final.volume / 100,
+                distortion: final.distortion,
+            });
+            ZenithAudio.setPlaybackParams({
+                speed: final.speed / 100,
+                preservePitch: !!prefs.preservePitch,
+            });
         }
     });
 
@@ -996,6 +1071,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (isPlaying) play(time);
                 else {
                     if (isStreamActive) streamAudioEl.currentTime = time;
+                    if (isAndroid && ZenithAudio)
+                        ZenithAudio.seekTo({ seconds: time });
                     updateSimpleUI(true);
                     renderWaveform(true);
                 }
@@ -1106,6 +1183,7 @@ document.addEventListener("DOMContentLoaded", () => {
         trackVolumeSlider.value = val;
         trackVolumeInput.value = val;
         onSettingsChange();
+        if (isAndroid && ZenithAudio) ZenithAudio.setDsp({ volume: val / 100 });
     }
 
     volMuteBtn.addEventListener("click", () => {
@@ -1126,7 +1204,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const currentPos = getCurrentTime();
             currentSource.playbackRate.value = rate;
             playbackStartedAtCtx = audioContext.currentTime - currentPos / rate;
-        }
+        } else if (isAndroid && ZenithAudio)
+            ZenithAudio.setPlaybackParams({
+                speed: rate,
+                preservePitch: !!prefs.preservePitch,
+            });
         speedSlider.value = val;
         speedInput.value = val;
         onSettingsChange();
@@ -1290,6 +1372,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function displayTracks(folders) {
+        androidQueueLoaded = false;
         const openFolders = new Set();
         document
             .querySelectorAll("#local-tracks-section .folder-group.open h3")
