@@ -28,6 +28,35 @@ jobs:
           distribution: "temurin"
           java-version: "21"
 
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Configure Maven Central Mirror
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat << 'EOF' > ~/.gradle/init.d/mirror.gradle
+          allprojects {
+              buildscript {
+                  repositories.all { repo ->
+                      if (repo instanceof MavenArtifactRepository) {
+                          def u = repo.url.toString()
+                          if (u.contains('repo.maven.apache.org') || u.contains('repo1.maven.org')) {
+                              repo.url = uri('https://maven-central.storage-download.googleapis.com/maven2')
+                          }
+                      }
+                  }
+              }
+              repositories.all { repo ->
+                  if (repo instanceof MavenArtifactRepository) {
+                      def u = repo.url.toString()
+                      if (u.contains('repo.maven.apache.org') || u.contains('repo1.maven.org')) {
+                          repo.url = uri('https://maven-central.storage-download.googleapis.com/maven2')
+                      }
+                  }
+              }
+          }
+          EOF
+
       - name: Install dependencies
         run: npm ci
 
