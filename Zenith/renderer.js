@@ -1169,6 +1169,17 @@ document.addEventListener("DOMContentLoaded", () => {
         distortionSlider.value = final.distortion;
         distortionInput.value = final.distortion;
 
+        if (isAndroid && ZenithAudio) {
+            ZenithAudio.setDsp({
+                volume: final.volume / 100,
+                distortion: final.distortion,
+            });
+            ZenithAudio.setPlaybackParams({
+                speed: final.speed / 100,
+                preservePitch: !!prefs.preservePitch,
+            });
+        }
+
         setTimeout(() => {
             isApplyingSettings = false;
         }, 50);
@@ -1215,6 +1226,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function applyDistortionDSP(val) {
+      if (isAndroid && ZenithAudio) {
+          ZenithAudio.setDsp({ distortion: val });
+          return;
+      }
         if (val <= 0) {
             distPreGain.gain.setValueAtTime(1, audioContext.currentTime);
             distortionNode.curve = null;
@@ -1597,6 +1612,31 @@ document.addEventListener("DOMContentLoaded", () => {
         if (frameIntervalMs > 0 && now - lastFrameTime < frameIntervalMs)
             return;
         lastFrameTime = now;
+        if (isAndroid && ZenithAudio && !isPollingAndroid) {
+            isPollingAndroid = true;
+            const needsSpec =
+                (prefs.showSpec && !prefs.lowGfx) ||
+                (prefs.showWave && prefs.visMode !== "wave");
+            ZenithAudio.getPlaybackState({ withSpectrum: needsSpec })
+                .then((st) => {
+                    if (st) {
+                        androidCurrentTime = st.currentTime || 0;
+                        if (st.duration > 0) androidDuration = st.duration;
+                        if (st.spectrum && Array.isArray(st.spectrum)) {
+                            for (
+                                let i = 0;
+                                i < Math.min(48, st.spectrum.length);
+                                i++
+                            ) {
+                                dataArray[i] = st.spectrum[i];
+                            }
+                        }
+                    }
+                })
+                .finally(() => {
+                    isPollingAndroid = false;
+                });
+        }
 
         updateSimpleUI(false);
         if (prefs.showWave) {
@@ -1967,7 +2007,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     bindPrefCheckbox("set-perf-guard", "perfGuard");
     bindPrefSelect("set-audio-mode", "audioMode", false);
-    bindPrefCheckbox("set-preserve-pitch", "preservePitch");
+    bindPrefCheckbox("set-preserve-pitch", "preservePitch", () => {
+        if (isAndroid && ZenithAudio) {
+            ZenithAudio.setPlaybackParams({
+                speed: Number(speedSlider.value) / 100,
+                preservePitch: !!prefs.preservePitch,
+            });
+        }
+    });
     bindPrefCheckbox("set-global-dsp", "globalDsp");
     bindPrefSelect("set-fade-ms", "fadeMs", true);
 
@@ -2069,6 +2116,65 @@ document.addEventListener("DOMContentLoaded", () => {
         updateCanvasSizeCache();
         if (hasActiveTrack()) renderWaveform(true);
     });
+
+    if (isAndroid && ZenithAudio) {
+        selectFolderBtn.textContent = "Scan";
+        if (miniModeBtn) miniModeBtn.style.display = "none";
+        document.getElementById("win-min").style.display = "none";
+        document.getElementById("win-max").style.display = "none";
+        document.getElementById("win-close").style.display = "none";
+
+        ZenithAudio.addListener("trackChanged", async ({ uri }) => {
+            if (!uri || uri === currentTrackPath) return;
+            currentTrackPath = uri;
+            if (currentPlayingElement)
+                currentPlayingElement.classList.remove("playing");
+            const el = Array.from(
+                document.querySelectorAll(".track-item"),
+            ).find((t) => t.dataset.path === uri);
+            if (el) {
+                currentPlayingElement = el;
+                el.classList.add("playing");
+            }
+            const meta = await window.electronAPI.getTrackMetadata(uri);
+            currentMetadata = meta;
+            currentTrackNameLabel.textContent = meta.title || "Zenith Track";
+            currentTrackFolderLabel.textContent =
+                meta.artist || "Android Library";
+            androidDuration = meta.duration || 0;
+            androidCurrentTime = 0;
+            waveformPeaks = generatePseudoPeaks(uri);
+            lastWaveProgressX = -1;
+            if (meta.picture) {
+                if (currentTrackArtwork) currentTrackArtwork.src = meta.picture;
+                artworkGlowEl.style.backgroundImage = `url("${meta.picture}")`;
+            } else {
+                if (currentTrackArtwork) currentTrackArtwork.src = "icon.png";
+                artworkGlowEl.style.backgroundImage = "";
+            }
+            if (!prefs.globalDsp) {
+                const s = await window.electronAPI.getTrackSettings(uri);
+                applySettings(s);
+            }
+            updateSimpleUI(true);
+            renderWaveform(true);
+        });
+
+        ZenithAudio.addListener(
+            "playbackStateChanged",
+            ({ isPlaying: playing }) => {
+                isPlaying = !!playing;
+                if (window.ThemeFX) window.ThemeFX.setPlayingState(isPlaying);
+                updateUIState();
+                if (isPlaying) startRenderLoop();
+                else {
+                    stopRenderLoop();
+                    updateSimpleUI(true);
+                    renderWaveform(true);
+                }
+            },
+        );
+    }
 
     applyPreferencesToUI();
     updateThemeCache();

@@ -1137,3 +1137,92 @@ body.mini-mode .waveform-container {
 body.mini-mode #vis-mode-btn {
   display: none;
 }
+
+
+@media (max-width: 768px) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .title-bar {
+    height: 28px;
+    min-height: 28px;
+  }
+
+  .app-workspace {
+    flex-direction: column;
+  }
+
+  .player-stage {
+    min-width: 0;
+    flex: 0 0 auto;
+    max-height: 55vh;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .resizer-bar {
+    display: none;
+  }
+
+  .explorer-sidebar {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    flex: 1;
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .now-playing-container {
+    min-height: 0;
+    padding: 10px 12px;
+  }
+
+  .cover-wrapper {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+  }
+
+  .track-info h1 {
+    font-size: 16px;
+  }
+
+  #top-controls {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .main-controls {
+    justify-content: center;
+  }
+
+  .control-group input[type="range"]::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+  }
+
+  .eq-band input[type="range"] {
+    height: 52px;
+  }
+
+  .status-bar {
+    height: auto;
+    min-height: 34px;
+    flex-wrap: wrap;
+    padding: 4px 8px;
+    gap: 6px;
+  }
+
+  .status-search input {
+    width: 130px;
+  }
+
+  .theme-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
