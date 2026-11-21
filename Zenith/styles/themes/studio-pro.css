@@ -1,0 +1,236 @@
+/* styles/themes/studio-pro.css */
+
+:root {
+    --bg-main: #111114;
+    --panel-bg: #18181c;
+    --surface: #222228;
+    --surface-hover: #2c2c34;
+    --accent: #0a84ff;
+    --accent-secondary: #30d158;
+    --accent-gradient: linear-gradient(90deg, #0a84ff 0%, #30d158 100%);
+    --text-main: #f4f4f6;
+    --text-dim: #8a8a96;
+    --border-light: #2b2b33;
+    --border-focus: #0a84ff;
+    --transition: 0.12s ease;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+.title-bar {
+    background: #141418;
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+
+.title-text {
+    color: var(--text-main);
+    letter-spacing: 1.4px;
+}
+
+.status-search input {
+    background: #0d0d10;
+    border: 1px solid #2e2e36;
+    border-radius: 6px;
+}
+
+.status-search input:focus {
+    background: #09090b;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.2);
+}
+
+.win-btn {
+    color: var(--text-dim);
+}
+
+.win-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+}
+
+.win-tool.active {
+    color: var(--accent);
+}
+
+.explorer-sidebar {
+    background: #141418;
+    border-right: 1px solid var(--border-light);
+}
+
+.explorer-header {
+    background: #18181d;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.explorer-header button {
+    background: var(--surface);
+    border: 1px solid #35353f;
+    border-radius: 5px;
+}
+
+.explorer-header button:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.folder-group.open h3 {
+    color: var(--text-main);
+    background: rgba(10, 132, 255, 0.12);
+    border-color: rgba(10, 132, 255, 0.35);
+}
+
+.track-item.playing {
+    background: rgba(10, 132, 255, 0.16);
+    border-left-color: var(--accent);
+    color: #ffffff;
+}
+
+.player-stage {
+    background: radial-gradient(circle at 50% 35%, rgba(10, 132, 255, 0.06) 0%, transparent 65%);
+}
+
+#spectrogram-canvas {
+    opacity: 0.14;
+}
+
+.cover-wrapper {
+    border-radius: 6px;
+    border: 1px solid #383842;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+}
+
+.stage-kicker {
+    color: var(--accent);
+}
+
+.hero-dsp-pill {
+    background: #1b1b20;
+    border: 1px solid #30303a;
+    border-radius: 5px;
+    color: var(--text-dim);
+}
+
+.hero-dsp-pill:hover {
+    border-color: var(--accent);
+    color: var(--text-main);
+}
+
+.eq-container-wrapper {
+    background: #17171b;
+    border-top: 1px solid var(--border-light);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.eq-select,
+.eq-mini-btn,
+.setting-select {
+    background: #222228;
+    border: 1px solid #34343e;
+    border-radius: 4px;
+}
+
+.eq-mini-btn.active {
+    background: rgba(10, 132, 255, 0.18);
+    border-color: var(--accent);
+    color: #60a5fa;
+}
+
+.eq-band input[type="range"]::-webkit-slider-runnable-track {
+    width: 4px;
+    background: #0d0d10;
+    border: 1px solid #2e2e36;
+    border-radius: 2px;
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb {
+    width: 16px;
+    height: 9px;
+    margin-left: -7px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #e4e4e7 0%, #a1a1aa 100%);
+    border: 1px solid #09090b;
+}
+
+.eq-band input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--accent);
+}
+
+.control-input,
+.eq-band input[type="number"] {
+    color: var(--accent-secondary);
+}
+
+#top-controls.transport-dock {
+    background: #16161a;
+    border-top: 1px solid var(--border-light);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.transport-art {
+    border-radius: 4px;
+    border: 1px solid #32323b;
+}
+
+#play-pause-btn {
+    background: #f4f4f6;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+#play-pause-btn.is-playing {
+    background: var(--accent);
+}
+
+#play-pause-btn.is-playing::before {
+    background: #ffffff;
+}
+
+.ctrl-mini-btn.active {
+    color: var(--accent);
+}
+
+.waveform-container {
+    background: #0c0c0f;
+    border: 1px solid #2c2c34;
+    border-radius: 4px;
+}
+
+.vis-mode-btn,
+.dock-pill-btn {
+    background: #222228;
+    border: 1px solid #32323c;
+    border-radius: 4px;
+}
+
+.dock-pill-btn.active {
+    background: rgba(10, 132, 255, 0.18);
+    border-color: var(--accent);
+    color: #60a5fa;
+}
+
+.status-bar {
+    background: #101013;
+    border-top: 1px solid var(--border-light);
+}
+
+.modal-content {
+    background: #18181c;
+    border: 1px solid #383844;
+    border-radius: 10px;
+}
+
+.setting-row,
+.theme-chip {
+    background: #202026;
+    border-color: #2f2f38;
+}
+
+.settings-tab.active,
+.theme-chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+}

@@ -1,3 +1,4 @@
+// --- theme-fx.js ---
 class ThemeFXEngine {
     constructor() {
         this.currentTheme = null;
@@ -5,10 +6,12 @@ class ThemeFXEngine {
         this.enabled = true;
         this.audioData = {
             analyser: null,
-            dataArray: null,
+            freqBuffer: null,
+            timeBuffer: null,
             isPlaying: false,
         };
         this.container = null;
+        this.onPlaybackChange = null;
         this.init();
     }
 
@@ -16,7 +19,7 @@ class ThemeFXEngine {
         this.container = document.createElement("div");
         this.container.id = "theme-fx-layer";
         this.container.style.cssText =
-            "position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:90;overflow:hidden;";
+            "position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden;";
         document.body.appendChild(this.container);
 
         const themeLink = document.getElementById("theme-link");
@@ -85,9 +88,16 @@ class ThemeFXEngine {
         }
     }
 
-    setAudioContext(analyser, dataArray) {
+    setAudioContext(analyser) {
         this.audioData.analyser = analyser;
-        this.audioData.dataArray = dataArray;
+        if (analyser) {
+            this.audioData.freqBuffer = new Uint8Array(
+                analyser.frequencyBinCount,
+            );
+            this.audioData.timeBuffer = new Uint8Array(
+                analyser.frequencyBinCount,
+            );
+        }
     }
 
     setPlayingState(isPlaying) {
@@ -101,20 +111,22 @@ class ThemeFXEngine {
         if (
             !this.enabled ||
             !this.audioData.analyser ||
-            !this.audioData.dataArray
-        )
+            !this.audioData.freqBuffer
+        ) {
             return 0;
-        this.audioData.analyser.getByteFrequencyData(this.audioData.dataArray);
+        }
+        this.audioData.analyser.getByteFrequencyData(this.audioData.freqBuffer);
         let sum = 0;
-        for (let i = 0; i < 8; i++) sum += this.audioData.dataArray[i];
+        for (let i = 0; i < 8; i++) sum += this.audioData.freqBuffer[i];
         return sum / 8 / 255;
     }
 
     detectTheme() {
         const themeLink = document.getElementById("theme-link");
+        const rawHref = themeLink ? themeLink.getAttribute("href") : "";
         let themeName = "main.css";
-        if (themeLink && themeLink.href) {
-            const parts = themeLink.href.split("/");
+        if (rawHref) {
+            const parts = rawHref.split("/");
             themeName = parts[parts.length - 1] || "main.css";
         }
         this.applyThemeFX(themeName);
@@ -134,16 +146,10 @@ class ThemeFXEngine {
                 this.initFrutigerAero();
                 break;
             case "y2k-futurism.css":
-                this.initY2K();
-                break;
-            case "dreamcore.css":
-                this.initDreamcore();
+                this.initY2KOscilloscope();
                 break;
             case "lofi.css":
-                this.initLofi();
-                break;
-            case "kinetic.css":
-                this.initKinetic();
+                this.initLofiTonearm();
                 break;
             default:
                 break;
@@ -153,26 +159,31 @@ class ThemeFXEngine {
     initFrutigerAero() {
         const canvas = document.createElement("canvas");
         canvas.style.cssText =
-            "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;";
+            "position:absolute;inset:0;width:100%;height:100%;pointer-events:none;";
         this.container.appendChild(canvas);
         const ctx = canvas.getContext("2d");
 
-        // Pre-bake bubble sprite once to avoid per-frame gradient allocation
         const sprite = document.createElement("canvas");
         sprite.width = 64;
         sprite.height = 64;
         const sCtx = sprite.getContext("2d");
-        const grad = sCtx.createRadialGradient(22, 22, 3, 32, 32, 30);
-        grad.addColorStop(0, "rgba(255, 255, 255, 0.65)");
-        grad.addColorStop(0.5, "rgba(0, 210, 255, 0.2)");
-        grad.addColorStop(1, "rgba(56, 239, 125, 0.3)");
+        const grad = sCtx.createRadialGradient(22, 20, 2, 32, 32, 30);
+        grad.addColorStop(0, "rgba(255, 255, 255, 0.72)");
+        grad.addColorStop(0.35, "rgba(120, 235, 255, 0.25)");
+        grad.addColorStop(0.85, "rgba(0, 190, 255, 0.14)");
+        grad.addColorStop(1, "rgba(56, 239, 125, 0.22)");
         sCtx.beginPath();
-        sCtx.arc(32, 32, 30, 0, Math.PI * 2);
+        sCtx.arc(32, 32, 29, 0, Math.PI * 2);
         sCtx.fillStyle = grad;
         sCtx.fill();
-        sCtx.lineWidth = 1.5;
-        sCtx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+        sCtx.lineWidth = 1.25;
+        sCtx.strokeStyle = "rgba(255, 255, 255, 0.55)";
         sCtx.stroke();
+
+        sCtx.beginPath();
+        sCtx.ellipse(23, 19, 8, 4, -0.55, 0, Math.PI * 2);
+        sCtx.fillStyle = "rgba(255, 255, 255, 0.65)";
+        sCtx.fill();
 
         let w = (canvas.width = window.innerWidth);
         let h = (canvas.height = window.innerHeight);
@@ -183,14 +194,14 @@ class ThemeFXEngine {
         window.addEventListener("resize", resize);
 
         const bubbles = [];
-        for (let i = 0; i < 16; i++) {
+        for (let i = 0; i < 14; i++) {
             bubbles.push({
                 x: Math.random() * w,
-                y: h + Math.random() * h,
-                r: 8 + Math.random() * 16,
-                vy: 0.7 + Math.random() * 1.2,
+                y: Math.random() * h,
+                r: 10 + Math.random() * 18,
+                vy: 0.45 + Math.random() * 0.85,
                 wobble: Math.random() * Math.PI * 2,
-                wobbleSpeed: 0.02 + Math.random() * 0.02,
+                wobbleSpeed: 0.015 + Math.random() * 0.015,
             });
         }
 
@@ -204,7 +215,7 @@ class ThemeFXEngine {
             animId = requestAnimationFrame(loop);
             if (document.hidden) return;
 
-            const interval = Math.max(window.__zenithFrameInterval || 19, 32);
+            const interval = Math.max(window.__zenithFrameInterval || 20, 32);
             if (now - lastTime < interval) return;
             lastTime = now;
 
@@ -212,18 +223,20 @@ class ThemeFXEngine {
             const bass = this.audioData.isPlaying ? this.getBassEnergy() : 0;
 
             for (const b of bubbles) {
-                b.y -= b.vy * (1 + bass * 1.5);
+                b.y -= b.vy * (1 + bass * 1.4);
                 b.wobble += b.wobbleSpeed;
-                b.x += Math.sin(b.wobble) * 0.6;
+                b.x += Math.sin(b.wobble) * 0.45;
 
                 if (b.y + b.r < 0) {
-                    b.y = h + b.r + Math.random() * 50;
+                    b.y = h + b.r + Math.random() * 40;
                     b.x = Math.random() * w;
                 }
 
                 const size = b.r * 2;
+                ctx.globalAlpha = 0.5;
                 ctx.drawImage(sprite, b.x - b.r, b.y - b.r, size, size);
             }
+            ctx.globalAlpha = 1;
         };
         animId = requestAnimationFrame(loop);
 
@@ -235,29 +248,71 @@ class ThemeFXEngine {
         };
     }
 
-    initY2K() {
-        const cover = document.querySelector(".cover-wrapper");
-        if (!cover) return;
+    initY2KOscilloscope() {
+        const stage = document.querySelector(".player-stage");
+        if (!stage) return;
+
+        const canvas = document.createElement("canvas");
+        canvas.style.cssText =
+            "position:fixed;pointer-events:none;z-index:1;opacity:0.28;";
+        this.container.appendChild(canvas);
+        const ctx = canvas.getContext("2d");
+
+        let rect = stage.getBoundingClientRect();
+        const syncRect = () => {
+            rect = stage.getBoundingClientRect();
+            canvas.style.left = `${rect.left}px`;
+            canvas.style.top = `${rect.top}px`;
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            canvas.width = Math.max(1, Math.floor(rect.width * 0.5));
+            canvas.height = Math.max(1, Math.floor(rect.height * 0.5));
+        };
+        syncRect();
+
+        const observer = new ResizeObserver(syncRect);
+        observer.observe(stage);
+        window.addEventListener("resize", syncRect);
 
         let animId = null;
-        let angle = 0;
         let lastTime = 0;
 
         const loop = (now) => {
             if (!this.enabled || !this.audioData.isPlaying) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 animId = null;
                 return;
             }
             animId = requestAnimationFrame(loop);
             if (document.hidden) return;
 
-            const interval = window.__zenithFrameInterval || 19;
+            const interval = window.__zenithFrameInterval || 20;
             if (now - lastTime < interval) return;
             lastTime = now;
 
-            const bass = this.getBassEnergy();
-            angle = (angle + 1.2 + bass * 3) % 360;
-            cover.style.transform = `rotate(${angle.toFixed(2)}deg)`;
+            if (!this.audioData.analyser || !this.audioData.timeBuffer) return;
+            this.audioData.analyser.getByteTimeDomainData(
+                this.audioData.timeBuffer,
+            );
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const midY = h * 0.5;
+            const buf = this.audioData.timeBuffer;
+            const stepX = w / (buf.length - 1);
+
+            ctx.clearRect(0, 0, w, h);
+            ctx.beginPath();
+            for (let i = 0; i < buf.length; i++) {
+                const v = (buf[i] - 128) / 128;
+                const y = midY + v * (h * 0.24);
+                const x = i * stepX;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = "#00f0ff";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
         };
 
         this.onPlaybackChange = (playing) => {
@@ -274,183 +329,44 @@ class ThemeFXEngine {
         this.cleanupFn = () => {
             if (animId) cancelAnimationFrame(animId);
             animId = null;
-            if (cover) cover.style.transform = "none";
-        };
-    }
-
-    initKinetic() {
-        const coverWrapper = document.querySelector(".cover-wrapper");
-        const playBtn = document.getElementById("play-pause-btn");
-
-        const canvas = document.createElement("canvas");
-        canvas.style.cssText =
-            "position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:95;";
-        this.container.appendChild(canvas);
-        const ctx = canvas.getContext("2d");
-
-        let w = (canvas.width = window.innerWidth);
-        let h = (canvas.height = window.innerHeight);
-        const resize = () => {
-            w = canvas.width = window.innerWidth;
-            h = canvas.height = window.innerHeight;
-        };
-        window.addEventListener("resize", resize);
-
-        const ripples = [];
-        let currentScale = 1;
-        let animId = null;
-        let lastTime = 0;
-
-        const startLoop = () => {
-            if (!animId && this.enabled) {
-                lastTime = 0;
-                animId = requestAnimationFrame(loop);
-            }
-        };
-
-        const onPointerDown = (e) => {
-            if (!this.enabled) return;
-            ripples.push({
-                x: e.clientX,
-                y: e.clientY,
-                r: 4,
-                maxR: 90,
-                alpha: 0.25,
-            });
-            startLoop();
-        };
-        window.addEventListener("pointerdown", onPointerDown);
-
-        const loop = (now) => {
-            if (!this.enabled) {
-                animId = null;
-                return;
-            }
-            if (
-                !this.audioData.isPlaying &&
-                ripples.length === 0 &&
-                Math.abs(currentScale - 1) < 0.001
-            ) {
-                ctx.clearRect(0, 0, w, h);
-                if (coverWrapper) coverWrapper.style.transform = "scale(1)";
-                if (playBtn) playBtn.style.transform = "scale(1)";
-                animId = null;
-                return;
-            }
-
-            animId = requestAnimationFrame(loop);
-            if (document.hidden) return;
-
-            const interval = window.__zenithFrameInterval || 19;
-            if (now - lastTime < interval) return;
-            lastTime = now;
-
-            ctx.clearRect(0, 0, w, h);
-
-            const bass = this.audioData.isPlaying ? this.getBassEnergy() : 0;
-            const targetScale = this.audioData.isPlaying ? 1 + bass * 0.045 : 1;
-            currentScale += (targetScale - currentScale) * 0.14;
-
-            if (coverWrapper) {
-                coverWrapper.style.transform = `scale(${currentScale.toFixed(4)})`;
-            }
-
-            if (playBtn && this.audioData.isPlaying) {
-                const btnScale = 1 + (currentScale - 1) * 0.8;
-                playBtn.style.transform = `scale(${btnScale.toFixed(4)})`;
-            }
-
-            for (let i = ripples.length - 1; i >= 0; i--) {
-                const r = ripples[i];
-                r.r += (r.maxR - r.r) * 0.12;
-                r.alpha *= 0.9;
-
-                ctx.beginPath();
-                ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(255, 255, 255, ${r.alpha})`;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-
-                if (r.alpha < 0.005) ripples.splice(i, 1);
-            }
-        };
-
-        this.onPlaybackChange = (playing) => {
-            if (playing) startLoop();
-        };
-
-        if (this.audioData.isPlaying) startLoop();
-
-        this.cleanupFn = () => {
-            if (animId) cancelAnimationFrame(animId);
-            animId = null;
-            window.removeEventListener("resize", resize);
-            window.removeEventListener("pointerdown", onPointerDown);
+            observer.disconnect();
+            window.removeEventListener("resize", syncRect);
             canvas.remove();
-            if (coverWrapper) coverWrapper.style.transform = "none";
-            if (playBtn) playBtn.style.transform = "none";
         };
     }
 
-    initDreamcore() {
-        const eyeWrapper = document.createElement("div");
-        eyeWrapper.style.cssText =
-            "position:fixed;top:10px;right:24px;width:30px;height:30px;pointer-events:none;z-index:100;";
-
-        const eye = document.createElement("div");
-        eye.style.cssText =
-            "width:24px;height:24px;border-radius:50%;background:#ffffff;border:1.5px solid #ffd1dc;box-shadow:0 0 8px #ffd1dc;position:relative;overflow:hidden;";
-
-        const pupil = document.createElement("div");
-        pupil.style.cssText =
-            "width:8px;height:8px;border-radius:50%;background:#140e1c;position:absolute;top:7px;left:7px;";
-
-        eye.appendChild(pupil);
-        eyeWrapper.appendChild(eye);
-        this.container.appendChild(eyeWrapper);
-
-        const onMouseMove = (e) => {
-            if (!this.enabled || document.hidden) return;
-            const rect = eye.getBoundingClientRect();
-            const ex = rect.left + rect.width / 2;
-            const ey = rect.top + rect.height / 2;
-            const angle = Math.atan2(e.clientY - ey, e.clientX - ex);
-            pupil.style.transform = `translate(${Math.cos(angle) * 4}px, ${Math.sin(angle) * 4}px)`;
-        };
-        window.addEventListener("mousemove", onMouseMove);
-
-        this.cleanupFn = () => {
-            window.removeEventListener("mousemove", onMouseMove);
-            eyeWrapper.remove();
-        };
-    }
-
-    initLofi() {
+    initLofiTonearm() {
         const cover = document.querySelector(".cover-wrapper");
         if (!cover) return;
 
         const tonearm = document.createElement("div");
         tonearm.id = "lofi-tonearm";
         tonearm.style.cssText = `
-            position: absolute; top: -4px; right: -6px; width: 36px; height: 64px;
-            pointer-events: none; z-index: 25; transform-origin: 28px 6px;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: rotate(-35deg);
+            position: absolute;
+            top: -10px;
+            right: -22px;
+            width: 64px;
+            height: 132px;
+            pointer-events: none;
+            z-index: 25;
+            transform-origin: 48px 16px;
+            transition: transform 0.55s cubic-bezier(0.25, 0.9, 0.3, 1);
+            transform: rotate(-28deg);
         `;
         tonearm.innerHTML = `
-            <svg width="36" height="64" viewBox="0 0 36 64" fill="none">
-                <circle cx="28" cy="6" r="5" fill="#201510" stroke="#c8963e" stroke-width="1.5"/>
-                <path d="M28 6 L14 44 L10 58" stroke="#c8963e" stroke-width="2" stroke-linecap="round"/>
-                <rect x="6" y="56" width="7" height="5" rx="1" fill="#451a03" stroke="#ffaa40"/>
+            <svg width="64" height="132" viewBox="0 0 64 132" fill="none">
+                <circle cx="48" cy="16" r="12" fill="#1f1610" stroke="#d99b43" stroke-width="2"/>
+                <circle cx="48" cy="16" r="4" fill="#d99b43"/>
+                <path d="M48 16 L40 84 L20 112" stroke="#d99b43" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="10" y="108" width="14" height="10" rx="2" transform="rotate(-35 17 113)" fill="#2a1b12" stroke="#f59e0b" stroke-width="1.5"/>
             </svg>
         `;
-        cover.style.position = "relative";
         cover.appendChild(tonearm);
 
         const setArmState = (playing) => {
             tonearm.style.transform = playing
-                ? "rotate(4deg)"
-                : "rotate(-35deg)";
+                ? "rotate(6deg)"
+                : "rotate(-28deg)";
         };
         setArmState(this.audioData.isPlaying);
         this.onPlaybackChange = setArmState;

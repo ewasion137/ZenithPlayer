@@ -1,3 +1,4 @@
+// --- renderer.js ---
 document.addEventListener("DOMContentLoaded", () => {
     const audioContext = new AudioContext({ latencyHint: "playback" });
     const isAndroid = !!window.__ZENITH_ANDROID__;
@@ -60,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showGlow: true,
         showFx: true,
         showSidebar: true,
+        sidebarWidth: 280,
         miniOnTop: true,
         fpsMode: "auto",
         specScale: 0.5,
@@ -130,7 +132,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastWaveProgressX = -1;
     let specCleared = true;
     let cachedWaveBarGrad = null;
-    let cachedWaveAreaGrad = null;
     let cachedSpecGrad = null;
     let settingsSaveTimer = null;
     let cachedClipCurve = null;
@@ -143,7 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let specCanvasW = 0;
     let specCanvasH = 0;
 
-    // --- DOM Elements ---
     const playPauseBtn = document.getElementById("play-pause-btn");
     const prevBtn = document.getElementById("prev-btn");
     const nextBtn = document.getElementById("next-btn");
@@ -152,6 +152,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const volMuteBtn = document.getElementById("vol-mute-btn");
     const miniModeBtn = document.getElementById("mini-mode-btn");
     const visModeBtn = document.getElementById("vis-mode-btn");
+    const sidebarToggleBtn = document.getElementById("sidebar-toggle-btn");
+    const dspToggleBtn = document.getElementById("dsp-toggle-btn");
 
     const addUrlBtn = document.getElementById("add-url-btn");
     const jumpPlayingBtn = document.getElementById("jump-playing-btn");
@@ -170,9 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const progressSlider = document.getElementById("progress-slider");
     const progressView = document.getElementById("progress-view");
-    const timeDisplay = document.getElementById("time-display");
-    const timeCurrentEl = timeDisplay.firstElementChild;
-    const timeTotalEl = timeDisplay.lastElementChild;
+    const timeCurrentEl = document.getElementById("time-current");
+    const timeTotalEl = document.getElementById("time-total");
 
     const searchInput = document.getElementById("search-input");
     const currentTrackNameLabel = document.getElementById("current-track-name");
@@ -182,6 +183,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentTrackArtwork = document.getElementById(
         "current-track-artwork",
     );
+    const transportArt = document.getElementById("transport-art");
+    const transportTitle = document.getElementById("transport-title");
+    const transportArtist = document.getElementById("transport-artist");
+    const heroDspStatus = document.getElementById("hero-dsp-status");
     const artworkGlowEl = document.querySelector(".artwork-glow");
     const audioFormatTag = document.getElementById("audio-format-tag");
 
@@ -213,8 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const resizer = document.getElementById("sidebar-resizer");
     const sidebar = document.getElementById("explorer-sidebar");
+    const playerStage = document.querySelector(".player-stage");
 
-    // --- FPS Limiter ---
     function applyFpsLimit() {
         const mode = prefs.fpsMode;
         if (mode === "native") {
@@ -262,7 +267,6 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(step);
     }
 
-    // --- Canvas Cache ---
     function rebuildCanvasGradients() {
         if (waveCanvasW > 0) {
             cachedWaveBarGrad = waveformCtx.createLinearGradient(
@@ -273,15 +277,6 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             cachedWaveBarGrad.addColorStop(0, cachedAccent);
             cachedWaveBarGrad.addColorStop(1, cachedAccentSec);
-
-            cachedWaveAreaGrad = waveformCtx.createLinearGradient(
-                0,
-                0,
-                waveCanvasW,
-                0,
-            );
-            cachedWaveAreaGrad.addColorStop(0, cachedAccent);
-            cachedWaveAreaGrad.addColorStop(1, cachedAccentSec);
         }
         if (specCanvasH > 0) {
             cachedSpecGrad = spectrogramCtx.createLinearGradient(
@@ -313,10 +308,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 waveformCanvas.height = waveCanvasH * dpr;
             }
         }
-        if (spectrogramCanvas) {
+        if (spectrogramCanvas && playerStage) {
             const scale = Number(prefs.specScale) || 0.5;
-            specCanvasW = Math.floor(window.innerWidth * scale);
-            specCanvasH = Math.floor(window.innerHeight * scale);
+            const stageW = playerStage.clientWidth || window.innerWidth;
+            const stageH = playerStage.clientHeight || window.innerHeight;
+            specCanvasW = Math.floor(stageW * scale);
+            specCanvasH = Math.floor(stageH * scale);
             spectrogramCanvas.width = specCanvasW;
             spectrogramCanvas.height = specCanvasH;
             specCleared = true;
@@ -324,7 +321,25 @@ document.addEventListener("DOMContentLoaded", () => {
         rebuildCanvasGradients();
     }
 
-    // --- EQ Presets & Generation ---
+    if (typeof ResizeObserver !== "undefined") {
+        const stageObserver = new ResizeObserver(() => {
+            updateCanvasSizeCache();
+            if (hasActiveTrack()) renderWaveform(true);
+        });
+        if (playerStage) stageObserver.observe(playerStage);
+        if (waveformCanvas && waveformCanvas.parentElement) {
+            stageObserver.observe(waveformCanvas.parentElement);
+        }
+    }
+
+    function updateHeroDspBadge() {
+        if (!heroDspStatus) return;
+        const speedStr = (Number(speedSlider.value) / 100).toFixed(2);
+        const driveStr = Number(distortionSlider.value) || 0;
+        const eqStr = prefs.eqEnabled ? "EQ ON" : "EQ OFF";
+        heroDspStatus.textContent = `${speedStr}x • DRIVE ${driveStr}% • ${eqStr}`;
+    }
+
     const EQ_PRESETS = {
         flat: [0, 0, 0, 0, 0, 0, 0],
         bass: [7.5, 5.5, 2.5, 0, 0, 1, 1.5],
@@ -344,6 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 eq: eqSavedValues,
             });
         }
+        updateHeroDspBadge();
     }
 
     eqFilters.forEach((filter, i) => {
@@ -413,20 +429,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
     eqBypassBtn.addEventListener("click", () => {
         prefs.eqEnabled = !prefs.eqEnabled;
-        eqBypassBtn.textContent = prefs.eqEnabled ? "ON" : "OFF";
+        eqBypassBtn.textContent = prefs.eqEnabled ? "EQ ON" : "EQ OFF";
         eqBypassBtn.classList.toggle("active", prefs.eqEnabled);
         syncEqFiltersToDSP();
         savePrefs();
     });
 
-    eqCollapseBtn.addEventListener("click", () => {
-        prefs.eqCollapsed = !prefs.eqCollapsed;
-        eqWrapper.classList.toggle("collapsed", prefs.eqCollapsed);
-        eqCollapseBtn.innerHTML = prefs.eqCollapsed ? "&#9656;" : "&#9662;";
+    function toggleDspRack(forceOpen) {
+        if (!prefs.showEq) {
+            prefs.showEq = true;
+            prefs.eqCollapsed = false;
+        } else {
+            prefs.eqCollapsed =
+                typeof forceOpen === "boolean"
+                    ? !forceOpen
+                    : !prefs.eqCollapsed;
+        }
         savePrefs();
-    });
+        applyPreferencesToUI();
+        setTimeout(updateCanvasSizeCache, 20);
+    }
 
-    // --- Track Helpers ---
+    eqCollapseBtn.addEventListener("click", () => toggleDspRack(false));
+    if (dspToggleBtn) {
+        dspToggleBtn.addEventListener("click", () => toggleDspRack());
+    }
+    if (heroDspStatus) {
+        heroDspStatus.addEventListener("click", () => toggleDspRack(true));
+    }
+
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener("click", () => {
+            prefs.showSidebar = !prefs.showSidebar;
+            savePrefs();
+            applyPreferencesToUI();
+            updateCanvasSizeCache();
+            if (hasActiveTrack()) renderWaveform(true);
+        });
+    }
+
     function hasActiveTrack() {
         if (isAndroid) return !!currentTrackPath;
         return isStreamActive ? !!currentStreamUrl : !!currentTrackBuffer;
@@ -485,7 +526,25 @@ document.addEventListener("DOMContentLoaded", () => {
         audioFormatTag.textContent = `${khz} • ${ch} • ${fmt} • ${mode}`;
     }
 
-    // --- Playback Core ---
+    function syncTrackDisplay(title, subtitle, artworkSrc) {
+        currentTrackNameLabel.textContent = title;
+        currentTrackFolderLabel.textContent = subtitle;
+        if (transportTitle) transportTitle.textContent = title;
+        if (transportArtist) transportArtist.textContent = subtitle;
+
+        const imgSrc = artworkSrc || "icon.png";
+        if (currentTrackArtwork) currentTrackArtwork.src = imgSrc;
+        if (transportArt) transportArt.src = imgSrc;
+
+        if (artworkSrc) {
+            artworkGlowEl.style.backgroundImage = `url("${artworkSrc}")`;
+            artworkGlowEl.style.opacity = prefs.showGlow ? "0.35" : "0";
+        } else {
+            artworkGlowEl.style.backgroundImage = "";
+            artworkGlowEl.style.opacity = prefs.showGlow ? "0.08" : "0";
+        }
+    }
+
     function handleTrackEnded() {
         if (!isPlaying) return;
         isPlaying = false;
@@ -690,7 +749,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentStreamUrl = null;
         cleanupBlobUrl();
         isPlaying = false;
-        timeCurrentEl.textContent = "Loading...";
+        timeCurrentEl.textContent = "...";
         timeTotalEl.textContent = "--:--";
 
         const meta = await window.electronAPI.getTrackMetadata(trackPath);
@@ -700,7 +759,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const rawFileName = trackElement
             ? trackElement.querySelector(".track-name").textContent
             : trackPath.split(/\\|\//).pop();
-        currentTrackNameLabel.textContent = meta.title || rawFileName;
+        const displayTitle = meta.title || rawFileName;
 
         const folderNode = trackElement
             ? trackElement.closest(".folder-group")
@@ -708,23 +767,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const folderName = folderNode
             ? folderNode.querySelector("h3").textContent
             : "Local";
-        if (meta.artist) {
-            currentTrackFolderLabel.textContent = meta.album
+        const displaySub = meta.artist
+            ? meta.album
                 ? `${meta.artist} • ${meta.album}`
-                : meta.artist;
-        } else {
-            currentTrackFolderLabel.textContent = folderName;
-        }
+                : meta.artist
+            : folderName;
 
-        if (meta.picture) {
-            if (currentTrackArtwork) currentTrackArtwork.src = meta.picture;
-            artworkGlowEl.style.backgroundImage = `url("${meta.picture}")`;
-            artworkGlowEl.style.opacity = prefs.showGlow ? "0.4" : "0";
-        } else {
-            if (currentTrackArtwork) currentTrackArtwork.src = "icon.png";
-            artworkGlowEl.style.backgroundImage = "";
-            artworkGlowEl.style.opacity = prefs.showGlow ? "0.1" : "0";
-        }
+        syncTrackDisplay(displayTitle, displaySub, meta.picture);
 
         if (!prefs.globalDsp) {
             const savedSettings =
@@ -801,7 +850,7 @@ document.addEventListener("DOMContentLoaded", () => {
             play(0);
         } catch (err) {
             console.error("Playback error:", err);
-            timeCurrentEl.textContent = "Error";
+            timeCurrentEl.textContent = "Err";
         }
     }
 
@@ -832,19 +881,11 @@ document.addEventListener("DOMContentLoaded", () => {
             picture: resolvedData.picture,
         };
 
-        currentTrackNameLabel.textContent = resolvedData.title;
-        currentTrackFolderLabel.textContent = resolvedData.artist;
-
-        if (resolvedData.picture) {
-            if (currentTrackArtwork)
-                currentTrackArtwork.src = resolvedData.picture;
-            artworkGlowEl.style.backgroundImage = `url("${resolvedData.picture}")`;
-            artworkGlowEl.style.opacity = prefs.showGlow ? "0.4" : "0";
-        } else {
-            if (currentTrackArtwork) currentTrackArtwork.src = "icon.png";
-            artworkGlowEl.style.backgroundImage = "";
-            artworkGlowEl.style.opacity = prefs.showGlow ? "0.1" : "0";
-        }
+        syncTrackDisplay(
+            resolvedData.title,
+            resolvedData.artist,
+            resolvedData.picture,
+        );
 
         if (!prefs.globalDsp) {
             const savedSettings = await window.electronAPI.getTrackSettings(
@@ -889,11 +930,10 @@ document.addEventListener("DOMContentLoaded", () => {
             play(0);
         } catch (err) {
             console.error("Web audio decode error:", err);
-            timeCurrentEl.textContent = "Decode Error";
+            timeCurrentEl.textContent = "Err";
         }
     }
 
-    // --- Navigation (Shuffle / Repeat / Next / Prev) ---
     function getVisibleTracks() {
         return Array.from(document.querySelectorAll(".track-item")).filter(
             (t) => t.style.display !== "none",
@@ -986,20 +1026,23 @@ document.addEventListener("DOMContentLoaded", () => {
             repeatBtn.textContent = "↻";
             repeatBtn.title = "Repeat: Off";
         }
-        if (isAndroid && ZenithAudio) {
-            ZenithAudio.setDsp({
-                volume: final.volume / 100,
-                distortion: final.distortion,
-            });
-            ZenithAudio.setPlaybackParams({
-                speed: final.speed / 100,
-                preservePitch: !!prefs.preservePitch,
-            });
+        if (isAndroid && ZenithAudio && ZenithAudio.setRepeatMode) {
+            ZenithAudio.setRepeatMode({ mode: repeatMode });
         }
     });
 
-    // --- Transport & Shortcuts ---
     window.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.code === "KeyK") {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+            return;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.code === "KeyE") {
+            e.preventDefault();
+            toggleDspRack();
+            return;
+        }
         if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT")
             return;
         if (e.code === "Space") {
@@ -1054,7 +1097,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     miniModeBtn.addEventListener("click", () => toggleMiniMode());
 
-    // --- Progress Slider & Vis Mode ---
     progressSlider.addEventListener(
         "mousedown",
         () => (isDraggingSlider = true),
@@ -1100,8 +1142,8 @@ document.addEventListener("DOMContentLoaded", () => {
         renderWaveform(true);
     });
 
-    // --- Settings Persistence (Per-Track) ---
     function onSettingsChange() {
+        updateHeroDspBadge();
         if (isApplyingSettings || !currentTrackPath) return;
         clearTimeout(settingsSaveTimer);
         settingsSaveTimer = setTimeout(() => {
@@ -1180,12 +1222,12 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
+        updateHeroDspBadge();
         setTimeout(() => {
             isApplyingSettings = false;
         }, 50);
     }
 
-    // --- DSP Sliders (Mute, Wheel, DblClick) ---
     function updateVolume(value) {
         const val = Math.min(200, Math.max(0, Number(value) || 0));
         isMuted = val === 0;
@@ -1226,10 +1268,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function applyDistortionDSP(val) {
-      if (isAndroid && ZenithAudio) {
-          ZenithAudio.setDsp({ distortion: val });
-          return;
-      }
+        if (isAndroid && ZenithAudio) {
+            ZenithAudio.setDsp({ distortion: val });
+            return;
+        }
         if (val <= 0) {
             distPreGain.gain.setValueAtTime(1, audioContext.currentTime);
             distortionNode.curve = null;
@@ -1275,7 +1317,6 @@ document.addEventListener("DOMContentLoaded", () => {
     bindControlPair(speedSlider, speedInput, 100, updateSpeed);
     bindControlPair(distortionSlider, distortionInput, 0, updateDistortion);
 
-    // --- Explorer, Web Streams, Search, Drag & Drop ---
     let savedWebTracks = [];
 
     async function initWebTracks() {
@@ -1378,7 +1419,7 @@ document.addEventListener("DOMContentLoaded", () => {
             item.append(nameSpan, delBtn);
             item.addEventListener("click", async (e) => {
                 e.stopPropagation();
-                timeCurrentEl.textContent = "Streaming...";
+                timeCurrentEl.textContent = "...";
                 const res = await window.electronAPI.resolveWebTrack(track.url);
                 if (res.success) playWebTrackBuffer(res, track, item);
             });
@@ -1476,7 +1517,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Drag & Drop files/folders
     let dragCounter = 0;
     window.addEventListener("dragenter", (e) => {
         e.preventDefault();
@@ -1499,7 +1539,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (paths.length > 0) window.electronAPI.scanDroppedPaths(paths);
     });
 
-    // --- Render Loop & Visuals ---
     function shouldRenderNow() {
         if (!isPlaying || !hasActiveTrack() || document.hidden) return false;
         if (prefs.pauseOnBlur && !document.hasFocus()) return false;
@@ -1682,7 +1721,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.toggle("is-playing", isPlaying);
     }
 
-    // --- Waveform & Inline Spectrum ---
     function generateWaveformPeaks(buffer) {
         if (!buffer) return [];
         const channelData = buffer.getChannelData(0);
@@ -1745,7 +1783,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             for (let i = 0; i < totalBars; i++) {
                 const x = i * (barWidth + gap);
-                const barH = waveformPeaks[i] * (waveCanvasH - 8);
+                const barH = waveformPeaks[i] * (waveCanvasH - 6);
                 const y = (waveCanvasH - barH) / 2;
 
                 if (x + barWidth <= progressX) {
@@ -1782,7 +1820,7 @@ document.addEventListener("DOMContentLoaded", () => {
             for (let i = 0; i < bins; i++) {
                 const norm = dataArray[i] / 255;
                 if (norm > 0.02) {
-                    const h = norm * (waveCanvasH - 4);
+                    const h = norm * (waveCanvasH - 2);
                     waveformCtx.globalAlpha = 0.35 + norm * 0.6;
                     waveformCtx.fillRect(
                         i * stepW,
@@ -1805,43 +1843,43 @@ document.addEventListener("DOMContentLoaded", () => {
             waveformCtx.fillRect(progressX - 1, 0, 2, waveCanvasH);
 
             waveformCtx.fillStyle = cachedAccent;
-            waveformCtx.fillRect(progressX - 2, (waveCanvasH - 14) / 2, 4, 14);
+            waveformCtx.fillRect(progressX - 2, (waveCanvasH - 12) / 2, 4, 12);
         }
 
         waveformCtx.restore();
     }
 
-    // --- Settings Modal & Component Toggles ---
     const themes = [
         "main.css",
-        "cosmic.css",
-        "frutigeraero.css",
+        "studio-pro.css",
         "terminal.css",
-        "winamp.css",
-        "macglass.css",
-        "kocmocunleashed.css",
-        "vaporwave.css",
-        "neumorphism.css",
-        "skeumorph-cassette.css",
-        "paper-dark.css",
-        "zen.css",
-        "y2k-futurism.css",
-        "gameboy.css",
-        "kinetic.css",
-        "dsg.css",
         "hyprland.css",
+        "winamp.css",
         "winxp.css",
-        "dreamcore.css",
-        "fogcore.css",
+        "frutigeraero.css",
+        "y2k-futurism.css",
+        "braun.css",
         "lofi.css",
     ];
+
+    const themeNames = {
+        "main.css": "Default",
+        "studio-pro.css": "Studio Pro",
+        "terminal.css": "Terminal",
+        "hyprland.css": "Hyprland",
+        "winamp.css": "Winamp",
+        "winxp.css": "Windows XP",
+        "frutigeraero.css": "Frutiger Aero",
+        "y2k-futurism.css": "Y2K Chrome",
+        "braun.css": "Braun OP-1",
+        "lofi.css": "Analog Lofi",
+    };
 
     const themeLink = document.getElementById("theme-link");
     const themeSwitcherBtn = document.getElementById("theme-switcher");
 
     function formatThemeName(file) {
-        if (file === "main.css") return "Default";
-        return file.replace(".css", "").replace(/-/g, " ");
+        return themeNames[file] || file.replace(".css", "").replace(/-/g, " ");
     }
 
     function renderThemeGrid(activeIndex) {
@@ -1862,10 +1900,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function applyTheme(themeName) {
-        themeLink.href =
-            themeName === "main.css"
-                ? "styles/main.css"
-                : `styles/themes/${themeName}`;
+        if (themeName === "main.css") {
+            themeLink.removeAttribute("href");
+        } else {
+            themeLink.setAttribute("href", `styles/themes/${themeName}`);
+        }
         if (window.ThemeFX) window.ThemeFX.applyThemeFX(themeName);
         setTimeout(() => {
             updateThemeCache();
@@ -1883,7 +1922,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const savedThemeIndex = Number(localStorage.getItem("themeIndex") || 0);
     const validThemeIndex =
-        savedThemeIndex < themes.length ? savedThemeIndex : 0;
+        savedThemeIndex >= 0 && savedThemeIndex < themes.length
+            ? savedThemeIndex
+            : 0;
     applyTheme(themes[validThemeIndex]);
     renderThemeGrid(validThemeIndex);
 
@@ -1918,8 +1959,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function applyPreferencesToUI() {
         eqWrapper.classList.toggle("component-hidden", !prefs.showEq);
         eqWrapper.classList.toggle("collapsed", prefs.eqCollapsed);
-        eqCollapseBtn.innerHTML = prefs.eqCollapsed ? "&#9656;" : "&#9662;";
-        eqBypassBtn.textContent = prefs.eqEnabled ? "ON" : "OFF";
+        if (dspToggleBtn) {
+            dspToggleBtn.classList.toggle(
+                "active",
+                prefs.showEq && !prefs.eqCollapsed,
+            );
+            dspToggleBtn.classList.toggle("component-hidden", !prefs.showEq);
+        }
+        eqBypassBtn.textContent = prefs.eqEnabled ? "EQ ON" : "EQ OFF";
         eqBypassBtn.classList.toggle("active", prefs.eqEnabled);
 
         progressView.classList.toggle("component-hidden", !prefs.showWave);
@@ -1927,6 +1974,12 @@ document.addEventListener("DOMContentLoaded", () => {
         artworkGlowEl.classList.toggle("component-hidden", !prefs.showGlow);
         sidebar.classList.toggle("component-hidden", !prefs.showSidebar);
         resizer.classList.toggle("component-hidden", !prefs.showSidebar);
+        if (sidebarToggleBtn) {
+            sidebarToggleBtn.classList.toggle("active", prefs.showSidebar);
+        }
+        if (prefs.sidebarWidth >= 220 && prefs.sidebarWidth <= 540) {
+            sidebar.style.width = `${prefs.sidebarWidth}px`;
+        }
 
         document.body.classList.toggle("low-gfx", prefs.lowGfx);
         optimizeBtn.textContent = prefs.lowGfx ? "GFX: OFF" : "GFX: ON";
@@ -1963,6 +2016,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         streamAudioEl.preservesPitch = !!prefs.preservePitch;
         applyFpsLimit();
+        updateHeroDspBadge();
     }
 
     function bindPrefCheckbox(id, key, afterFn) {
@@ -2025,7 +2079,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (hasActiveTrack()) renderWaveform(true);
     });
 
-    // --- Discord RPC Modal ---
     const rpcModal = document.getElementById("rpc-modal");
     const rpcBtn = document.getElementById("discord-rpc-btn");
     const closeRpcBtn = document.getElementById("close-rpc-modal");
@@ -2065,7 +2118,6 @@ document.addEventListener("DOMContentLoaded", () => {
         rpcBtn.classList.remove("saved");
     });
 
-    // --- Sidebar Resizer ---
     let isResizing = false;
     resizer.addEventListener("mousedown", () => {
         isResizing = true;
@@ -2075,9 +2127,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     window.addEventListener("mousemove", (e) => {
         if (!isResizing) return;
-        const newWidth = document.body.clientWidth - e.clientX;
-        if (newWidth >= 200 && newWidth <= 650) {
+        const newWidth = e.clientX;
+        if (newWidth >= 220 && newWidth <= 540) {
             sidebar.style.width = `${newWidth}px`;
+            prefs.sidebarWidth = newWidth;
             updateCanvasSizeCache();
             if (hasActiveTrack()) renderWaveform(true);
         }
@@ -2088,6 +2141,7 @@ document.addEventListener("DOMContentLoaded", () => {
             resizer.classList.remove("resizing");
             document.body.style.cursor = "default";
             document.body.style.userSelect = "auto";
+            savePrefs();
             updateCanvasSizeCache();
             if (hasActiveTrack()) renderWaveform(true);
         }
@@ -2138,20 +2192,15 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const meta = await window.electronAPI.getTrackMetadata(uri);
             currentMetadata = meta;
-            currentTrackNameLabel.textContent = meta.title || "Zenith Track";
-            currentTrackFolderLabel.textContent =
-                meta.artist || "Android Library";
             androidDuration = meta.duration || 0;
             androidCurrentTime = 0;
             waveformPeaks = generatePseudoPeaks(uri);
             lastWaveProgressX = -1;
-            if (meta.picture) {
-                if (currentTrackArtwork) currentTrackArtwork.src = meta.picture;
-                artworkGlowEl.style.backgroundImage = `url("${meta.picture}")`;
-            } else {
-                if (currentTrackArtwork) currentTrackArtwork.src = "icon.png";
-                artworkGlowEl.style.backgroundImage = "";
-            }
+            syncTrackDisplay(
+                meta.title || "Zenith Track",
+                meta.artist || "Android Library",
+                meta.picture,
+            );
             if (!prefs.globalDsp) {
                 const s = await window.electronAPI.getTrackSettings(uri);
                 applySettings(s);

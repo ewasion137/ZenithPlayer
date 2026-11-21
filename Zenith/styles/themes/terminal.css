@@ -1,516 +1,379 @@
-/* ==========================================================================
-   THEME: REAL TERMINAL (LINUX TTY / UNIX NCURSES / CMUS / ALSAMIXER / TMUX)
-   ========================================================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fira+Code:wght@400;600;700&display=swap');
+/* styles/themes/terminal.css */
 
 :root {
-    /* Настоящая 16-битная палитра ANSI / VGA Linux Console */
-    --bg-main: #000000;
-    --panel-bg: #050505;
-    --surface: #111111;
-    --surface-active: #222222;
-    --accent: #22c55e;          /* ANSI Green */
-    --accent-secondary: #06b6d4;/* ANSI Cyan */
-    --accent-dim: #4b5563;      /* ANSI Bright Black (Dark Gray) */
-    --accent-gradient: none;    /* Никаких градиентов в TTY */
-    --text-main: #e5e7eb;       /* ANSI White */
-    --text-dim: #9ca3af;        /* ANSI Gray */
-    --border-light: #27272a;    /* 1px рамка ncurses */
-    --border-focus: #ffffff;
-    --transition: 0s;           /* В терминале задержек нет — мгновенный отклик */
+    --bg-main: #070908;
+    --panel-bg: #0b0e0d;
+    --surface: #121715;
+    --surface-hover: #19201d;
+    --accent: #22c55e;
+    --accent-secondary: #06b6d4;
+    --accent-gradient: linear-gradient(90deg, #22c55e 0%, #06b6d4 100%);
+    --text-main: #e2e8e4;
+    --text-dim: #6f7d75;
+    --border-light: #222a26;
+    --border-focus: #22c55e;
+    --transition: 0s;
 }
 
-/* === СБРОС ВСЕХ ЭФФЕКТОВ: ТОЛЬКО МОНОШИРИННАЯ СЕТКА === */
-*, *::before, *::after {
-    border-radius: 0px !important;
-    text-shadow: none !important;
+*,
+*::before,
+*::after {
+    border-radius: 0 !important;
     box-shadow: none !important;
-    filter: none !important;
+    text-shadow: none !important;
 }
 
 body {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
     background-color: var(--bg-main);
-    background-image: none; /* Никакого псевдо-шума */
     color: var(--text-main);
-    font-size: 12px;
-    letter-spacing: 0px;
-    -webkit-font-smoothing: antialiased;
 }
 
-#spectrogram-canvas {
-    opacity: 0.12;
-    filter: grayscale(100%) !important;
-}
-
-/* === TITLE BAR: TMUX / SCREEN STATUS LINE === */
 .title-bar {
-    height: 24px;
-    min-height: 24px;
-    background: #111111;
+    min-height: 32px;
+    background: #0c0f0e;
     border-bottom: 1px solid var(--border-light);
-    padding: 0 6px;
-}
-
-.title-bar-drag {
-    gap: 12px;
-    padding-left: 4px;
 }
 
 .title-icon {
-    display: none; /* Консоль не использует иконки */
+    display: none;
 }
 
 .title-text {
-    font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    font-weight: 500;
-    color: #9ca3af;
-    letter-spacing: 0px;
-}
-
-.title-text::before {
-    content: '[0:cmus*] [1:bash] [2:htop] | ';
+    font-weight: 700;
+    letter-spacing: 1px;
     color: var(--accent);
 }
 
-.window-controls {
-    height: 100%;
+.status-search input {
+    background: #050706;
+    border: 1px solid var(--border-light);
+    font-family: inherit;
+    color: var(--text-main);
+}
+
+.status-search input:focus {
+    background: #050706;
+    border-color: var(--accent);
+}
+
+.search-shortcut {
+    background: #121715;
+    border: 1px solid var(--border-light);
+    color: var(--text-dim);
 }
 
 .win-btn {
-    width: 24px;
-    height: 100%;
-    background: transparent;
+    min-height: 32px;
     border-left: 1px solid var(--border-light);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: #9ca3af;
+    font-family: inherit;
+    color: var(--text-dim);
 }
 
 .win-btn:hover {
-    background: #ffffff !important;
-    color: #000000 !important;
+    background: var(--text-main);
+    color: #070908;
+}
+
+.win-tool.active {
+    color: var(--accent);
 }
 
 .win-close:hover {
-    background: #ef4444 !important;
-    color: #ffffff !important;
+    background: #ef4444;
+    color: #ffffff;
 }
 
-/* === NOW PLAYING: ТЕКСТОВЫЙ БУФЕР МЕТАДАННЫХ === */
-.now-playing-container {
-    background: var(--panel-bg);
+.explorer-sidebar {
+    background: #090c0b;
+    border-right: 1px solid var(--border-light);
+}
+
+.explorer-header {
+    background: #0d1210;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.explorer-title {
+    color: var(--accent-secondary);
+}
+
+.explorer-header button {
+    background: #070908;
     border: 1px solid var(--border-light);
-    padding: 12px;
-    min-height: auto;
+    font-family: inherit;
+    color: var(--text-main);
 }
 
-/* Обложка: строгий 1-битный прямоугольный фрейм */
-.cover-wrapper {
-    width: 70px;
-    height: 70px;
-    min-width: 70px;
+.explorer-header button:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #050706;
+}
+
+.folder-group h3 {
+    font-size: 11px;
+    background: #0c100e;
     border: 1px solid var(--border-light);
-    background: #000000;
+    color: var(--accent-secondary);
 }
 
-#current-track-artwork {
-    filter: grayscale(100%) contrast(120%) !important;
+.folder-group h3::before {
+    content: '+';
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+.folder-group.open h3 {
+    background: #121916;
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.folder-group.open h3::before {
+    content: '-';
+    transform: none;
+    color: var(--accent);
+}
+
+.track-item {
+    font-size: 11px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+}
+
+.track-item:hover {
+    background: #151c19;
+    color: var(--text-main);
+}
+
+.track-item.playing {
+    background: var(--accent);
+    border-left-color: #ffffff;
+    color: #050706;
+    font-weight: 700;
+}
+
+.track-item.playing .track-remove-btn {
+    color: #050706;
+}
+
+.resizer-bar {
+    width: 2px;
+    min-width: 2px;
+    margin-left: 0;
+    background: var(--border-light);
+}
+
+.resizer-bar:hover,
+.resizer-bar.resizing {
+    background: var(--accent);
+}
+
+.player-stage {
+    background: none;
+}
+
+#spectrogram-canvas {
+    opacity: 0.14;
 }
 
 .artwork-glow {
-    display: none !important;
+    display: none;
+}
+
+.cover-wrapper {
+    border: 1px solid var(--border-light);
+    background: #000000;
+}
+
+.stage-kicker {
+    color: var(--accent);
 }
 
 .track-info h1 {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0px;
+    font-family: inherit;
+    letter-spacing: -0.3px;
 }
 
-.track-info h1::before {
-    content: 'track: "';
+.hero-dsp-pill {
+    background: #0c100e;
+    border: 1px solid var(--border-light);
     color: var(--accent-secondary);
-    font-weight: 400;
 }
 
-.track-info h1::after {
-    content: '"';
-    color: var(--accent-secondary);
-    font-weight: 400;
-}
-
-.track-info p {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: #9ca3af;
-    margin-top: 4px;
-}
-
-.track-info p::before {
-    content: 'artist: ';
-    color: var(--accent-dim);
-}
-
-/* === УПРАВЛЕНИЕ: ПАНЕЛЬ ПЕРЕКЛЮЧАТЕЛЕЙ В СТИЛЕ CLI === */
-#top-controls {
-    background: var(--panel-bg);
-    border: 1px solid var(--border-light);
-    padding: 10px 14px;
-}
-
-.main-controls {
-    gap: 6px;
-}
-
-#prev-btn, #next-btn {
-    width: 32px;
-    height: 28px;
-    background: #111111;
-    border: 1px solid var(--border-light);
-}
-
-#prev-btn:hover, #next-btn:hover {
-    background: #ffffff;
-    transform: none;
-}
-
-#prev-btn::before {
-    border: none;
-    content: '|<';
-    font-size: 11px;
-    font-weight: bold;
-    color: #ffffff;
-}
-
-#next-btn::before {
-    border: none;
-    content: '>|';
-    font-size: 11px;
-    font-weight: bold;
-    color: #ffffff;
-}
-
-#prev-btn:hover::before, #next-btn:hover::before {
-    color: #000000;
-}
-
-/* Кнопка воспроизведения [ PLAY / PAUSE ] */
-#play-pause-btn {
-    width: 68px;
-    height: 28px;
-    background: #111111;
-    border: 1px solid var(--border-light);
-    box-shadow: none;
-}
-
-#play-pause-btn::before {
-    background: transparent;
-    clip-path: none;
-    content: '[PLAY]';
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: bold;
+.hero-dsp-pill:hover {
+    border-color: var(--accent);
     color: var(--accent);
-    margin: 0;
 }
 
-#play-pause-btn.is-playing::before {
-    clip-path: none;
-    content: '[PAUSE]';
-    color: #facc15;
-}
-
-#play-pause-btn:hover {
-    background: #ffffff;
-    transform: none;
-}
-
-#play-pause-btn:hover::before {
-    color: #000000;
-}
-
-.control-group label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--accent-dim);
-}
-
-/* Слайдеры в виде плоских ANSI-баров */
-.control-group input[type="range"] {
-    background: #18181b;
-    height: 6px;
-    border: 1px solid var(--border-light);
-}
-
-.control-group input[type="range"]::-webkit-slider-thumb {
-    width: 8px;
-    height: 12px;
-    background: #e5e7eb;
-    border: none;
-    cursor: ew-resize;
-}
-
-.control-input, .eq-band input[type="number"] {
-    background: #000000;
-    border: 1px solid var(--border-light);
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-}
-
-/* === ПРОГРЕСС-БАР: ТЕКСТОВЫЙ РЕЙЛИНГ === */
-.waveform-container {
-    background: #000000;
-    border: 1px solid var(--border-light);
-    height: 28px;
-}
-
-#waveform-canvas {
-    filter: contrast(200%) grayscale(100%) !important;
-}
-
-#time-display {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: #9ca3af;
-}
-
-/* === ЭКВАЛАЙЗЕР: ALSAMIXER AUDIO CHANNELS === */
 .eq-container-wrapper {
     background: var(--panel-bg);
-    border: 1px solid var(--border-light);
-    padding: 12px;
+    border-top: 1px solid var(--border-light);
 }
 
 .eq-header-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0px;
-    color: #ffffff;
-    margin-bottom: 8px;
+    color: var(--accent-secondary);
 }
 
-.eq-header-label::before {
-    content: 'Card: HDA Intel PCH | Chip: Realtek ALC892 | View: ';
-    color: var(--accent-dim);
-    font-weight: 400;
+.eq-select,
+.eq-mini-btn,
+.setting-select {
+    background: #070908;
+    border: 1px solid var(--border-light);
+    font-family: inherit;
 }
 
-.eq-band label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--accent-dim);
+.eq-mini-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #050706;
 }
 
-.eq-band input[type="range"] {
-    background: #111111;
+.eq-band input[type="range"]::-webkit-slider-runnable-track {
+    width: 6px;
+    background: #050706;
     border: 1px solid var(--border-light);
 }
 
 .eq-band input[type="range"]::-webkit-slider-thumb {
-    background: var(--accent);
-    height: 6px;
     width: 14px;
+    height: 8px;
+    margin-left: -5px;
+    background: var(--accent);
+    border: 1px solid #050706;
 }
 
-/* === РАЗДЕЛИТЕЛЬ: 1PX СТРОГИЙ BORDER === */
-.resizer-bar {
-    width: 1px;
-    min-width: 1px;
-    background: var(--border-light);
-}
-
-.resizer-bar:hover, .resizer-bar.resizing {
-    background: #ffffff;
-}
-
-/* === САЙДБАР: CMUS LIBRARY / FILE BROWSER === */
-.explorer-sidebar {
-    background: #000000;
-    border-left: 1px solid var(--border-light);
-}
-
-.explorer-header {
-    background: #0d0d0d;
-    border-bottom: 1px solid var(--border-light);
-    padding: 6px 10px;
-}
-
-.explorer-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0px;
-}
-
-.explorer-title::before {
-    content: 'Browser: ';
-    color: var(--accent-dim);
-    font-weight: 400;
-}
-
-.explorer-header button {
-    background: #111111;
+.control-input,
+.eq-band input[type="number"] {
+    font-family: inherit;
+    color: var(--accent);
     border: 1px solid var(--border-light);
-    color: #e5e7eb;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    padding: 2px 6px;
+    background: #050706;
 }
 
-.explorer-header button:hover {
-    background: #ffffff;
-    color: #000000;
-}
-
-.folder-group h3 {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 500;
-    background: #0a0a0a;
-    border: 1px solid var(--border-light);
-    color: var(--accent-secondary);
-    padding: 4px 6px;
-}
-
-.folder-group h3::before {
-    content: '+ ';
-    font-size: 11px;
-    margin-right: 4px;
-    color: var(--accent-dim);
-}
-
-.folder-group.open h3 {
-    color: #ffffff;
-    background: #18181b;
-    border-color: #3f3f46;
-}
-
-.folder-group.open h3::before {
-    content: '- ';
-    transform: none;
-}
-
-.track-item {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: #9ca3af;
-    padding: 3px 6px;
-    margin: 1px 0;
-    border: none;
-}
-
-.track-item::before {
-    content: '  ';
-}
-
-.track-item:hover {
-    background: #18181b;
-    color: #ffffff;
-}
-
-/* Выделение как инверсный курсор в vim/cmus */
-.track-item.playing {
-    background: #ffffff !important;
-    color: #000000 !important;
-    font-weight: 700;
-}
-
-.track-item.playing::before {
-    content: '► ';
-}
-
-/* === STATUS BAR: BASH PROMPT / TMUX FOOTER === */
-.status-bar {
-    height: 22px;
-    min-height: 22px;
-    background: #111111;
+#top-controls.transport-dock {
+    background: var(--panel-bg);
     border-top: 1px solid var(--border-light);
-    padding: 0 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
 }
 
-.status-btn {
-    font-size: 11px;
-    color: #9ca3af;
-    padding: 1px 4px;
+.transport-art {
+    border: 1px solid var(--border-light);
+}
+
+#prev-btn,
+#next-btn {
+    border: 1px solid var(--border-light);
+    background: #101513;
+}
+
+#prev-btn:hover,
+#next-btn:hover {
+    background: var(--text-main);
+}
+
+#prev-btn:hover::before {
+    border-right-color: #050706;
+}
+
+#next-btn:hover::before {
+    border-left-color: #050706;
+}
+
+#play-pause-btn {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+#play-pause-btn:hover {
+    transform: none;
+    background: #4ade80;
+}
+
+#play-pause-btn::before {
+    background: #050706;
+}
+
+.ctrl-mini-btn {
+    border: 1px solid transparent;
+}
+
+.ctrl-mini-btn:hover {
+    border-color: var(--border-light);
+    background: #121715;
+}
+
+.ctrl-mini-btn.active {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.waveform-container {
+    background: #040605;
+    border: 1px solid var(--border-light);
+}
+
+.vis-mode-btn,
+.dock-pill-btn {
+    background: #070908;
+    border: 1px solid var(--border-light);
+    font-family: inherit;
+}
+
+.dock-pill-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #050706;
+}
+
+.control-group input[type="range"] {
+    background: #050706;
+    border: 1px solid var(--border-light);
+    height: 6px;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    width: 8px;
+    height: 14px;
+    background: var(--accent);
+}
+
+.status-bar {
+    background: #050706;
+    border-top: 1px solid var(--border-light);
 }
 
 .status-btn:hover {
-    background: #ffffff;
-    color: #000000;
+    background: var(--text-main);
+    color: #050706;
 }
 
-.status-search input {
-    background: #000000;
-    border: 1px solid var(--border-light);
-    color: #ffffff;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 1px 4px;
-}
-
-.status-search input:focus {
-    border-color: #ffffff;
-}
-
-.status-tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+.status-btn.saved {
     color: var(--accent);
 }
 
-/* === МОДАЛЬНОЕ ОКНО: NCURSES DIALOG BOX === */
+.status-tag {
+    color: var(--accent);
+}
+
 .modal-content {
-    background: #050505;
-    border: 1px solid #ffffff;
-    padding: 12px;
+    background: #090c0b;
+    border: 1px solid var(--accent);
 }
 
-.modal-header h3 {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: #ffffff;
-    font-weight: 700;
-}
-
-.modal-header h3::before {
-    content: '[ ';
-    color: var(--accent-dim);
-}
-
-.modal-header h3::after {
-    content: ' ]';
-    color: var(--accent-dim);
-}
-
-.modal-body input {
-    background: #000000;
+.modal-body input,
+.setting-row,
+.theme-chip {
+    background: #050706;
     border: 1px solid var(--border-light);
-    color: #ffffff;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: inherit;
 }
 
-.modal-body input:focus {
-    border-color: #ffffff;
-}
-
-.modal-actions button {
-    background: #111111;
-    border: 1px solid var(--border-light);
-    color: #ffffff;
-    font-family: 'JetBrains Mono', monospace;
-}
-
+.settings-tab.active,
+.theme-chip.active,
 .modal-actions button:hover {
-    background: #ffffff;
-    color: #000000;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #050706;
 }
